@@ -11,8 +11,11 @@
 
 #include <stdio.h>
 #include <io.h>
+
 #include "GlOgl.h"
 #include "GLExtensions.h"
+#include "OGLTables.h"
+
 
 // Configuration Variables
 ConfigStruct    UserConfig,
@@ -332,20 +335,6 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 //*************************************************
 DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
 {
-    static DWORD    nSquareTex[ 9 ] = { 131072, 32768, 8192, 2048, 512, 128, 32, 8, 2 };
-    static DWORD    nBytes;
-
-    switch ( aspectRatio )
-    {
-    case GR_ASPECT_1x1:     nBytes = nSquareTex[ Lod ];             break;
-    case GR_ASPECT_1x2:
-    case GR_ASPECT_2x1:     nBytes = nSquareTex[ Lod ] >> 1;        break;
-    case GR_ASPECT_1x4:
-    case GR_ASPECT_4x1:     nBytes = nSquareTex[ Lod ] >> 2;        break;
-    case GR_ASPECT_1x8:
-    case GR_ASPECT_8x1:     nBytes = nSquareTex[ Lod ] >> 3;        break;
-    }
-
     /*
     ** If the format is one of these:
     ** GR_TEXFMT_RGB_332
@@ -356,12 +345,7 @@ DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
     ** GR_TEXFMT_P_8
     ** Reduces the size by 2
     */
-    if ( format <= GR_TEXFMT_RSVD1 )
-    {
-        nBytes >>= 1;
-    }
-
-    return nBytes;
+    return nSquareLod[ format > GR_TEXFMT_RSVD1 ][ aspectRatio ][ Lod ];
 }
 
 // Calculates the frequency of the processor clock
