@@ -139,9 +139,6 @@
 			Name="Header"
 			Filter=".h">
 			<File
-				RelativePath=".\3dfx.h">
-			</File>
-			<File
 				RelativePath=".\GLRender.h">
 			</File>
 			<File
@@ -151,16 +148,10 @@
 				RelativePath=".\Glextensions.h">
 			</File>
 			<File
-				RelativePath=".\Glide.h">
-			</File>
-			<File
 				RelativePath=".\PGTexture.h">
 			</File>
 			<File
 				RelativePath=".\PGUTexture.h">
-			</File>
-			<File
-				RelativePath=".\Sst1vid.h">
 			</File>
 			<File
 				RelativePath=".\TexDB.h">
@@ -169,10 +160,19 @@
 				RelativePath=".\glext.h">
 			</File>
 			<File
-				RelativePath=".\glidesys.h">
+				RelativePath="sdk2_3dfx.h">
 			</File>
 			<File
-				RelativePath=".\glideutl.h">
+				RelativePath="sdk2_glide.h">
+			</File>
+			<File
+				RelativePath="sdk2_glidesys.h">
+			</File>
+			<File
+				RelativePath="sdk2_glideutl.h">
+			</File>
+			<File
+				RelativePath="sdk2_sst1vid.h">
 			</File>
 		</Filter>
 		<Filter
