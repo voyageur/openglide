@@ -14,6 +14,7 @@
 #include "GLextensions.h"
 #include "amd3dx.h"
 
+
 //**************************************************************
 // Defines
 //**************************************************************
@@ -36,8 +37,8 @@ void    (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent,
 void    (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 
 // Snapping constant
-const float vertex_snap_compare = 4096.0f;
-const float vertex_snap = float( 3L << 18 );
+static const float vertex_snap_compare = 4096.0f;
+static const float vertex_snap = float( 3L << 18 );
 
 // Standard structs for the render
 RenderStruct OGLRender;
@@ -109,7 +110,16 @@ void RenderUpdateArrays( void )
 {
     glVertexPointer( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TVertex[0] );
     glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor[0] );
+    if ( InternalConfig.MultiTextureEXTEnable )
+    {
+        glClientActiveTexture( GL_TEXTURE0_ARB );
+    }
     glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
+    if ( InternalConfig.MultiTextureEXTEnable )
+    {
+        glClientActiveTexture( GL_TEXTURE1_ARB );
+        glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
+    }
     glSecondaryColorPointerEXT( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TColor2[0] );
     if ( InternalConfig.FogCoordEXTEnable )
     {
@@ -140,9 +150,9 @@ void RenderDrawTriangles( void )
     {
         glEnable( GL_TEXTURE_2D );
 
-        use_two_tex = Textures->MakeReady();
+        use_two_tex = Textures->MakeReady( );
 
-        if( use_two_tex )
+        if ( use_two_tex )
         {
             glActiveTextureARB( GL_TEXTURE1_ARB );
 
@@ -478,14 +488,14 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
     }
     
     // Z-Buffering
-/*    if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
+    if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
          ( Glide.State.DepthFunction == GR_CMP_ALWAYS ) )
     {
         pV->az = 0.0f;
         pV->bz = 0.0f;
         pV->cz = 0.0f;
     }
-    else */ 
+    else
     if ( OpenGL.DepthBufferType )
     {
         pV->az = a->ooz * D1OVER65536;

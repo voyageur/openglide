@@ -29,7 +29,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-char *OpenGLideVersion = "Version0.08a1";
+char *OpenGLideVersion = "Version0.08a4";
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -252,6 +252,8 @@ bool InitWindow( HWND hwnd )
     GlideMsg( "Palette Extension = %s\n", InternalConfig.PaletteEXTEnable ? "true" : "false" );
     GlideMsg( "Vertex Array Extension = %s\n", InternalConfig.VertexArrayEXTEnable ? "true" : "false" );
     GlideMsg( "Fog Coord Extension = %s\n", InternalConfig.FogCoordEXTEnable ? "true" : "false" );
+    GlideMsg( "Blend Function Separate = %s\n", InternalConfig.BlendFuncSeparate ? "true" : "false" );
+    GlideMsg( "Texture LOD bias = %s\n", InternalConfig.TextureLodBias ? "true" : "false" );
     GlideMsg( "Texture Memory Size = %d Mb\n", InternalConfig.TextureMemorySize );
     GlideMsg( "Frame Buffer Memory Size = %d Mb\n", InternalConfig.FrameBufferMemorySize );
     GlideMsg( "MMX is %s\n", InternalConfig.MMXEnable ? "enabled" : "disabled" );

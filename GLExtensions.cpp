@@ -15,6 +15,8 @@
 #include "Glextensions.h"
 
 //Functions
+PFNGLCLIENTACTIVETEXTUREPROC            glClientActiveTexture = NULL;
+
 PFNGLMULTITEXCOORD4FARBPROC             glMultiTexCoord4fARB = NULL;
 PFNGLMULTITEXCOORD4FVARBPROC            glMultiTexCoord4fvARB = NULL;
 PFNGLACTIVETEXTUREARBPROC               glActiveTextureARB = NULL;
@@ -34,7 +36,7 @@ PFNGLGETCOLORTABLEEXTPROC               glGetColorTableEXT = NULL;
 PFNGLGETCOLORTABLEPARAMETERIVEXTPROC    glGetColorTableParameterivEXT = NULL;
 PFNGLGETCOLORTABLEPARAMETERFVEXTPROC    glGetColorTableParameterfvEXT = NULL;
 
-PFNGLBLENDFUNCSEPARATEEXTPROC            glBlendFuncSeparateEXT = NULL;
+PFNGLBLENDFUNCSEPARATEEXTPROC           glBlendFuncSeparateEXT = NULL;
 
 // Declarations
 void GLExtensions( void );
@@ -219,6 +221,7 @@ void GLExtensions( void )
         GlideMsg( "MultiTexture Textures Units = %x\n", NumberOfTMUs );
 
         OpenGL.MultiTextureTMUs     = NumberOfTMUs;
+        glClientActiveTexture       = (PFNGLCLIENTACTIVETEXTUREPROC) wglGetProcAddress( "glClientActiveTexture" );
         glActiveTextureARB          = (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress( "glActiveTextureARB" );
         glMultiTexCoord4fARB        = (PFNGLMULTITEXCOORD4FARBPROC) wglGetProcAddress( "glMultiTexCoord4fARB" );
         glMultiTexCoord4fvARB       = (PFNGLMULTITEXCOORD4FVARBPROC) wglGetProcAddress( "glMultiTexCoord4fvARB" );
@@ -249,10 +252,6 @@ void GLExtensions( void )
         else
         {
             glEnable( GL_COLOR_SUM_EXT );
-            if ( InternalConfig.VertexArrayEXTEnable )
-            {
-                glEnableClientState( GL_SECONDARY_COLOR_ARRAY_EXT );
-            }
         }
     }
 
@@ -271,10 +270,6 @@ void GLExtensions( void )
             glFogf( GL_FOG_MODE, GL_LINEAR );
             glFogf( GL_FOG_START, 0.0f );
             glFogf( GL_FOG_END, 1.0f );
-            if ( InternalConfig.VertexArrayEXTEnable )
-            {
-                glEnableClientState( GL_FOG_COORDINATE_ARRAY_EXT );
-            }
         }
     }
 
@@ -283,6 +278,11 @@ void GLExtensions( void )
         glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_COLOR_ARRAY );
         glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glEnableClientState( GL_SECONDARY_COLOR_ARRAY_EXT );
+        if ( InternalConfig.FogCoordEXTEnable )
+        {
+            glEnableClientState( GL_FOG_COORDINATE_ARRAY_EXT );
+        }
 
         RenderUpdateArrays( );
     }
