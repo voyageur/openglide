@@ -766,25 +766,25 @@
    Carefull!  Doesn't check for your offset being
    in range. */
 
-#define PREFETCHM(src,off)					    \
+#define PREFETCHM(src,off)                      \
 {                                               \
    _asm _emit 0x0f                              \
-   _asm _emit 0x0d								\
-   _asm _emit (0x40 | (_K3D_##src & 0x07))		\
-   _asm _emit off								\
+   _asm _emit 0x0d                              \
+   _asm _emit (0x40 | (_K3D_##src & 0x07))      \
+   _asm _emit off                               \
 }
 
 /* Prefetch with a long offset */
 
-#define PREFETCHMLONG(src,off)					\
+#define PREFETCHMLONG(src,off)                  \
 {                                               \
    _asm _emit 0x0f                              \
-   _asm _emit 0x0d								\
-   _asm _emit (0x80 | (_K3D_##src & 0x07))		\
-   _asm _emit (off & 0x000000ff)				\
-   _asm _emit (off & 0x0000ff00) >>	8			\
-   _asm _emit (off & 0x00ff0000) >>	16			\
-   _asm _emit (off & 0xff000000) >>	24			\
+   _asm _emit 0x0d                              \
+   _asm _emit (0x80 | (_K3D_##src & 0x07))      \
+   _asm _emit (off & 0x000000ff)                \
+   _asm _emit (off & 0x0000ff00) >> 8           \
+   _asm _emit (off & 0x00ff0000) >> 16          \
+   _asm _emit (off & 0xff000000) >> 24          \
 }
 
 #define PREFETCHW(src)                          \
@@ -799,7 +799,7 @@
    _asm _emit 0x0f                              \
    _asm _emit 0x0d                              \
    _asm _emit 0x48 | (_K3D_##src & 0x07)        \
-   _asm	_emit off								\
+   _asm _emit off                               \
 }
 
 #define PREFETCHWMLONG(src,off)                 \
@@ -807,10 +807,10 @@
    _asm _emit 0x0f                              \
    _asm _emit 0x0d                              \
    _asm _emit 0x88 | (_K3D_##src & 0x07)        \
-   _asm _emit (off & 0x000000ff)				\
-   _asm _emit (off & 0x0000ff00) >>	8			\
-   _asm _emit (off & 0x00ff0000) >>	16			\
-   _asm _emit (off & 0xff000000) >>	24			\
+   _asm _emit (off & 0x000000ff)                \
+   _asm _emit (off & 0x0000ff00) >> 8           \
+   _asm _emit (off & 0x00ff0000) >> 16          \
+   _asm _emit (off & 0xff000000) >> 24          \
 }
 
 #define CPUID                                   \
@@ -1113,9 +1113,9 @@
 #define prefetchw(src)          PREFETCHW(src)
 
 #define prefetchm(src,off)      PREFETCHM(src,off)
-#define prefetchmlong(src,off)	PREFETCHMLONG(src,off)
+#define prefetchmlong(src,off)  PREFETCHMLONG(src,off)
 #define prefetchwm(src,off)     PREFETCHWM(src,off)
-#define prefetchwmlong(src,off)	 PREFETCHWMLONG(src,off)
+#define prefetchwmlong(src,off)  PREFETCHWMLONG(src,off)
 
 #define pfnacc(dst,src)         PFNACC(dst,src)
 #define pfpnacc(dst,src)        PFPNACC(dst,src)

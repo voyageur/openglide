@@ -1,22 +1,26 @@
-// TexDB.h: interface for the TexDB class.
-//
-//////////////////////////////////////////////////////////////////////
+//**************************************************************
+//*            OpenGLide - Glide to OpenGL Wrapper
+//*             http://openglide.sourceforge.net
+//*
+//*                  TexDB Class Definition
+//*
+//*         OpenGLide is OpenSource under LGPL license
+//*              Originaly made by Fabio Barros
+//*      Modified by Paul for Glidos (http://www.glidos.net)
+//**************************************************************
 
-#if !defined(AFX_TEXDB_H__4D8DBC18_A31F_4E9E_9863_E0DC9635872E__INCLUDED_)
-#define AFX_TEXDB_H__4D8DBC18_A31F_4E9E_9863_E0DC9635872E__INCLUDED_
+#ifndef __TEXDB_H__
+#define __TEXDB_H__
 
 #include <windows.h>
 #include "glide.h"
 #include "GL/gl.h"
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
 class TexDB  
 {
 public:
-	void Clear();
+    void Clear( void );
+
     struct Record
     {
         FxU32 startAddress;
@@ -26,17 +30,17 @@ public:
         GLuint texNum;
         Record *next;
 
-        Record()
+        Record( void )
         {
-            glGenTextures(1, &texNum);
+            glGenTextures( 1, &texNum );
         };
 
-        ~Record()
+        ~Record( void )
         {
-            glDeleteTextures(1, &texNum);
+            glDeleteTextures( 1, &texNum );
         };
 
-        bool Match(FxU32 stt, GrTexInfo *inf, FxU32 h)
+        bool Match( FxU32 stt, GrTexInfo *inf, FxU32 h )
         {
             return (startAddress == stt
                 && inf->largeLod == info.largeLod
@@ -45,14 +49,16 @@ public:
                 && (hash == h || h == 0));
         };
     };
-	GLuint Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash);
-	void WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash);
-	bool Find(FxU32 startAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, bool *pal_change);
-	TexDB();
-	virtual ~TexDB();
+    GLuint Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash );
+    void WipeRange( FxU32 startAddress, FxU32 endAddress, FxU32 hash );
+    bool Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
+               GLuint *pTexNum, bool *pal_change );
+    TexDB( void );
+    virtual ~TexDB( void );
+
 private:
-    enum {TEX_SECTIONS = 256};
-    Record *m_first[TEX_SECTIONS];
+    enum { TEX_SECTIONS = 256 };
+    Record *m_first[ TEX_SECTIONS ];
 };
 
-#endif // !defined(AFX_TEXDB_H__4D8DBC18_A31F_4E9E_9863_E0DC9635872E__INCLUDED_)
+#endif

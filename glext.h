@@ -1,3 +1,4 @@
+
 #ifndef __glext_h_
 #define __glext_h_
 
@@ -3080,31 +3081,31 @@ extern "C" {
 
 
 // OpenGL 1.2
-#define GL_RESCALE_NORMAL				0x803A
-#define GL_CLAMP_TO_EDGE				0x812F
-#define GL_MAX_ELEMENTS_VERTICES		0xF0E8
-#define GL_MAX_ELEMENTS_INDICES			0xF0E9
-#define GL_BGR							0x80E0
-#define GL_BGRA							0x80E1
-#define GL_UNSIGNED_BYTE_3_3_2			0x8032
-#define GL_UNSIGNED_BYTE_2_3_3_REV		0x8362
-#define GL_UNSIGNED_SHORT_5_6_5			0x8363
-#define GL_UNSIGNED_SHORT_5_6_5_REV		0x8364
-#define GL_UNSIGNED_SHORT_4_4_4_4		0x8033
-#define GL_UNSIGNED_SHORT_4_4_4_4_REV	0x8365
-#define GL_UNSIGNED_SHORT_5_5_5_1		0x8034
-#define GL_UNSIGNED_SHORT_1_5_5_5_REV	0x8366
-#define GL_UNSIGNED_INT_8_8_8_8			0x8035
-#define GL_UNSIGNED_INT_8_8_8_8_REV		0x8367
-#define GL_UNSIGNED_INT_10_10_10_2		0x8036
-#define GL_UNSIGNED_INT_2_10_10_10_REV	0x8368
-#define GL_LIGHT_MODEL_COLOR_CONTROL	0x81F8
-#define GL_SINGLE_COLOR					0x81F9
-#define GL_SEPARATE_SPECULAR_COLOR		0x81FA
-#define GL_TEXTURE_MIN_LOD				0x813A
-#define GL_TEXTURE_MAX_LOD				0x813B
-#define GL_TEXTURE_BASE_LEVEL			0x813C
-#define GL_TEXTURE_MAX_LEVEL			0x813D
+#define GL_RESCALE_NORMAL               0x803A
+#define GL_CLAMP_TO_EDGE                0x812F
+#define GL_MAX_ELEMENTS_VERTICES        0xF0E8
+#define GL_MAX_ELEMENTS_INDICES         0xF0E9
+#define GL_BGR                          0x80E0
+#define GL_BGRA                         0x80E1
+#define GL_UNSIGNED_BYTE_3_3_2          0x8032
+#define GL_UNSIGNED_BYTE_2_3_3_REV      0x8362
+#define GL_UNSIGNED_SHORT_5_6_5         0x8363
+#define GL_UNSIGNED_SHORT_5_6_5_REV     0x8364
+#define GL_UNSIGNED_SHORT_4_4_4_4       0x8033
+#define GL_UNSIGNED_SHORT_4_4_4_4_REV   0x8365
+#define GL_UNSIGNED_SHORT_5_5_5_1       0x8034
+#define GL_UNSIGNED_SHORT_1_5_5_5_REV   0x8366
+#define GL_UNSIGNED_INT_8_8_8_8         0x8035
+#define GL_UNSIGNED_INT_8_8_8_8_REV     0x8367
+#define GL_UNSIGNED_INT_10_10_10_2      0x8036
+#define GL_UNSIGNED_INT_2_10_10_10_REV  0x8368
+#define GL_LIGHT_MODEL_COLOR_CONTROL    0x81F8
+#define GL_SINGLE_COLOR                 0x81F9
+#define GL_SEPARATE_SPECULAR_COLOR      0x81FA
+#define GL_TEXTURE_MIN_LOD              0x813A
+#define GL_TEXTURE_MAX_LOD              0x813B
+#define GL_TEXTURE_BASE_LEVEL           0x813C
+#define GL_TEXTURE_MAX_LEVEL            0x813D
 // End of it
 
 
@@ -3266,46 +3267,46 @@ extern "C" {
 #define GL_OPERAND3_ALPHA_NV                0x859B
 
 // EXT_secondary_color
-#define GL_COLOR_SUM_EXT					0x8458
-#define GL_CURRENT_SECONDARY_COLOR_EXT		0x8459
-#define GL_SECONDARY_COLOR_ARRAY_SIZE_EXT	0x845A
-#define GL_SECONDARY_COLOR_ARRAY_TYPE_EXT	0x845B
+#define GL_COLOR_SUM_EXT                    0x8458
+#define GL_CURRENT_SECONDARY_COLOR_EXT      0x8459
+#define GL_SECONDARY_COLOR_ARRAY_SIZE_EXT   0x845A
+#define GL_SECONDARY_COLOR_ARRAY_TYPE_EXT   0x845B
 #define GL_SECONDARY_COLOR_ARRAY_STRIDE_EXT 0x845C
 #define GL_SECONDARY_COLOR_ARRAY_POINTER_EXT 0x845D
-#define GL_SECONDARY_COLOR_ARRAY_EXT		0x845E
+#define GL_SECONDARY_COLOR_ARRAY_EXT        0x845E
 
 // GL_EXT_fog_coord
-#define GL_FOG_COORDINATE_SOURCE_EXT		0x8450
-#define GL_FOG_COORDINATE_EXT				0x8451
-#define GL_FRAGMENT_DEPTH_EXT				0x8452
-#define GL_CURRENT_FOG_COORDINATE_EXT		0x8453
-#define GL_FOG_COORDINATE_ARRAY_TYPE_EXT	0x8454
-#define GL_FOG_COORDINATE_ARRAY_STRIDE_EXT	0x8455
+#define GL_FOG_COORDINATE_SOURCE_EXT        0x8450
+#define GL_FOG_COORDINATE_EXT               0x8451
+#define GL_FRAGMENT_DEPTH_EXT               0x8452
+#define GL_CURRENT_FOG_COORDINATE_EXT       0x8453
+#define GL_FOG_COORDINATE_ARRAY_TYPE_EXT    0x8454
+#define GL_FOG_COORDINATE_ARRAY_STRIDE_EXT  0x8455
 #define GL_FOG_COORDINATE_ARRAY_POINTER_EXT 0x8456
-#define GL_FOG_COORDINATE_ARRAY_EXT			0x8457
+#define GL_FOG_COORDINATE_ARRAY_EXT         0x8457
 
 
 
 // GL_EXT_paletted_texture
-#define GL_COLOR_INDEX1_EXT					0x80E2
-#define GL_COLOR_INDEX2_EXT					0x80E3
-#define GL_COLOR_INDEX4_EXT					0x80E4
-#define GL_COLOR_INDEX8_EXT					0x80E5
-#define GL_COLOR_INDEX12_EXT				0x80E6
-#define GL_COLOR_INDEX16_EXT				0x80E7
+#define GL_COLOR_INDEX1_EXT                 0x80E2
+#define GL_COLOR_INDEX2_EXT                 0x80E3
+#define GL_COLOR_INDEX4_EXT                 0x80E4
+#define GL_COLOR_INDEX8_EXT                 0x80E5
+#define GL_COLOR_INDEX12_EXT                0x80E6
+#define GL_COLOR_INDEX16_EXT                0x80E7
 
-#define GL_COLOR_TABLE_FORMAT_EXT			0x80D8
-#define GL_COLOR_TABLE_WIDTH_EXT			0x80D9
-#define GL_COLOR_TABLE_RED_SIZE_EXT			0x80DA
-#define GL_COLOR_TABLE_GREEN_SIZE_EXT		0x80DB
-#define GL_COLOR_TABLE_BLUE_SIZE_EXT		0x80DC
-#define GL_COLOR_TABLE_ALPHA_SIZE_EXT		0x80DD
-#define GL_COLOR_TABLE_LUMINANCE_SIZE_EXT	0x80DE
-#define GL_COLOR_TABLE_INTENSITY_SIZE_EXT	0x80DF
+#define GL_COLOR_TABLE_FORMAT_EXT           0x80D8
+#define GL_COLOR_TABLE_WIDTH_EXT            0x80D9
+#define GL_COLOR_TABLE_RED_SIZE_EXT         0x80DA
+#define GL_COLOR_TABLE_GREEN_SIZE_EXT       0x80DB
+#define GL_COLOR_TABLE_BLUE_SIZE_EXT        0x80DC
+#define GL_COLOR_TABLE_ALPHA_SIZE_EXT       0x80DD
+#define GL_COLOR_TABLE_LUMINANCE_SIZE_EXT   0x80DE
+#define GL_COLOR_TABLE_INTENSITY_SIZE_EXT   0x80DF
 
-#define GL_TEXTURE_INDEX_SIZE_EXT			0x80ED
+#define GL_TEXTURE_INDEX_SIZE_EXT           0x80ED
 
-#define GL_SHARED_TEXTURE_PALETTE_EXT		0x81FB
+#define GL_SHARED_TEXTURE_PALETTE_EXT       0x81FB
 
 
 
@@ -3391,9 +3392,9 @@ typedef void (APIENTRY * PFNGLPOINTPARAMETERFVEXTPROC) (GLenum pname, const GLfl
 
 // GL_EXT_paletted_texture
 typedef void (APIENTRY * PFNGLCOLORTABLEEXTPROC)( GLenum target, GLenum internalFormat, GLsizei width, 
-									GLenum format, GLenum type, const GLvoid *data );
+                                    GLenum format, GLenum type, const GLvoid *data );
 typedef void (APIENTRY * PFNGLCOLORSUBTABLEEXTPROC)( GLenum target, GLsizei start, GLsizei count, GLenum format,
-									GLenum type, const GLvoid *data );
+                                    GLenum type, const GLvoid *data );
 typedef void (APIENTRY * PFNGLGETCOLORTABLEEXTPROC)( GLenum target, GLenum format, GLenum type, GLvoid *data );
 typedef void (APIENTRY * PFNGLGETCOLORTABLEPARAMETERIVEXTPROC)( GLenum target, GLenum pname, GLint *params );
 typedef void (APIENTRY * PFNGLGETCOLORTABLEPARAMETERFVEXTPROC)( GLenum target, GLenum pname, GLfloat *params );

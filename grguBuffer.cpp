@@ -12,8 +12,6 @@
 #include <stdio.h>
 
 #include "glogl.h"
-#include "Profile.h"
-#include "custom_time.h"
 
 // extern variables
 extern __int64          InitialTick,
@@ -76,17 +74,10 @@ grBufferSwap( int swap_interval )
 {
 
     static float    Temp = 1.0f;
-    static bool     bProfileInit = false;
 
 #ifdef CRITICAL
     GlideMsg( "grBufferSwap( %d )\n", swap_interval );
 #endif
-
-    if ( !bProfileInit )
-    {
-        InitTime( );
-        ProfileInit( );
-    }
 
     RenderDrawTriangles( );
     glFlush( );
@@ -100,23 +91,10 @@ grBufferSwap( int swap_interval )
 #endif
 
 
-   // Draw the profile info
-    ProfileBegin( "Profile Text" );
-    ProfileDraw( );
-    ProfileEnd( "Profile Text" );
-
 //  if ( swap_interval > 0 )
 //  {
 //      Sleep( swap_interval * OpenGL.WaitSignal );
 //  }
-    if ( bProfileInit )
-    {
-        ProfileEnd( "Main Loop" );
-    }
-    else
-    {
-        bProfileInit = true;
-    }
 
     SwapBuffers( hDC );
 /*
@@ -126,9 +104,6 @@ grBufferSwap( int swap_interval )
     Frame++;
     RDTSC( InitialTick );
 */
-    ProfileDumpOutputToBuffer( );
-
-    ProfileBegin( "Main Loop" );
 
 #ifdef OPENGL_DEBUG
     GLErro( "grBufferSwap" );

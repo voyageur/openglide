@@ -13,7 +13,6 @@
 #include "GLRender.h"
 #include "GLextensions.h"
 #include "amd3dx.h"
-#include "profile.h"
 
 //**************************************************************
 // extern variables and functions prototypes
@@ -132,8 +131,6 @@ void RenderDrawTriangles( void )
     {
         return;
     }
-
-    ProfileBegin( "DrawTriangles" );
 
     if ( OpenGL.Texture )
     {
@@ -297,9 +294,6 @@ void RenderDrawTriangles( void )
 #endif
 
     OGLRender.NumberOfTriangles = 0;
-
-    ProfileEnd( "DrawTriangles" );
-
 }
 
 void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
@@ -319,10 +313,6 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
     float                   atmuoow;
     float                   btmuoow;
     float                   ctmuoow;
-
-    ProfileBegin( "RenderAddTriangle" );
-
-    ProfileBegin( "Init" );
 
     pC = &OGLRender.TColor[ OGLRender.NumberOfTriangles ];
     pC2 = &OGLRender.TColor2[ OGLRender.NumberOfTriangles ];
@@ -441,15 +431,8 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
             break;
         }
     }
-    ProfileEnd( "Init" );
-
-    ProfileBegin( "ColorFunc" );
 
     ColorFunctionFunc( pC, pC2, &Local, &Other );
-
-    ProfileEnd( "ColorFunc" );
-
-    ProfileBegin( "AlphaFunc" );
 
     pC2->aa = 0.0f;
     pC2->ba = 0.0f;
@@ -507,9 +490,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 //      pC2->ca =  Local.ca;
         break;
     }
-    ProfileEnd( "AlphaFunc" );
 
-    ProfileBegin( "Other" );
     if ( Glide.State.ColorCombineInvert )
     {
         pC->ar = 1.0f - pC->ar;
@@ -595,7 +576,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
         }
     }
 
-    if ( a->x > 2048 )
+    if ( 0 && a->x > 2048 )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;
@@ -738,10 +719,6 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 #ifdef OPENGL_DEBUG
     GLErro( "Render::AddTriangle" );
 #endif
-
-    ProfileEnd( "Other" );
-
-    ProfileEnd( "RenderAddTriangle" );
 }
 
 void RenderAddLine( const GrVertex *a, const GrVertex *b )
@@ -760,8 +737,6 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
                             *pt3;
     float                   atmuoow;
     float                   btmuoow;
-
-    ProfileBegin( "RenderAddLine" );
 
     pC  = &OGLRender.TColor[ MAXTRIANGLES ];
     pC2 = &OGLRender.TColor2[ MAXTRIANGLES ];
@@ -1143,7 +1118,7 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         }
     }
 
-    if ( a->x > 2048 )
+    if ( 0 && a->x > 2048 )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;
@@ -1321,8 +1296,6 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 #ifdef OPENGL_DEBUG
     GLErro( "Render::AddLine" );
 #endif
-
-    ProfileEnd( "RenderAddLine" );
 }
 
 void RenderAddPoint( const GrVertex *a )
@@ -1339,8 +1312,6 @@ void RenderAddPoint( const GrVertex *a )
     static void             * pt1, 
                             * pt2, 
                             * pt3;
-
-    ProfileBegin( "RenderAddPoint" );
 
     pC  = &OGLRender.TColor[ MAXTRIANGLES ];
     pC2 = &OGLRender.TColor2[ MAXTRIANGLES ];
@@ -1624,7 +1595,7 @@ void RenderAddPoint( const GrVertex *a )
         }
     }
 
-    if ( a->x > 2048 )
+    if ( 0 && a->x > 2048 )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;
@@ -1769,8 +1740,6 @@ void RenderAddPoint( const GrVertex *a )
 #ifdef OPENGL_DEBUG
     GLErro( "Render::AddPoint" );
 #endif
-
-    ProfileEnd( "RenderAddPoint" );
 }
 
 // Color Factor functions
