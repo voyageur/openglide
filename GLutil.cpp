@@ -215,7 +215,9 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
     unsigned int            BitsPerPixel;
     
     if( hwnd == NULL )
+    {
         hwnd = GetActiveWindow();
+    }
 
     if ( hwnd == NULL )
     {
@@ -232,6 +234,24 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
                        WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS );
         MoveWindow( hwnd, 0, 0, width, height, FALSE );
         mode_changed = SetScreenMode( hwnd, width, height );
+    }
+    else
+    {
+       RECT rect;
+       rect.left = 0;
+       rect.right = width;
+       rect.top = 0;
+       rect.bottom = height;
+
+       AdjustWindowRectEx( &rect, 
+                           GetWindowLong( hwnd, GWL_STYLE ),
+                           GetMenu( hwnd ) != NULL,
+                           GetWindowLong( hwnd, GWL_EXSTYLE ) );
+       MoveWindow( hwnd, 
+                   x, y, 
+                   x + ( rect.right - rect.left ),
+                   y + ( rect.bottom - rect.top ),
+                   TRUE );
     }
 
     hWND = hwnd;
