@@ -52,9 +52,16 @@ bool TexDB::Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
         if(r->Match(startAddress, info, hash))
         {
             *pTexNum = r->texNum;
+#ifdef UTEXSS
+            GlideMsg("Found tex %d\n", r->texNum);
+#endif
             return true;
         }
     }
+
+#ifdef UTEX
+            GlideMsg("Tex not found\n");
+#endif
 
     return false;
 }
@@ -84,6 +91,9 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress)
             if(startAddress < r->endAddress && r->startAddress < endAddress)
             {
                 *p = r->next;
+#ifdef UTEX
+                GlideMsg("Wipe tex %d\n", r->texNum);
+#endif
                 delete r;
             }
             else
@@ -114,6 +124,30 @@ GLuint TexDB::Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 h
     r->next = m_first[sect];
     m_first[sect] = r;
 
+#ifdef UTEX
+                GlideMsg("Add tex %d\n", r->texNum);
+#endif
+
     return r->texNum;
 }
 
+
+void TexDB::Clear()
+{
+    Record *r;
+    int i;
+
+    for(i = 0; i < TEX_SECTIONS; i++)
+    {
+        r = m_first[i];
+        
+        while(r != NULL)
+        {
+            Record *tmp = r;
+            r = r->next;
+            delete tmp;
+        }
+
+        m_first[i] = NULL;
+    }
+}

@@ -41,8 +41,17 @@ GrMipMapId_t PGUTexture::AllocateMemory(GrChipID_t tmu, FxU8 odd_even_mask, int 
     for(lod = largest_lod; lod <= smallest_lod; lod++)
         size += PGTexture::MipMapMemRequired(lod, aspect, fmt);
 
+#ifdef UTEX
+    GlideMsg("Allocate id = %d size = %d\n", m_free_id, size);
+#endif
+
     if(m_free_id >= MAX_MM || m_free_mem + size >= PGTexture::TEX_MEMORY)
+    {
+#ifdef UTEX
+        GlideMsg("Allocation failed\n");
+#endif
         return GR_NULL_MIPMAP_HANDLE;
+    }
 
     mm_info[m_free_id].odd_even_mask  = odd_even_mask;
     mm_info[m_free_id].width          = width;
@@ -69,6 +78,9 @@ GrMipMapId_t PGUTexture::AllocateMemory(GrChipID_t tmu, FxU8 odd_even_mask, int 
 
 void PGUTexture::DownloadMipMap(GrMipMapId_t mmid, const void *src, const GuNccTable *table)
 {
+#ifdef UTEX
+    GlideMsg("Download id = %d ", mmid);
+#endif
     if(mmid >=0 && mmid < MAX_MM && mm_info[mmid].valid)
     {
         GrTexInfo info;
@@ -78,9 +90,26 @@ void PGUTexture::DownloadMipMap(GrMipMapId_t mmid, const void *src, const GuNccT
         info.largeLod    = mm_info[mmid].lod_max;
         info.smallLod    = mm_info[mmid].lod_min;
         info.data        = (void *)src;
+#ifdef UTEX
+        {
+            GrLOD_t lod;
+            FxU32 size = 0;
+
+            for(lod = info.largeLod; lod <= info.smallLod; lod++)
+                size += PGTexture::MipMapMemRequired(lod, info.aspectRatio, info.format);
+
+            GlideMsg("size = %d\n", size);
+        }
+#endif
 
         grTexDownloadMipMap(0, mm_start[mmid], mm_info[mmid].odd_even_mask, &info);
     }
+#ifdef UTEX
+    else
+    {
+        GlideMsg("failed\n");
+    }
+#endif
 }
 
 void PGUTexture::DownloadMipMapLevel(GrMipMapId_t mmid, GrLOD_t lod, const void **src)
@@ -92,6 +121,9 @@ void PGUTexture::MemReset()
 {
     int i;
 
+#ifdef UTEX
+    GlideMsg("Reset\n");
+#endif
     for(i = 0; i < MAX_MM; i++)
         mm_info[i].valid = false;
 
@@ -119,6 +151,12 @@ void PGUTexture::Source(GrMipMapId_t id)
 
         m_current_id = id;
     }
+#ifdef UTEX
+    else
+    {
+        GlideMsg("TexSourcefailed\n");
+    }
+#endif
 }
 
 GrMipMapInfo *PGUTexture::GetMipMapInfo(GrMipMapId_t mmid)

@@ -16,6 +16,7 @@
 class TexDB  
 {
 public:
+	void Clear();
     struct Record
     {
         FxU32 startAddress;

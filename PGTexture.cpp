@@ -510,7 +510,7 @@ void PGTexture::GetTexValues(TexValues *tval)
 
 void PGTexture::Clear()
 {
-
+    m_db.Clear();
 }
 
 void PGTexture::GetAspect(float *hAspect, float *wAspect)
