@@ -90,6 +90,10 @@ struct RenderStruct
 #endif
 };
 
+typedef float (*ALPHAFACTORFUNCPROC)( float LocalAlpha, float OtherAlpha );
+typedef void  (*COLORFACTORFUNCPROC)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+typedef void  (*COLORFUNCTIONPROC)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
+
 //**************************************************************
 // Function Prototypes
 //**************************************************************
@@ -104,10 +108,10 @@ void RenderAddPoint( const GrVertex *a, bool unsnap );
 void RenderDrawTriangles( void );
 
 // Main Render variables
-extern RenderStruct		OGLRender;
-extern float (*AlphaFactorFunc)( float LocalAlpha, float OtherAlpha );
-extern void  (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-extern void  (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
+extern RenderStruct		    OGLRender;
+extern ALPHAFACTORFUNCPROC  AlphaFactorFunc;
+extern COLORFACTORFUNCPROC  ColorFactor3Func;
+extern COLORFUNCTIONPROC    ColorFunctionFunc;
 
 // Prototypes for the color combining
 float AlphaFactorZero( float LocalAlpha, float OtherAlpha );

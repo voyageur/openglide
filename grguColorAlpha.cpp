@@ -15,6 +15,7 @@
 #include "GLRender.h"
 #include "Glextensions.h"
 #include "PGTexture.h"
+#include "OGLTables.h"
 
 
 //*************************************************
@@ -124,6 +125,36 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
     Glide.State.ColorCombineOther       = other;
     Glide.State.ColorCombineInvert      = invert;
     
+    Glide.CLocal = colorCombineTable[ factor ][ function ].local;
+    Glide.COther = colorCombineTable[ factor ][ function ].other;
+    if ( colorCombineTable[ factor ][ function ].alocal )
+    {
+        Glide.ALocal = true;
+    }
+    if ( colorCombineTable[ factor ][ function ].aother )
+    {
+        Glide.AOther = true;
+    }
+    ColorFunctionFunc = colorCombineTable[ factor ][ function ].func;
+    ColorFactor3Func = colorCombineTable[ factor ][ function ].factorfunc;
+
+    // Need to verify the statement below because of the factor will only be used if there
+    // is need, so we may need not to enable the texture
+    if ( ( Glide.COther &&
+           ( other == GR_COMBINE_OTHER_TEXTURE ) &&
+           ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) ) ||
+         ( ( factor == GR_COMBINE_FACTOR_TEXTURE_ALPHA ) ||
+           ( factor == GR_COMBINE_FACTOR_ONE_MINUS_TEXTURE_ALPHA ) ||
+           ( factor == GR_COMBINE_FACTOR_TEXTURE_RGB ) ) )
+    {
+        OpenGL.ColorTexture = true;
+    }
+    else
+    {
+        OpenGL.ColorTexture = false;
+    }
+
+/*
     Glide.COther = false;
     Glide.CLocal = false;
 
@@ -308,7 +339,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         break;
 
     }
-
+*/
     if ( ( Glide.State.ColorCombineFactor == GR_COMBINE_FACTOR_TEXTURE_ALPHA ) &&
          ( Glide.State.ColorCombineOther == GR_COMBINE_OTHER_TEXTURE ) )
     {
@@ -596,92 +627,20 @@ grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
     Glide.State.AlphaOther = other;
     Glide.State.AlphaInvert = invert;
 
-    Glide.ALocal = false;
-    Glide.AOther = false;
+    Glide.ALocal = alphaCombineTable[ factor ][ function ].local;
+    Glide.AOther = alphaCombineTable[ factor ][ function ].other;
+    AlphaFactorFunc = alphaCombineTable[ factor ][ function ].func;
 
-    OpenGL.AlphaTexture = false;
-
-    switch ( function )
+    if ( Glide.AOther && ( other == GR_COMBINE_OTHER_TEXTURE ) )
     {
-    case GR_COMBINE_FUNCTION_LOCAL:
-    case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL:
-    case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA:
-        Glide.ALocal = true;
-        break;
-
-    case GR_COMBINE_FUNCTION_SCALE_OTHER:
-        if ( Glide.State.AlphaOther == GR_COMBINE_OTHER_TEXTURE )
-        {
-            OpenGL.AlphaTexture = true;
-        }
-        Glide.AOther = true;
-        break;
-
-    case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL:
-    case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA:
-    case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL:
-    case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL:
-    case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA:
-        if ( Glide.State.AlphaOther == GR_COMBINE_OTHER_TEXTURE )
-        {
-            OpenGL.AlphaTexture = true;
-        }
-        Glide.AOther = true;
-        Glide.ALocal = true;
-        break;
-    }
-
-    switch ( factor )
-    {
-    case GR_COMBINE_FACTOR_LOCAL:
-    case GR_COMBINE_FACTOR_LOCAL_ALPHA:
-        AlphaFactorFunc = AlphaFactorLocal;
-        Glide.ALocal = true;
-        break;
-
-    case GR_COMBINE_FACTOR_ONE_MINUS_LOCAL:
-    case GR_COMBINE_FACTOR_ONE_MINUS_LOCAL_ALPHA:
-        AlphaFactorFunc = AlphaFactorOneMinusLocal;
-        Glide.ALocal = true;
-        break;
-
-    case GR_COMBINE_FACTOR_OTHER_ALPHA:
-        if ( Glide.State.AlphaOther == GR_COMBINE_OTHER_TEXTURE )
-        {
-            OpenGL.AlphaTexture = true;
-        }
-        AlphaFactorFunc = AlphaFactorOther;
-        Glide.AOther = true;
-        break;
-
-    case GR_COMBINE_FACTOR_ONE_MINUS_OTHER_ALPHA:
-        if ( Glide.State.AlphaOther == GR_COMBINE_OTHER_TEXTURE )
-        {
-            OpenGL.AlphaTexture = true;
-        }
-        AlphaFactorFunc = AlphaFactorOneMinusOther;
-        Glide.AOther = true;
-        break;
-
-    case GR_COMBINE_FACTOR_TEXTURE_ALPHA:
-    case GR_COMBINE_FACTOR_TEXTURE_RGB:     //GR_COMBINE_FACTOR_LOD_FRACTION:
-    case GR_COMBINE_FACTOR_ONE_MINUS_TEXTURE_ALPHA:
-    case GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION:
         OpenGL.AlphaTexture = true;
-
-    case GR_COMBINE_FACTOR_ONE:
-        AlphaFactorFunc = AlphaFactorOne;
-        Glide.AOther = true;
-        break;
+    }
+    else
+    {
+        OpenGL.AlphaTexture = false;
     }
 
     OpenGL.Texture = ( OpenGL.ColorTexture || ( OpenGL.Blend && OpenGL.AlphaTexture ) );
-
-//      OpenGL.TextureMode = GL_DECAL;
-//      OpenGL.TextureMode = GL_REPLACE;
-//      OpenGL.TextureMode = GL_MODULATE;
-//      OpenGL.TextureMode = GL_BLEND;
-//      OpenGL.TextureMode = GL_ADD;
 }
 
 //*************************************************

@@ -32,9 +32,9 @@
 //**************************************************************
 
 // The functions for the color combine
-float   (*AlphaFactorFunc)( float LocalAlpha, float OtherAlpha );
-void    (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void    (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
+ALPHAFACTORFUNCPROC AlphaFactorFunc;
+COLORFACTORFUNCPROC ColorFactor3Func;
+COLORFUNCTIONPROC   ColorFunctionFunc;
 
 // Snapping constant
 static const float vertex_snap_compare = 4096.0f;

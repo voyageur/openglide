@@ -197,6 +197,9 @@
 				RelativePath=".\Glide.cpp">
 			</File>
 			<File
+				RelativePath="OGLColorAlphaTables.cpp">
+			</File>
+			<File
 				RelativePath=".\PGTexture.cpp">
 			</File>
 			<File
@@ -235,6 +238,9 @@
 		</Filter>
 		<File
 			RelativePath=".\Glide2x.rc">
+		</File>
+		<File
+			RelativePath="OGLTables.h">
 		</File>
 	</Files>
 	<Globals>

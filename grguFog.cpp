@@ -252,11 +252,13 @@ guFogTableIndexToW( int i )
         32768.000000f,  37449.144531f,  43690.667969f,  52428.800781f
     };
 
+#ifdef OGL_DEBUG
     if ( ( i < 0 ) ||
          ( i >= GR_FOG_TABLE_SIZE ) )
     {
         Error( "Error on guFogTableIndexToW( %d )\n", i );
     }
+#endif
 
     return tableIndexToW[ i ];
 }
