@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 
-#include "glogl.h"
+#include "GlOgl.h"
 #include "GLRender.h"
 
 // extern variables
