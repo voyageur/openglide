@@ -15,7 +15,7 @@
 //*************************************************
 //* Draws a Triangle on the screen
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
 {
 #ifdef OGL_CRITICAL
@@ -34,7 +34,7 @@ grDrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
 //*************************************************
 //* Draws a Triangle on the screen
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawPlanarPolygonVertexList( int nVertices, const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -56,7 +56,7 @@ grDrawPlanarPolygonVertexList( int nVertices, const GrVertex vlist[] )
 //*************************************************
 //* Draws a Line on the screen
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawLine( const GrVertex *a, const GrVertex *b )
 {
 #ifdef OGL_CRITICAL
@@ -75,7 +75,7 @@ grDrawLine( const GrVertex *a, const GrVertex *b )
 //*************************************************
 //* Draws a Point on the screen
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawPoint( const GrVertex *a )
 {
 #ifdef OGL_CRITICAL
@@ -88,7 +88,7 @@ grDrawPoint( const GrVertex *a )
 //*************************************************
 //* Draw a convex non-planar polygon
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -113,7 +113,7 @@ grDrawPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 //*************************************************
 //* Draw a convex planar polygon
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawPlanarPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -138,7 +138,7 @@ grDrawPlanarPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 //*************************************************
 //* Draw a convex non-planar polygon
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDrawPolygonVertexList( int nVertices, const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -160,7 +160,7 @@ grDrawPolygonVertexList( int nVertices, const GrVertex vlist[] )
     }
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guAADrawTriangleWithClip( const GrVertex *a, const GrVertex *b, 
                           const GrVertex *c )
 {
@@ -177,7 +177,7 @@ guAADrawTriangleWithClip( const GrVertex *a, const GrVertex *b,
     }
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guDrawTriangleWithClip( const GrVertex *a,
                         const GrVertex *b,
                         const GrVertex *c )
@@ -195,7 +195,7 @@ guDrawTriangleWithClip( const GrVertex *a,
     }
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guDrawPolygonVertexListWithClip( int nverts, const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -217,7 +217,7 @@ guDrawPolygonVertexListWithClip( int nverts, const GrVertex vlist[] )
     }
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grAADrawLine( const GrVertex *a, const GrVertex *b )
 {
 #ifdef OGL_CRITICAL
@@ -227,7 +227,7 @@ grAADrawLine( const GrVertex *a, const GrVertex *b )
     RenderAddLine( a, b, true );
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grAADrawPoint(const GrVertex *a )
 {
 #ifdef OGL_CRITICAL
@@ -237,7 +237,7 @@ grAADrawPoint(const GrVertex *a )
     RenderAddPoint( a, true );
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grAADrawPolygon( const int nverts, const int ilist[], const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -259,7 +259,7 @@ grAADrawPolygon( const int nverts, const int ilist[], const GrVertex vlist[] )
     }
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grAADrawPolygonVertexList( const int nverts, const GrVertex vlist[] )
 {
 #ifdef OGL_CRITICAL
@@ -281,7 +281,7 @@ grAADrawPolygonVertexList( const int nverts, const GrVertex vlist[] )
     }
 }
 
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grAADrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
                   FxBool ab_antialias, FxBool bc_antialias, FxBool ca_antialias )
 {

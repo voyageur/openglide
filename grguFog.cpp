@@ -20,7 +20,7 @@
 //* download a fog table
 //* Fog is applied after color combining and before alpha blending.
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grFogTable( const GrFog_t *ft )
 {
 #ifdef OGL_DONE
@@ -46,7 +46,7 @@ grFogTable( const GrFog_t *ft )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grFogColorValue( GrColor_t fogcolor )
 {
 #ifdef OGL_PARTDONE
@@ -65,7 +65,7 @@ grFogColorValue( GrColor_t fogcolor )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grFogMode( GrFogMode_t mode )
 {
 #ifdef OGL_PARTDONE
@@ -112,7 +112,7 @@ grFogMode( GrFogMode_t mode )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guFogGenerateExp( GrFog_t *fogtable, float density )
 {
 #ifdef OGL_PARTDONE
@@ -145,7 +145,7 @@ guFogGenerateExp( GrFog_t *fogtable, float density )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guFogGenerateExp2( GrFog_t *fogtable, float density )
 {
 #ifdef OGL_PARTDONE
@@ -163,7 +163,7 @@ guFogGenerateExp2( GrFog_t *fogtable, float density )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guFogGenerateLinear( GrFog_t *fogtable,
                      float nearZ, float farZ )
 {
@@ -205,7 +205,7 @@ guFogGenerateLinear( GrFog_t *fogtable,
 //*************************************************
 //* convert a fog table index to a floating point eye-space w value
 //*************************************************
-DLLEXPORT float __stdcall
+FX_ENTRY float FX_CALL
 guFogTableIndexToW( int i )
 {
 #ifdef OGL_DONE

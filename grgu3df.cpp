@@ -21,7 +21,7 @@ DWORD GetTexSize( const int Lod, const int aspectRatio, const int format );
 int Read3dfHeader( const char *filename, Gu3dfInfo *data );
 
 //*************************************************
-DLLEXPORT FxBool __stdcall
+FX_ENTRY FxBool FX_CALL
 gu3dfGetInfo( const char *filename, Gu3dfInfo *info )
 {
 #ifdef OGL_PARTDONE
@@ -76,7 +76,7 @@ static FxU32 ReadDataShort( FILE *fp )
 }
 
 //*************************************************
-DLLEXPORT FxBool __stdcall
+FX_ENTRY FxBool FX_CALL
 gu3dfLoad( const char *filename, Gu3dfInfo *data )
 {
 #ifdef OGL_PARTDONE

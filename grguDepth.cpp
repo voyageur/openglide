@@ -15,7 +15,7 @@
 //*************************************************
 //* Changes Depth Buffer Mode
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDepthBufferMode( GrDepthBufferMode_t mode )
 {
 #ifdef OGL_DONE
@@ -88,7 +88,7 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
 //*************************************************
 //* Enables or Disables Depth Buffer Writting
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDepthMask( FxBool enable )
 {
 #ifdef OGL_DONE
@@ -109,7 +109,7 @@ grDepthMask( FxBool enable )
 //*************************************************
 //* Sets the Depth Function to use
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDepthBufferFunction( GrCmpFnc_t func )
 {
 #ifdef OGL_DONE
@@ -134,7 +134,7 @@ grDepthBufferFunction( GrCmpFnc_t func )
 //*************************************************
 //* Set the depth bias level
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grDepthBiasLevel( FxI16 level )
 {
 #ifdef OGL_PARTDONE
