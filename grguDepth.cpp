@@ -37,6 +37,7 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
 		OpenGL.ZFar = WBUFFERFAR;
 		break;
 	}
+
 	glEnable( GL_DEPTH_TEST );
 
 	glMatrixMode( GL_PROJECTION );
@@ -130,7 +131,8 @@ grDepthBiasLevel( FxI16 level )
 	RenderDrawTriangles();
 
 	Glide.State.DepthBiasLevel = level;
-	OpenGL.DepthBiasLevel = level * D1OVER65536;
+	//OpenGL.DepthBiasLevel = level * D1OVER65536;
+	OpenGL.DepthBiasLevel = level * 10.0f;
 
 	glPolygonOffset( 1.0f, OpenGL.DepthBiasLevel );
 
