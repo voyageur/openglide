@@ -168,14 +168,13 @@ void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 
 void PGTexture::DownloadTable( GrTexTable_t type, FxU32 *data, int first, int count )
 {
+//    GlideMsg( "DownloadTable( %d, 0x%X, %d, %d )\n", type, data, first, count );
+
     if ( type == GR_TEXTABLE_PALETTE )
     {
         for ( int i = 0; i < count; i++ )
         {
-            m_palette[first+i] = (  ( data[ i ] & 0xff00ff00 )
-                | ( ( data[ i ] & 0x00ff0000 ) >> 16 )
-                | ( ( data[ i ] & 0x000000ff ) << 16 )
-                );
+              m_palette[ first + i ] = data[ i ] & 0x00FFFFFF; 
         }
         
         m_palette_dirty = true;
@@ -409,7 +408,7 @@ bool PGTexture::MakeReady( void )
         case GR_TEXFMT_P_8:
             if ( InternalConfig.EXT_paletted_texture )
             {
-                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette );
+                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
                 
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, 
                               texVals.width, texVals.height, 0, 
@@ -422,7 +421,7 @@ bool PGTexture::MakeReady( void )
             else
             {
                 ConvertP8to8888( data, m_tex_temp, texVals.nPixels, m_palette );
-                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_tex_temp );
             }
             break;
             
@@ -431,7 +430,7 @@ bool PGTexture::MakeReady( void )
             {
                 FxU32 *tex_temp2 = m_tex_temp + 256 * 128;
 
-                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette );
+                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
 
                 SplitAP88( (WORD *)data, (BYTE *)m_tex_temp, (BYTE *)tex_temp2, texVals.nPixels );
                 
@@ -452,7 +451,7 @@ bool PGTexture::MakeReady( void )
             else
             {
                 ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
-                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_tex_temp );
             }
             break;
             

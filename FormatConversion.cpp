@@ -31,6 +31,19 @@ void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, int Pixels )
 // This functions processes 2 pixels at a time, there is no problem in
 // passing odd numbers or a number less than 2 for the pixels, but
 // the buffers should be large enough
+void Convert5551to565( DWORD *Buffer1, DWORD *Buffer2, int Pixels )
+{
+	while ( Pixels > 0 )
+	{
+		*Buffer2++ = (   (*Buffer1) & 0xFFC0FFC0 ) |
+					 ( ( (*Buffer1++) & 0x003E003E ) >> 1 );
+		Pixels -= 2;
+	}
+}
+
+// This functions processes 2 pixels at a time, there is no problem in
+// passing odd numbers or a number less than 2 for the pixels, but
+// the buffers should be large enough
 void Convert4444to4444special( DWORD *Buffer1, DWORD *Buffer2, int Pixels )
 {
 	while ( Pixels > 0 )
@@ -80,6 +93,39 @@ copying:
         psllq mm0, 1
         por mm1, mm2
         por mm0, mm1
+        
+		movq [edx + ecx], mm0
+		sub ecx, 8
+		jg copying
+		EMMS
+	}
+}
+
+unsigned __int64 Mask5551_565_1 = 0xFFC0FFC0FFC0FFC0;
+unsigned __int64 Mask5551_565_2 = 0x003E003E003E003E;
+
+// This functions processes 4 pixels at a time, there is no problem in
+// passing odd numbers or a number less than 4 for the pixels, but
+// the buffers should be large enough
+void MMXConvert5551to565( void *Src, void *Dst, int NumberOfPixels )
+{
+	__asm
+	{
+		mov ecx, NumberOfPixels
+		mov eax, Src
+        shl ecx, 1
+		mov edx, Dst
+		movq mm5, [Mask5551_565_2]
+		movq mm4, [Mask5551_565_1]
+    align 16
+copying:
+        movq mm0, [eax + ecx]
+        movq mm2, mm0
+
+        pand mm0, mm5
+        pand mm2, mm4
+        psrlq mm0, 1
+        por mm0, mm2
         
 		movq [edx + ecx], mm0
 		sub ecx, 8

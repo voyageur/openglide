@@ -373,7 +373,10 @@ void GLExtensions( void )
         glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_COLOR_ARRAY );
         glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-        glEnableClientState( GL_SECONDARY_COLOR_ARRAY_EXT );
+        if ( InternalConfig.EXT_secondary_color )
+        {
+            glEnableClientState( GL_SECONDARY_COLOR_ARRAY_EXT );
+        }
         if ( InternalConfig.EXT_fog_coord )
         {
             glEnableClientState( GL_FOG_COORDINATE_ARRAY_EXT );
