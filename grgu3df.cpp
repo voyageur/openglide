@@ -1,34 +1,21 @@
 //**************************************************************
-//*				OpenGLide - Glide->OpenGL Wrapper
+//*            OpenGLide - Glide to OpenGL Wrapper
+//*             http://openglide.sourceforge.net
+//*
 //*						3DF functions
-//*					   Made by Glorfindel
+//*
+//*         OpenGLide is OpenSource under LGPL license
+//*              Originaly made by Fabio Barros
+//*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
-#include "glogl.h"
 #include <string.h>
 #include <stdio.h>
 
-/* structs for 3df
-typedef struct
-{
-  FxU32               width, height;
-  int                 small_lod, large_lod;
-  GrAspectRatio_t     aspect_ratio;
-  GrTextureFormat_t   format;
-} Gu3dfHeader;
-
-typedef struct
-{
-  Gu3dfHeader  header;
-  GuTexTable   table;
-  void        *data;
-  FxU32        mem_required;    // memory required for mip map in bytes.
-} Gu3dfInfo;
-*/
+#include "glogl.h"
 
 // extern variables
-DWORD GetTexSize(const int Lod, const int aspectRatio, const int format );
-
+DWORD GetTexSize( const int Lod, const int aspectRatio, const int format );
 
 // prototypes
 int Read3dfHeader( const char *filename, Gu3dfInfo *data );
@@ -56,20 +43,22 @@ gu3dfGetInfo( const char *filename, Gu3dfInfo *info )
 		return FXTRUE;
 	}
 	else
+    {
 		return FXFALSE;
+    }
 }
 
 
 static FxU32 ReadDataLong( FILE *fp )
 {
-    FxU32 data;
-    FxU8 byte[4];
+    FxU32   data;
+    FxU8    byte[4];
 
-    fread(byte, 4, 1, fp);
-    data = (((FxU32) byte[0]) << 24) |
-           (((FxU32) byte[1]) << 16) |
-           (((FxU32) byte[2]) <<  8) |
-            ((FxU32) byte[3]);
+    fread( byte, 4, 1, fp );
+    data = (((FxU32) byte[ 0 ]) << 24) |
+           (((FxU32) byte[ 1 ]) << 16) |
+           (((FxU32) byte[ 2 ]) <<  8) |
+            ((FxU32) byte[ 3 ]);
 
     return data;
 }
@@ -82,8 +71,8 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
 	GlideMsg( "gu3dfLoad( %s, --- )\n", filename );
 #endif
 
-	FILE * file3df;
-	int jump = Read3dfHeader( filename, data );
+	FILE    * file3df;
+	int     jump = Read3dfHeader( filename, data );
 
 #ifdef DEBUG
 	GlideMsg( "Start of Data (Offset) = %d\n", jump );
@@ -114,31 +103,31 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
 
 GrTextureFormat_t ParseTextureFormat( const char * text )
 {
-	if (!strcmp( text, "argb1555\n" ))
+	if ( !strcmp( text, "argb1555\n" ) )
 	{
 		return GR_TEXFMT_ARGB_1555;
 	}
-	if (!strcmp( text, "argb4444\n" ))
+	if ( !strcmp( text, "argb4444\n" ) )
 	{
 		return GR_TEXFMT_ARGB_4444;
 	}
-	if (!strcmp( text, "rgb565\n" ))
+	if ( !strcmp( text, "rgb565\n" ) )
 	{
 		return GR_TEXFMT_RGB_565;
 	}
-	if (!strcmp( text, "rgb332\n" ))
+	if ( !strcmp( text, "rgb332\n" ) )
 	{
 		return GR_TEXFMT_RGB_332;
 	}
-	if (!strcmp( text, "argb8332\n" ))
+	if ( !strcmp( text, "argb8332\n" ) )
 	{
 		return GR_TEXFMT_ARGB_8332;
 	}
-	if (!strcmp( text, "p8\n" ))
+	if ( !strcmp( text, "p8\n" ) )
 	{
 		return GR_TEXFMT_P_8;
 	}
-	if (!strcmp( text, "ap88\n" ))
+	if ( !strcmp( text, "ap88\n" ) )
 	{
 		return GR_TEXFMT_AP_88;
 	}
@@ -186,14 +175,21 @@ GrAspectRatio_t ParseAspect( int h, int v )
 
 int Read3dfHeader( const char *filename, Gu3dfInfo *data )
 {
-	FILE * file3df;
-	char buffer[255];
-	int temp1, temp2, lod1, lod2, nWidth, nHeight;
+	FILE    * file3df;
+	char    buffer[255];
+	int     temp1, 
+            temp2, 
+            lod1, 
+            lod2, 
+            nWidth, 
+            nHeight;
 
 	file3df = fopen( filename, "r" );
 
 	if ( file3df == NULL )
+    {
 		return 0;
+    }
 
 	fgets( buffer, 255, file3df );
 	fgets( buffer, 255, file3df );
@@ -211,7 +207,7 @@ int Read3dfHeader( const char *filename, Gu3dfInfo *data )
 
 	data->header.aspect_ratio = ParseAspect( temp1, temp2 );
 
-	switch (data->header.aspect_ratio)
+	switch ( data->header.aspect_ratio )
 	{
 	case GR_ASPECT_8x1:	nWidth = lod1;		nHeight = lod1 >> 3;	break;
 	case GR_ASPECT_4x1:	nWidth = lod1;		nHeight = lod1 >> 2;	break;

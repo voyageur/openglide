@@ -1,7 +1,12 @@
 //**************************************************************
-//*				OpenGLide - Glide->OpenGL Wrapper
-//*					Utility File
-//*				Made by Glorfindel
+//*            OpenGLide - Glide to OpenGL Wrapper
+//*             http://openglide.sourceforge.net
+//*
+//*					     Utility File
+//*
+//*         OpenGLide is OpenSource under LGPL license
+//*              Originaly made by Fabio Barros
+//*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
 #include <stdio.h>
@@ -14,30 +19,33 @@ ConfigStruct	UserConfig,
 				InternalConfig;
 
 // Extern prototypes
-extern unsigned long NumberOfErrors;
-extern BOOL GenerateErrorFile();
+extern unsigned long    NumberOfErrors;
+extern BOOL             GenerateErrorFile();
 
 
 // Functions
 
-void __cdecl GlideMsg(char *szString, ...)
+void __cdecl GlideMsg( char *szString, ... )
 {
-	va_list(Arg);
-	va_start(Arg, szString);
+	va_list( Arg );
+	va_start( Arg, szString );
 
-	FILE *fHandle = fopen( GLIDEFILE, "at");
-	if(!fHandle) return;
-	vfprintf(fHandle, szString, Arg);
+	FILE *fHandle = fopen( GLIDEFILE, "at" );
+	if ( !fHandle )
+    {
+        return;
+    }
+	vfprintf( fHandle, szString, Arg );
 	fflush( fHandle );
-	fclose(fHandle);
+	fclose( fHandle );
 
-	va_end(Arg);
+	va_end( Arg );
 }
 
-void __cdecl Error(char *szString, ...)
+void __cdecl Error( char *szString, ... )
 {
-	va_list(Arg);
-	va_start(Arg, szString);
+	va_list( Arg );
+	va_start( Arg, szString );
 
 	if ( NumberOfErrors == 0 )
 	{
@@ -45,12 +53,15 @@ void __cdecl Error(char *szString, ...)
 	}
 
 	FILE *fHandle = fopen( ERRORFILE, "at");
-	if(!fHandle) return;
-	vfprintf(fHandle, szString, Arg);
+	if ( !fHandle )
+    {
+        return;
+    }
+	vfprintf( fHandle, szString, Arg );
 	fflush( fHandle );
-	fclose(fHandle);
+	fclose( fHandle );
 
-	va_end(Arg);
+	va_end( Arg );
 	NumberOfErrors++;
 }
 
@@ -58,130 +69,144 @@ void GLErro( char *Funcao )
 {
 	GLenum Erro = glGetError();
 
-	if (Erro != GL_NO_ERROR)
+	if ( Erro != GL_NO_ERROR )
 	{
-		Error( "%s: OpenGLError = %s\n", Funcao, gluErrorString( Erro ) );//ErrorCode );
+		Error( "%s: OpenGLError = %s\n", Funcao, gluErrorString( Erro ) );
 	}
 }
 
+// Not included
 #if 0
-static LPDIRECTDRAW              pDD = NULL;
+
+static LPDIRECTDRAW             pDD = NULL;
 static LPDIRECTDRAWSURFACE      pSurf = NULL;
 static LPDIRECTDRAWGAMMACONTROL pControl = NULL;
 
-static HRESULT open_direct_draw(HWND hwnd)
+static HRESULT open_direct_draw( HWND hwnd )
 {
-    HRESULT res;
-    DDSURFACEDESC desc;
+    HRESULT         res;
+    DDSURFACEDESC   desc;
 
-    res = DirectDrawCreate(NULL, &pDD, NULL);
-    if(res != DD_OK)
+    res = DirectDrawCreate( NULL, &pDD, NULL );
+    if ( res != DD_OK )
+    {
         return res;
+    }
 
-    res = pDD->SetCooperativeLevel(NULL, DDSCL_NORMAL);
-    //res = pDD->SetCooperativeLevel(hwnd, DDSCL_EXCLUSIVE|DDSCL_FULLSCREEN);
-    if(res != DD_OK)
+    res = pDD->SetCooperativeLevel( NULL, DDSCL_NORMAL );
+    if ( res != DD_OK )
+    {
         return res;
+    }
 
-    memset(&desc, 0, sizeof(desc));
-    desc.dwSize = sizeof(desc);
+    memset( &desc, 0, sizeof( desc ) );
+    desc.dwSize = sizeof( desc );
     desc.dwFlags = DDSD_CAPS;
     desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
 
-    res = pDD->CreateSurface(&desc, &pSurf, NULL);
-    if(res != DD_OK)
+    res = pDD->CreateSurface( &desc, &pSurf, NULL );
+    if( res != DD_OK )
+    {
         return res;
+    }
 
-    res = pSurf->QueryInterface(IID_IDirectDrawGammaControl, (void **) &pControl);
+    res = pSurf->QueryInterface( IID_IDirectDrawGammaControl, (void **) &pControl );
 
     return res;
 }
 
-static void close_direct_draw()
+static void close_direct_draw( void )
 {
-    if(pControl != NULL)
+    if ( pControl != NULL )
     {
-        pControl->Release();
+        pControl->Release( );
         pControl = NULL;
     }
 
-    if(pSurf != NULL)
+    if ( pSurf != NULL )
     {
-        pSurf->Release();
+        pSurf->Release( );
         pSurf = NULL;
     }
 
-    if(pDD != NULL)
+    if ( pDD != NULL )
     {
-        pDD->Release();
+        pDD->Release( );
         pDD = NULL;
     }
 }
 
-static HRESULT set_gamma_ramp()
+static HRESULT set_gamma_ramp( void )
 {
-    HRESULT res;
+    HRESULT     res;
     DDGAMMARAMP ramp;
-    int i;
+    int         i;
     
-    if(pControl == NULL)
-        return DDERR_NOTINITIALIZED;
-    
-    for(i = 0; i < 256; i++)
+    if ( pControl == NULL )
     {
-        WORD v = (WORD) (0xffff * pow(i / 255.0, 0.66));
-        
-        ramp.red[i] = ramp.green[i] = ramp.blue[i] = (v & 0xff00);
+        return DDERR_NOTINITIALIZED;
     }
     
-    res = pControl->SetGammaRamp(0, &ramp);
+    for ( i = 0; i < 256; i++ )
+    {
+        WORD v = (WORD)( 0xffff * pow( i / 255.0, 0.66 ) );
+        
+        ramp.red[ i ] = ramp.green[ i ] = ramp.blue[ i ] = ( v & 0xff00 );
+    }
+    
+    res = pControl->SetGammaRamp( 0, &ramp );
 
     return res;
 }
+
 #endif
 
 HDC hDC;
 static HGLRC hRC;
 static HWND hWND;
 static struct
-        {
-            WORD red[256];
-            WORD green[256];
-            WORD blue[256];
-        } old_ramp;
+{
+    WORD red[ 256 ];
+    WORD green[ 256 ];
+    WORD blue[ 256 ];
+} old_ramp;
 
 static BOOL ramp_stored = FALSE;
-static bool mode_changed = false;
+static BOOL mode_changed = FALSE;
 
-static bool SetScreenMode(HWND hWnd, int xsize, int ysize)
+static BOOL SetScreenMode( HWND hWnd, int xsize, int ysize )
 {
-    HDC hdc;
-    DWORD bits_per_pixel;
-    bool found;
+    HDC     hdc;
+    DWORD   bits_per_pixel;
+    BOOL    found;
     DEVMODE DevMode;
 
-    hdc = ::GetDC(hWnd);
-    bits_per_pixel = GetDeviceCaps(hdc, BITSPIXEL);
-    ::ReleaseDC(hWnd, hdc);
+    hdc = ::GetDC( hWnd );
+    bits_per_pixel = GetDeviceCaps( hdc, BITSPIXEL );
+    ::ReleaseDC( hWnd, hdc );
     
-    found = false;
-    DevMode.dmSize = sizeof(DEVMODE);
+    found = FALSE;
+    DevMode.dmSize = sizeof( DEVMODE );
     
-    for(int i = 0; !found && EnumDisplaySettings(NULL, i, &DevMode) != FALSE; i++ )
+    for ( int i = 0; 
+          !found && EnumDisplaySettings( NULL, i, &DevMode ) != FALSE; 
+          i++ )
     {
-        if((DevMode.dmPelsWidth == (DWORD)xsize) && (DevMode.dmPelsHeight == (DWORD)ysize) && 
-            (DevMode.dmBitsPerPel == bits_per_pixel))
-            found = true;
+        if ( ( DevMode.dmPelsWidth == (DWORD)xsize ) && 
+             ( DevMode.dmPelsHeight == (DWORD)ysize ) && 
+             ( DevMode.dmBitsPerPel == bits_per_pixel ) )
+        {
+            found = TRUE;
+        }
     }
     
-    return (found && ChangeDisplaySettings( &DevMode, CDS_RESET|CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL);
+    return ( found && ChangeDisplaySettings( &DevMode, CDS_RESET|CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL );
 }
 
-static void ResetScreenMode()
+static void ResetScreenMode( void )
 {
-    ChangeDisplaySettings(NULL, 0);
+    ChangeDisplaySettings( NULL, 0 );
 }
-
 
 void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 {
@@ -189,90 +214,93 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 	int						PixFormat;
 	unsigned int			BitsPerPixel;
 
-    if(hwnd == NULL)
+    if ( hwnd == NULL )
     {
-        MessageBox(NULL, "NULL window specified", "Error", MB_OK);
-        exit(1);
+        MessageBox( NULL, "NULL window specified", "Error", MB_OK );
+        exit( 1 );
     }
 
-    mode_changed = false;
+    mode_changed = FALSE;
 
-    if(UserConfig.InitFullScreen)
+    if ( UserConfig.InitFullScreen )
     {
-        SetWindowLong(hwnd, GWL_STYLE, WS_POPUP|WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS);
-        MoveWindow(hwnd, 0, 0, width, height, false);
-        mode_changed = SetScreenMode(hwnd, width, height);
+        SetWindowLong( hwnd, 
+                       GWL_STYLE, 
+                       WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS );
+        MoveWindow( hwnd, 0, 0, width, height, FALSE );
+        mode_changed = SetScreenMode( hwnd, width, height );
     }
 
     hWND = hwnd;
 
 	hDC = GetDC( hwnd );
-    	BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
+    BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
 
-	ZeroMemory( &pfd, sizeof(pfd) );
-	pfd.nSize        = sizeof(pfd);
+	ZeroMemory( &pfd, sizeof( pfd ) );
+	pfd.nSize        = sizeof( pfd );
 	pfd.nVersion     = 1;
 	pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 	pfd.iPixelType   = PFD_TYPE_RGBA;
 	pfd.cColorBits   = BitsPerPixel;
 	pfd.cDepthBits   = BitsPerPixel;
 
-
-	if (!(PixFormat = ChoosePixelFormat(hDC, &pfd)))
+	if ( !( PixFormat = ChoosePixelFormat( hDC, &pfd ) ) )
 	{
-		MessageBox(NULL, "ChoosePixelFormat() failed:  "
-		   "Cannot find a suitable pixel format.", "Error", MB_OK); 
-		exit(1);
+		MessageBox( NULL, "ChoosePixelFormat() failed:  "
+		            "Cannot find a suitable pixel format.", "Error", MB_OK );
+		exit( 1 );
 	} 
 
-	if (!SetPixelFormat(hDC, PixFormat, &pfd))
+	if ( !SetPixelFormat( hDC, PixFormat, &pfd ) )
 	{
-		MessageBox(NULL, "SetPixelFormat() failed:  "
-			   "Cannot set format specified.", "Error", MB_OK);
-		exit(1);
+		MessageBox( NULL, "SetPixelFormat() failed:  "
+			        "Cannot set format specified.", "Error", MB_OK );
+		exit( 1 );
 	} 
 
-	DescribePixelFormat( hDC, PixFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd );
+	DescribePixelFormat( hDC, PixFormat, sizeof( PIXELFORMATDESCRIPTOR ), &pfd );
 	GlideMsg( "ColorBits	= %d\n", pfd.cColorBits );
 	GlideMsg( "DepthBits	= %d\n", pfd.cDepthBits );
 
 	if ( pfd.cDepthBits > 16 )
-        UserConfig.PrecisionFixEnable = false;
-
-	hRC = wglCreateContext(hDC);
-	wglMakeCurrent(hDC, hRC);
-
     {
-        HDC pDC = GetDC(NULL);
-
-        ramp_stored = GetDeviceGammaRamp(pDC, &old_ramp);
-
-        ReleaseDC(NULL, pDC);
+        UserConfig.PrecisionFixEnable = FALSE;
     }
+
+	hRC = wglCreateContext( hDC );
+	wglMakeCurrent( hDC, hRC );
+
+    HDC pDC = GetDC( NULL );
+
+    ramp_stored = GetDeviceGammaRamp( pDC, &old_ramp );
+
+    ReleaseDC( NULL, pDC );
 }    
 
-void FinaliseOpenGLWindow(void)
+void FinaliseOpenGLWindow( void )
 {
-    if(ramp_stored)
+    if ( ramp_stored )
     {
-        HDC pDC = GetDC(NULL);
+        HDC pDC = GetDC( NULL );
 
-        BOOL res = SetDeviceGammaRamp(pDC, &old_ramp);
+        BOOL res = SetDeviceGammaRamp( pDC, &old_ramp );
 
-        ReleaseDC(NULL, pDC);
+        ReleaseDC( NULL, pDC );
     }
 
-	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(hRC);
-	ReleaseDC(hWND, hDC);
+	wglMakeCurrent( NULL, NULL );
+	wglDeleteContext( hRC );
+	ReleaseDC( hWND, hDC );
 
-    if(mode_changed)
-        ResetScreenMode();
+    if( mode_changed )
+    {
+        ResetScreenMode( );
+    }
 }
 
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
 {
-	switch (Glide.State.ColorFormat)
+	switch ( Glide.State.ColorFormat )
 	{
 	case GR_COLORFORMAT_ARGB:	//0xAARRGGBB
 		A = (BYTE)((GlideColor & 0xFF000000) >> 24);
@@ -280,18 +308,21 @@ void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
 		G = (BYTE)((GlideColor & 0x0000FF00) >>  8);
 		B = (BYTE)((GlideColor & 0x000000FF)      );
 		break;
+
 	case GR_COLORFORMAT_ABGR:	//0xAABBGGRR
 		A = (BYTE)((GlideColor & 0xFF000000) >> 24);
 		B = (BYTE)((GlideColor & 0x00FF0000) >> 16);
 		G = (BYTE)((GlideColor & 0x0000FF00) >>  8);
 		R = (BYTE)((GlideColor & 0x000000FF)      );
 		break;
+
 	case GR_COLORFORMAT_RGBA: 	//0xRRGGBBAA
 		R = (BYTE)((GlideColor & 0xFF000000) >> 24);
 		G = (BYTE)((GlideColor & 0x00FF0000) >> 16);
 		B = (BYTE)((GlideColor & 0x0000FF00) >>  8);
 		A = (BYTE)((GlideColor & 0x000000FF)      );
 		break;
+
 	case GR_COLORFORMAT_BGRA:	//0xBBGGRRAA
 		B = (BYTE)((GlideColor & 0xFF000000) >> 24);
 		G = (BYTE)((GlideColor & 0x00FF0000) >> 16);
@@ -308,14 +339,17 @@ GrColor_t ConvertConstantColor( float R, float G, float B, float A )
 	GrColor_t b = (GrColor_t) B;
 	GrColor_t a = (GrColor_t) A;
 
-	switch (Glide.State.ColorFormat)
+	switch ( Glide.State.ColorFormat )
 	{
 	case GR_COLORFORMAT_ARGB:	//0xAARRGGBB
 		return ( a << 24 ) | ( r << 16 ) | ( g << 8 ) | b;
+
 	case GR_COLORFORMAT_ABGR:	//0xAABBGGRR
 		return ( a << 24 ) | ( b << 16 ) | ( g << 8 ) | r;
+
 	case GR_COLORFORMAT_RGBA: 	//0xRRGGBBAA
 		return ( r << 24 ) | ( g << 16 ) | ( b << 8 ) | a;
+
 	case GR_COLORFORMAT_BGRA:	//0xBBGGRRAA
 		return ( b << 24 ) | ( g << 16 ) | ( r << 8 ) | a;
 	}
@@ -325,7 +359,7 @@ GrColor_t ConvertConstantColor( float R, float G, float B, float A )
 
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A )
 {
-	switch (Glide.State.ColorFormat)
+	switch ( Glide.State.ColorFormat )
 	{
 	case GR_COLORFORMAT_ARGB:	//0xAARRGGBB
 		A = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
@@ -333,18 +367,21 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 		G = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
 		B = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
 		break;
+
 	case GR_COLORFORMAT_ABGR:	//0xAABBGGRR
 		A = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
 		B = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
 		G = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
 		R = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
 		break;
+
 	case GR_COLORFORMAT_RGBA: 	//0xRRGGBBAA
 		R = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
 		G = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
 		B = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
 		A = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
 		break;
+
 	case GR_COLORFORMAT_BGRA:	//0xBBGGRRAA
 		B = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
 		G = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
@@ -354,13 +391,13 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 	}
 }
 
-
 //----------------------------------------------------------------
-DWORD GetTexSize(const int Lod, const int aspectRatio, const int format )
+DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
 {
-	static DWORD nLength, nBytes;
+	static DWORD    nLength, 
+                    nBytes;
 
-	switch(Lod)
+	switch ( Lod )
 	{
 	case GR_LOD_256:	nLength = 256;	break;
 	case GR_LOD_128:	nLength = 128;	break;
@@ -373,7 +410,7 @@ DWORD GetTexSize(const int Lod, const int aspectRatio, const int format )
 	case GR_LOD_1:		nLength = 1;	break;
 	}
 
-	switch(aspectRatio)
+	switch ( aspectRatio )
 	{
 	case GR_ASPECT_1x1:		nBytes = nLength * nLength;				break;
 	case GR_ASPECT_1x2:
@@ -384,7 +421,7 @@ DWORD GetTexSize(const int Lod, const int aspectRatio, const int format )
 	case GR_ASPECT_8x1:		nBytes = (nLength >> 3) * nLength;		break;
 	}
 
-	switch(format)
+	switch ( format )
 	{
 	case GR_TEXFMT_RGB_565:
 	case GR_TEXFMT_ARGB_8332:
@@ -402,11 +439,15 @@ DWORD GetTexSize(const int Lod, const int aspectRatio, const int format )
 
 // Calculates the frequency of the processor clock
 #pragma optimize( "", off )
-float ClockFrequency()
+float ClockFrequency( void )
 {
-	__int64	i64_perf_start, i64_perf_freq, i64_perf_end;
-	__int64	i64_clock_start,i64_clock_end;
-	double d_loop_period, d_clock_freq;
+	__int64	i64_perf_start, 
+            i64_perf_freq, 
+            i64_perf_end,
+	        i64_clock_start,
+            i64_clock_end;
+	double  d_loop_period, 
+            d_clock_freq;
 
 	QueryPerformanceFrequency( (LARGE_INTEGER*)&i64_perf_freq );
 
@@ -414,7 +455,7 @@ float ClockFrequency()
 	i64_perf_end = 0;
 
 	RDTSC( i64_clock_start );
-	while( i64_perf_end < i64_perf_start + 250000 )
+	while( i64_perf_end < ( i64_perf_start + 250000 ) )
 	{
 		QueryPerformanceCounter( (LARGE_INTEGER*)&i64_perf_end );
 	}
@@ -422,33 +463,33 @@ float ClockFrequency()
 
 	i64_clock_end -= i64_clock_start;
 
-	d_loop_period = ((double)(i64_perf_freq)) / 250000.0;
-	d_clock_freq = ((double)(i64_clock_end & 0xffffffff)) * d_loop_period;
+	d_loop_period = ((double)i64_perf_freq) / 250000.0;
+	d_clock_freq = ((double)( i64_clock_end & 0xffffffff )) * d_loop_period;
 
 	return (float)d_clock_freq;
 }
 #pragma optimize( "", on )
 
-
-
-char *FindConfig( char *IniFile, char *IniConfig )
+char * FindConfig( char *IniFile, char *IniConfig )
 {
-	char Buffer1[256], *EqLocation, *Find;
-	FILE *file;
+	char    Buffer1[256], 
+            * EqLocation, 
+            * Find;
+	FILE    * file;
 
 	Find = NULL;
 	file = fopen( IniFile, "r" );
 
 	while ( fgets( Buffer1, 255, file ) != NULL )
 	{
-		if ( (EqLocation = strchr( Buffer1, '=' )) != NULL )
+		if ( ( EqLocation = strchr( Buffer1, '=' ) ) != NULL )
 		{		
 			if ( !strncmp( Buffer1, IniConfig, EqLocation - Buffer1 ) )
 			{
 				Find = EqLocation + 1;
-				if ( Find[ strlen( Find )-1 ] == 10 )
+				if ( Find[ strlen( Find ) - 1 ] == 10 )
 				{
-					Find[ strlen( Find )-1 ] = '\0';
+					Find[ strlen( Find ) - 1 ] = '\0';
 				}
 				break;
 			}
@@ -460,37 +501,37 @@ char *FindConfig( char *IniFile, char *IniConfig )
 	return Find;
 }
 
-void GetOptions()
+void GetOptions( void )
 {
-	FILE *IniFile;
-	char *Pointer;
-	extern char *OpenGLideVersion;
-	char Path[255];
+	FILE        * IniFile;
+	char        * Pointer;
+	extern char * OpenGLideVersion;
+	char        Path[255];
 
-	UserConfig.FogEnable				= true;
-	UserConfig.InitFullScreen			= false;
-	UserConfig.PrecisionFixEnable		= true;
-	UserConfig.CreateWindow				= false;
-	UserConfig.EnableMipMaps			= false;
-	UserConfig.BuildMipMaps				= false;
-    UserConfig.IgnorePaletteChange      = false;
+	UserConfig.FogEnable				= TRUE;
+	UserConfig.InitFullScreen			= FALSE;
+	UserConfig.PrecisionFixEnable		= TRUE;
+	UserConfig.CreateWindow				= FALSE;
+	UserConfig.EnableMipMaps			= FALSE;
+	UserConfig.BuildMipMaps				= FALSE;
+    UserConfig.IgnorePaletteChange      = FALSE;
 
-	UserConfig.Wrap565Enable			= false;
+	UserConfig.Wrap565Enable			= FALSE;
 
-	UserConfig.MultiTextureEXTEnable	= false;
-	UserConfig.PaletteEXTEnable			= true;
-	UserConfig.PackedPixelsEXTEnable	= false;
-	UserConfig.TextureEnvEXTEnable		= false;
-	UserConfig.VertexArrayEXTEnable		= false;
-	UserConfig.SecondaryColorEXTEnable	= false;
-	UserConfig.FogCoordEXTEnable		= true;
+	UserConfig.MultiTextureEXTEnable	= FALSE;
+	UserConfig.PaletteEXTEnable			= TRUE;
+	UserConfig.PackedPixelsEXTEnable	= FALSE;
+	UserConfig.TextureEnvEXTEnable		= FALSE;
+	UserConfig.VertexArrayEXTEnable		= FALSE;
+	UserConfig.SecondaryColorEXTEnable	= FALSE;
+	UserConfig.FogCoordEXTEnable		= TRUE;
 
 	UserConfig.TextureMemorySize		= 16;
 	UserConfig.FrameBufferMemorySize	= 8;
 
 	UserConfig.Priority					= 2;
-	UserConfig.MMXEnable				= false;
-	UserConfig.TDnowEnable				= false;
+	UserConfig.MMXEnable				= FALSE;
+	UserConfig.TDnowEnable				= FALSE;
 
     /*
 	if ( GetWindowsDirectory( Path, MAX_PATH ) == 0 )
@@ -507,8 +548,7 @@ void GetOptions()
 
 	GlideMsg("Configuration file is %s\n", Path );
 	
-
-	if ( access( Path, 00) == -1 )
+	if ( access( Path, 00 ) == -1 )
 	{
 		IniFile = fopen( Path, "w" );
 		fprintf( IniFile, "Configuration File for OpenGLide\n\n" );
@@ -582,13 +622,13 @@ void GetOptions()
 		else
 		{
 			remove( Path );
-			GetOptions();
+			GetOptions( );
 		}
 	}
 }
 
 // Detect if Processor has MMX Instructions
-int DetectMMX()
+int DetectMMX( void )
 {
 	DWORD Result;
 

@@ -1,15 +1,27 @@
 //**************************************************************
-//*				Glide->OpenGL Wrapper
-//*					Render Class
-//*				Made by Glorfindel
+//*            OpenGLide - Glide to OpenGL Wrapper
+//*             http://openglide.sourceforge.net
+//*
+//*                     Render Header
+//*
+//*         OpenGLide is OpenSource under LGPL license
+//*              Originaly made by Fabio Barros
+//*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
 #ifndef __GLRENDER_H__
 #define __GLRENDER_H__
 
+//**************************************************************
+// Defines
+//**************************************************************
 
 #define MAXTRIANGLES			500
 
+
+//**************************************************************
+// Structs
+//**************************************************************
 
 struct GlVertex
 {
@@ -60,16 +72,12 @@ struct TFogStruct
 
 struct RenderStruct
 {
-//private:
-//	Triangle *Triangles;
 	TColorStruct	*TColor;
 	TColorStruct	*TColor2;
 	TTextureStruct	*TTexture;
 	TVertexStruct	*TVertex;
 	TFogStruct		*TFog;
 	long NumberOfTriangles;
-
-//public:
 
 #ifdef DEBUG
 	float MinX, MinY, MinZ, MinW;
@@ -80,30 +88,28 @@ struct RenderStruct
 	float MaxF, MinF;
 	long FrameTriangles, MaxTriangles, MaxSequencedTriangles;
 #endif
-
-//	Render();
-//	~Render();
-//	void UpdateArrays();
-//	void AddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c );
-//	void AddLine( const GrVertex *a, const GrVertex *b );
-//	void AddPoint( const GrVertex *a );
-//	void DrawTriangles();
 };
 
+//**************************************************************
+// Function Prototypes
+//**************************************************************
 
-//extern Render			OGLRender;
-extern RenderStruct		OGLRender;
-
-void RenderInitialize();
-void RenderFree();
-void RenderUpdateArrays();
+// Main Render functions
+void RenderInitialize( void );
+void RenderFree( void );
+void RenderUpdateArrays( void );
 void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c );
 void RenderAddLine( const GrVertex *a, const GrVertex *b );
 void RenderAddPoint( const GrVertex *a );
-void RenderDrawTriangles();
+void RenderDrawTriangles( void );
 
-
+// Main Render variables
+extern RenderStruct		OGLRender;
 extern float (*AlphaFactorFunc)( float LocalAlpha, float OtherAlpha );
+extern void  (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+extern void  (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
+
+// Prototypes for the color combining
 float AlphaFactorZero( float LocalAlpha, float OtherAlpha );
 float AlphaFactorLocal( float LocalAlpha, float OtherAlpha );
 float AlphaFactorOther( float LocalAlpha, float OtherAlpha );
@@ -111,8 +117,6 @@ float AlphaFactorOneMinusLocal( float LocalAlpha, float OtherAlpha );
 float AlphaFactorOneMinusOther( float LocalAlpha, float OtherAlpha );
 float AlphaFactorOne( float LocalAlpha, float OtherAlpha );
 
-
-extern void (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 void ColorFactor3Zero( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 void ColorFactor3Local( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 void ColorFactor3LocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
@@ -122,8 +126,6 @@ void ColorFactor3OtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent,
 void ColorFactor3OneMinusOtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 void ColorFactor3One( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 
-
-extern void (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 void ColorFunctionZero( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 void ColorFunctionLocal( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 void ColorFunctionLocalAlpha( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
@@ -135,6 +137,5 @@ void ColorFunctionScaleOtherMinusLocalAddLocal( TColorStruct * pC, TColorStruct 
 void ColorFunctionScaleOtherMinusLocalAddLocalAlpha( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 void ColorFunctionMinusLocalAddLocal( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 void ColorFunctionMinusLocalAddLocalAlpha( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
-
 
 #endif
