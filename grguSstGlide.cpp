@@ -113,7 +113,7 @@ grGlideSetState( const GrState *state )
     grChromakeyValue( StateTemp.ChromakeyValue );
     grChromakeyMode( StateTemp.ChromaKeyMode );
     grAlphaTestReferenceValue( StateTemp.AlphaReferenceValue );
-    grAlphaTestFunction( StateTemp.AlphaFunction );
+    grAlphaTestFunction( StateTemp.AlphaTestFunction );
     grColorMask( StateTemp.ColorMask, StateTemp.AlphaMask );
     grConstantColorValue( StateTemp.ConstantColorValue );
     grFogColorValue( StateTemp.FogColorValue );
