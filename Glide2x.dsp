@@ -138,6 +138,10 @@ SOURCE=.\Sst1vid.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TexDB.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\text.h
 # End Source File
 # End Group
@@ -228,6 +232,10 @@ SOURCE=.\PGTexture.cpp
 # Begin Source File
 
 SOURCE=.\profile.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TexDB.cpp
 # End Source File
 # Begin Source File
 

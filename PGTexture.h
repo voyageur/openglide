@@ -6,6 +6,7 @@
 #define AFX_PGTEXTURE_H__01BF3022_514F_4D5E_B0DF_F188A6B61846__INCLUDED_
 
 #include "Glide.h"	// Added by ClassView
+#include "TexDB.h"	// Added by ClassView
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -21,6 +22,7 @@ class PGTexture
     };
 
 private:
+	TexDB m_db;
 	GrChromakeyMode_t m_chromakey_mode;
 	GrColor_t m_chromakey_value;
 	float m_wAspect;

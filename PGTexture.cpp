@@ -219,6 +219,10 @@ void PGTexture::DownloadMipMap(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *inf
 
     if(startAddress + size <= TEX_MEMORY)
         memcpy(m_memory + startAddress, info->data, size);
+
+    /* Any texture based on memory crossing this range
+     * is now out of date */
+    m_db.WipeRange(startAddress, startAddress + size);
 }
 
 void PGTexture::Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
@@ -260,6 +264,8 @@ void PGTexture::MakeReady()
 {
     FxU8 *data;
     TexValues texVals;
+    GLuint texNum;
+    FxU32 size;
     int i;
 
     if(!m_valid)
@@ -277,70 +283,92 @@ void PGTexture::MakeReady()
             m_palette[i] |= 0xff000000;
     }
 
-    switch(m_info.format)
+    size = TextureMemRequired(m_evenOdd, &m_info);
+
+    /* See if we already have an OpenGL texture to match this */
+    if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, m_palette, &texNum))
     {
-    case GR_TEXFMT_RGB_565:
-        Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_ARGB_4444:
-        Convert4444to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_ARGB_1555:
-        Convert1555to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_P_8:
-        ConvertP8to8888( data, m_tex_temp, texVals.nPixels, m_palette );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_AP_88:
-        ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_ALPHA_8:
-        ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_ALPHA_INTENSITY_88:
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
-        break;
-        
-    case GR_TEXFMT_INTENSITY_8:
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data );
-        break;
-        
-    case GR_TEXFMT_ALPHA_INTENSITY_44:
-        ConvertAI44toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_8BIT://GR_TEXFMT_RGB_332
-        Convert332to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_16BIT://GR_TEXFMT_ARGB_8332:
-        Convert8332to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
-        
-    case GR_TEXFMT_YIQ_422:
-    case GR_TEXFMT_AYIQ_8422:
-    case GR_TEXFMT_RSVD0:
-    case GR_TEXFMT_RSVD1:
-    case GR_TEXFMT_RSVD2:
-        Error("grTexDownloadMipMapLevel - Unsupported format(%d)\n", m_info.format);
-        memset(m_tex_temp, 255, texVals.nPixels * 2);
-        glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_tex_temp );
-        break;
+        ::glBindTexture(GL_TEXTURE_2D, texNum);
+    }
+    else
+    {
+        /* Any existing textures crossing this memory range
+         * is unlikely to be used, so remove the OpenGL version
+         * of them */
+        m_db.WipeRange(m_startAddress, m_startAddress + size);
+
+        /* Add this new texture to the data base */
+        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, m_palette);
+
+        ::glBindTexture(GL_TEXTURE_2D, texNum);
+        ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        switch(m_info.format)
+        {
+        case GR_TEXFMT_RGB_565:
+            Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_ARGB_4444:
+            Convert4444to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_ARGB_1555:
+            Convert1555to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_P_8:
+            ConvertP8to8888( data, m_tex_temp, texVals.nPixels, m_palette );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_AP_88:
+            ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_ALPHA_8:
+            ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_ALPHA_INTENSITY_88:
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
+            break;
+            
+        case GR_TEXFMT_INTENSITY_8:
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data );
+            break;
+            
+        case GR_TEXFMT_ALPHA_INTENSITY_44:
+            ConvertAI44toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_8BIT://GR_TEXFMT_RGB_332
+            Convert332to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_16BIT://GR_TEXFMT_ARGB_8332:
+            Convert8332to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+            
+        case GR_TEXFMT_YIQ_422:
+        case GR_TEXFMT_AYIQ_8422:
+        case GR_TEXFMT_RSVD0:
+        case GR_TEXFMT_RSVD1:
+        case GR_TEXFMT_RSVD2:
+            Error("grTexDownloadMipMapLevel - Unsupported format(%d)\n", m_info.format);
+            memset(m_tex_temp, 255, texVals.nPixels * 2);
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_tex_temp );
+            break;
+        }
     }
 }
 
