@@ -36,16 +36,17 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 #ifdef OGL_CRITICAL
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
 #endif
+    static GrColor_t    old_color = 0;
+    static float        BR = 0.0f, 
+                        BG = 0.0f, 
+                        BB = 0.0f, 
+                        BA = 0.0f;
 
     if ( ( Glide.State.ClipMinX == 0 ) && 
          ( Glide.State.ClipMinY == 0 ) && 
          ( Glide.State.ClipMaxX == (FxU32) Glide.WindowWidth ) &&
          ( Glide.State.ClipMaxY == (FxU32) Glide.WindowHeight ) )
     {
-        static float        BR, 
-                            BG, 
-                            BB, 
-                            BA;
         static unsigned int Bits;
         
         Bits = 0;
@@ -55,7 +56,11 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
         if ( OpenGL.ColorMask )
         {
             Bits = GL_COLOR_BUFFER_BIT;
-            ConvertColorF( color, BR, BG, BB, BA );
+            if ( color != old_color )
+            {
+                old_color = color;
+                ConvertColorF( color, BR, BG, BB, BA );
+            }
             glClearColor( BR, BG, BB, BA );
         }
         
@@ -69,13 +74,37 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
     }
     else
     {
-        static float    BR, 
-                        BG, 
-                        BB, 
-                        BA;
-        GLboolean       alpha_test;
+        static GLboolean    alpha_test;
+        static FxU32        oldDepth = 0x10000;
+        static GLuint       clearList = glGenLists( 1 );  
 
-        ConvertColorF( color, BR, BG, BB, BA );
+        if ( depth != oldDepth )
+        {
+            oldDepth = depth;
+
+            glNewList( clearList, GL_COMPILE );
+
+                glDisable( GL_TEXTURE_2D );
+                glDisable( GL_ALPHA_TEST );
+                glDisable( GL_BLEND );
+                glDisable( GL_DEPTH_TEST );
+                glDisable( GL_CULL_FACE );
+
+                glBegin( GL_TRIANGLE_STRIP );
+                    glVertex3f( 0.0f,                      0.0f,                       depth * D1OVER65536 );
+                    glVertex3f( (float) Glide.WindowWidth, 0.0f,                       depth * D1OVER65536 );
+                    glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, depth * D1OVER65536 );
+                    glVertex3f( 0.0f,                      (float) Glide.WindowHeight, depth * D1OVER65536 );
+                glEnd( );
+
+            glEndList( );
+        }
+
+        if ( color != old_color )
+        {
+            old_color = color;
+            ConvertColorF( color, BR, BG, BB, BA );
+        }
 
        /*
         * Remember alpha-test state because it is
@@ -84,30 +113,17 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
         */
         alpha_test = glIsEnabled( GL_ALPHA_TEST );
 
-        glDisable( GL_TEXTURE_2D );
-        glDisable( GL_ALPHA_TEST );
-        glDisable( GL_BLEND );
-        glDisable( GL_DEPTH_TEST );
-        glDisable( GL_CULL_FACE );
-
-        glBegin( GL_QUADS );
         glColor3f( BR, BG, BB );
-        glVertex3f( 0.0f,                      0.0f,                       depth * D1OVER65536 );
-        glVertex3f( (float) Glide.WindowWidth, 0.0f,                       depth * D1OVER65536 );
-        glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, depth * D1OVER65536 );
-        glVertex3f( 0.0f,                      (float) Glide.WindowHeight, depth * D1OVER65536 );
-        glEnd( );
+        glCallList( clearList );
 
         if ( alpha_test )
         {
             glEnable( GL_ALPHA_TEST );
         }
-
         if ( Glide.State.DepthBufferMode != GR_DEPTHBUFFER_DISABLE )
         {
             glEnable( GL_DEPTH_TEST );
         }
-
         if ( Glide.State.CullMode != GR_CULL_DISABLE )
         {
             glEnable( GL_CULL_FACE );
@@ -125,9 +141,6 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 DLLEXPORT void __stdcall
 grBufferSwap( int swap_interval )
 {
-
-    static float    Temp = 1.0f;
-
 #ifdef OGL_CRITICAL
     GlideMsg( "grBufferSwap( %d )\n", swap_interval );
 #endif
@@ -136,6 +149,8 @@ grBufferSwap( int swap_interval )
     glFlush( );
 
 #ifdef OGL_DEBUG
+    static float    Temp = 1.0f;
+
     if ( OGLRender.FrameTriangles > OGLRender.MaxTriangles )
     {
         OGLRender.MaxTriangles = OGLRender.FrameTriangles;
@@ -143,20 +158,15 @@ grBufferSwap( int swap_interval )
     OGLRender.FrameTriangles = 0;
 #endif
 
-
-//  if ( swap_interval > 0 )
-//  {
-//      Sleep( swap_interval * OpenGL.WaitSignal );
-//  }
-
     SwapBuffers( hDC );
-/*
+
+#ifdef OGL_DEBUG
     RDTSC( FinalTick );
     Temp = (float)(FinalTick - InitialTick);
     FpsAux += Temp;
     Frame++;
     RDTSC( InitialTick );
-*/
+#endif
 
 #ifdef OPENGL_DEBUG
     GLErro( "grBufferSwap" );
