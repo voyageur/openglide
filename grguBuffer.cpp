@@ -43,7 +43,7 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
                         BB = 0.0f, 
                         BA = 0.0f;
 
-    if ( ! OpenGL.Clipping )
+//    if ( ! OpenGL.Clipping )
     {
         static unsigned int Bits;
         
@@ -67,9 +67,19 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
             glClearDepth( depth * D1OVER65535 );
             Bits |= GL_DEPTH_BUFFER_BIT;
         }
-        
-        glClear( Bits );
+
+		if ( ! OpenGL.Clipping )
+		{
+	        glClear( Bits );
+		}
+		else
+		{
+			glEnable( GL_SCISSOR_TEST );
+			glClear( Bits );
+			glDisable( GL_SCISSOR_TEST );
+		}
     }
+	/*
     else
     {
         static GLboolean    alpha_test;
@@ -103,20 +113,6 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
                 glDisable( GL_DEPTH_TEST );
                 glDisable( GL_CULL_FACE );
 
-/*                glMatrixMode( GL_PROJECTION );
-                glLoadIdentity( );
-
-                if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
-                {
-                    glOrtho( 0, Glide.WindowWidth, 0, Glide.WindowHeight, 
-                            -1.0f, 0.0f );
-                }
-                else
-                {
-                    glOrtho( 0, Glide.WindowWidth, Glide.WindowHeight, 0, 
-                            -1.0f, 0.0f );
-                }
-*/
                 float gldepth = (float)depth * D1OVER65535;
 
                 glBegin( GL_TRIANGLE_STRIP );
@@ -126,19 +122,6 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
                     glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, gldepth );
                 glEnd( );
 
-  /*              if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
-                {
-                    glOrtho( 0, Glide.WindowWidth, 0, Glide.WindowHeight, 
-                            OpenGL.ZNear, OpenGL.ZFar );
-                }
-                else
-                {
-                    glOrtho( 0, Glide.WindowWidth, Glide.WindowHeight, 0, 
-                            OpenGL.ZNear, OpenGL.ZFar );
-                }
-*/
-                glMatrixMode( GL_MODELVIEW );
-    
             glEndList( );
         }
 
@@ -157,7 +140,7 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
             glEnable( GL_CULL_FACE );
         }
     }
-
+*/
 #ifdef OPENGL_DEBUG
     GLErro( "grBufferClear" );
 #endif

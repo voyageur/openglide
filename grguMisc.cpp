@@ -132,6 +132,9 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
                     Glide.State.ClipMaxX - Glide.State.ClipMinX, 
                     Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
     }
+	glScissor( Glide.State.ClipMinX, Glide.State.ClipMinY,
+			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
+			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
 
     glMatrixMode( GL_MODELVIEW );
 }
