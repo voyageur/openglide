@@ -51,7 +51,7 @@ public:
 
             if ( tex2Num != 0 )
             {
-                glDeleteTextures( 1, &texNum );
+                glDeleteTextures( 1, &tex2Num );
             }
         };
 
