@@ -90,10 +90,7 @@ inline void ConvertA8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels )
 	while(Pixels)
 	{
 		*Buffer2++ = 
-			((*Buffer1) << 24)		|		// A
-			((*Buffer1) << 16)		|		// B
-			((*Buffer1) <<  8)		|		// G
-			(*Buffer1++);					// R
+			((*Buffer1++) << 24 | 0xffffff);
 		Pixels--;
 	}
 }
@@ -346,8 +343,10 @@ void PGTexture::MakeReady()
             break;
             
         case GR_TEXFMT_ALPHA_8:
-            ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+            ConvertA8to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            //ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
+            //glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
             break;
             
         case GR_TEXFMT_ALPHA_INTENSITY_88:

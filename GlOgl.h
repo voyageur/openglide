@@ -180,6 +180,8 @@ struct OpenGLStruct
 	BYTE					ChromaColor[4];
 	bool					Fog;
 	bool					Texture;
+    bool                    ColorTexture;
+    bool                    AlphaTexture;
 	bool					Blend;
 	bool					AlphaBuffer;
 	bool					ChromaKey;
