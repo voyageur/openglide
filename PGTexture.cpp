@@ -11,7 +11,7 @@
 
 #include "glogl.h"
 #include "PGTexture.h"
-#include "glextensions.h"
+#include "Glextensions.h"
 #include "FormatConversion.h"
 #include "OGLTables.h"
 

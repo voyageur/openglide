@@ -14,7 +14,7 @@
 #include <io.h>
 
 #include "GlOgl.h"
-#include "GLExtensions.h"
+#include "Glextensions.h"
 #include "OGLTables.h"
 
 
