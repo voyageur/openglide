@@ -441,7 +441,16 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ALPHA_INTENSITY_44:
+#if 0
             OGL_LOAD_CREATE_TEXTURE( GL_LUMINANCE4_ALPHA4, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
+#else
+            ConvertAI44toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.BuildMipMaps )
+            {
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 2, texVals.width, texVals.height, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
+#endif
             break;
             
         case GR_TEXFMT_8BIT: //GR_TEXFMT_RGB_332

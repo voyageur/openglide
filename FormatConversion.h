@@ -17,6 +17,7 @@ void MMXConvert5551to565( void *Src, void *Dst, int NumberOfPixels );
 void MMXConvert565to8888( void *Src, void *Dst, DWORD NumberOfPixels );
 void MMXConvert4444to4444special( void *Src, void *Dst, int NumberOfPixels );
 void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels );
+void ConvertAI44toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels );
 void Convert8332to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels );
 void ConvertP8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels, DWORD *palette );
 void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWORD *palette );

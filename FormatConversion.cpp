@@ -351,6 +351,16 @@ void ConvertP8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels, DWORD *palett
     }
 }
 
+void ConvertAI44toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
+{
+    for ( DWORD i = Pixels; i > 0; i-- )
+    {
+        *Buffer2 = ( ( ( ( *Buffer1 ) & 0xF0 ) << 8 ) | ( ( ( *Buffer1 ) & 0x0F ) << 4 ) );
+        Buffer2++;
+        Buffer1++;
+    }
+}
+
 void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWORD *palette )
 {
     DWORD   RGB, 
