@@ -48,7 +48,7 @@ RSC=rc.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x416 /d "NDEBUG"
-# ADD RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -164,6 +164,10 @@ SOURCE=.\GLExtensions.cpp
 # Begin Source File
 
 SOURCE=.\Glide.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\Glide2x.rc
 # End Source File
 # Begin Source File
 
