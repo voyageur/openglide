@@ -95,10 +95,13 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
     * one that starts 3 sections back can
     * extend into this one.
     */
-    stt_sect -= 4;
-    if ( stt_sect < 0 )
+    if ( stt_sect < 4 )
     {
         stt_sect = 0;
+    }
+    else
+    {
+        stt_sect -= 4;
     }
  
     end_sect = endAddress / ( 32 * 1024 );
