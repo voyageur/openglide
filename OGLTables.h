@@ -11,6 +11,19 @@ typedef struct
     float w;
 } OGLAspect;
 
+typedef struct 
+{
+    int width;
+    int height;
+} OGLWindow;
+
+typedef struct
+{
+    int width;
+    int height;
+    int numPixels;
+} OGLTexInfo;
+
 typedef struct
 {
     bool                local;
@@ -30,11 +43,21 @@ typedef struct
 
 // OGLTextureTables.cpp
 extern OGLAspect texAspects[ 7 ];
+extern OGLTexInfo texInfo[ 7 ][ 9 ];
 extern DWORD nSquareLod[ 2 ][ 7 ][ 9 ];
 extern DWORD nSquareTexLod[ 2 ][ 7 ][ 9 ][ 9 ];
 
 // OGLColorAlphaTables.cpp
 extern OGLAlphaTable alphaCombineTable[ 14 ][ 17 ];
 extern OGLColorTable colorCombineTable[ 14 ][ 17 ];
+
+// OGLFogTables.cpp
+extern DWORD intStartEnd[ GR_FOG_TABLE_SIZE + 1 ];
+extern DWORD intEndMinusStart[ GR_FOG_TABLE_SIZE ];
+extern float tableIndexToW[ GR_FOG_TABLE_SIZE ];
+
+// OGLMiscTables.cpp
+extern OGLWindow windowDimensions[ 16 ];
+extern int windowRefresh[ 9 ];
 
 #endif

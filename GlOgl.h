@@ -94,6 +94,18 @@ struct TexSourceStruct
     GrTexInfo   Info;
 };
 
+union OGLByteColor
+{
+    struct
+    {
+        BYTE    B;
+        BYTE    G;
+        BYTE    R;
+        BYTE    A;
+    };
+    DWORD   C;
+};
+
 struct GlideState
 {
     GrBuffer_t              RenderBuffer;
@@ -203,7 +215,7 @@ struct OpenGLStruct
     GLfloat                 ZFar;
     GLfloat                 FogColor[ 4 ];
     BYTE                    FogTable[ OPENGLFOGTABLESIZE ];
-    BYTE                    ChromaColor[4];
+    OGLByteColor            ChromaColor;
     bool                    Fog;
     bool                    Texture;
     bool                    ColorTexture;
@@ -258,9 +270,11 @@ extern ConfigStruct     InternalConfig;
 void __cdecl GlideMsg( char *szString, ... );
 void __cdecl Error( char *szString, ... );
 void GLErro( char *Funcao );
+void ConvertColor4B( GrColor_t GlideColor, DWORD &C );
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
 GrColor_t ConvertConstantColor( float R, float G, float B, float A );
+void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes );
 
 int DetectMMX();
 

@@ -376,9 +376,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_LOCAL_DEPTH:
-            Local.aa = a->z;
-            Local.ba = b->z;
-            Local.ca = c->z;
+            Local.aa = a->z * D1OVER255;
+            Local.ba = b->z * D1OVER255;
+            Local.ca = c->z * D1OVER255;
             break;
         }
     }

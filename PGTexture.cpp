@@ -115,8 +115,8 @@ void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *in
         memcpy( m_memory + mip_offset - mip_size, info->data, mip_size );
     }
 
-    /* Any texture based on memory crossing this range
-     * is now out of date */
+    // Any texture based on memory crossing this range
+    // is now out of date
     m_db->WipeRange( startAddress, mip_offset, 0 );
 
 #ifdef OGL_DEBUG
@@ -159,8 +159,6 @@ void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 
 void PGTexture::DownloadTable( GrTexTable_t type, FxU32 *data, int first, int count )
 {
-//    GlideMsg( "DownloadTable( %d, 0x%X, %d, %d )\n", type, data, first, count );
-
     if ( type == GR_TEXTABLE_PALETTE )
     {
         for ( int i = count - 1; i >= 0; i-- )
@@ -212,7 +210,7 @@ bool PGTexture::MakeReady( void )
     bool        use_mipmap_ext2;
     bool        use_two_textures;
 
-    if( !m_valid )
+    if( ! m_valid )
     {
         return false;
     }
@@ -237,10 +235,10 @@ bool PGTexture::MakeReady( void )
         ApplyKeyToPalette( );
         if ( InternalConfig.EXT_paletted_texture )
         {
-           /*
-            * OpenGL's mipmap generation doesn't seem
-            * to handle paletted textures.
-            */
+            //
+            // OpenGL's mipmap generation doesn't seem
+            // to handle paletted textures.
+            //
             use_mipmap_ext = false;
             pal_change_ptr = &palette_changed;
         }
@@ -265,10 +263,10 @@ bool PGTexture::MakeReady( void )
         break;
     }
 
-    /* See if we already have an OpenGL texture to match this */
+    // See if we already have an OpenGL texture to match this
     if ( m_db->Find( m_startAddress, &m_info, test_hash,
-                    &texNum, use_two_textures ? &tex2Num : NULL,
-                    pal_change_ptr ) )
+                     &texNum, use_two_textures ? &tex2Num : NULL,
+                     pal_change_ptr ) )
     {
         glBindTexture( GL_TEXTURE_2D, texNum );
 
@@ -288,12 +286,12 @@ bool PGTexture::MakeReady( void )
     }
     else
     {
-        /* Any existing textures crossing this memory range
-         * is unlikely to be used, so remove the OpenGL version
-         * of them */
+        // Any existing textures crossing this memory range
+        // is unlikely to be used, so remove the OpenGL version
+        // of them
         m_db->WipeRange( m_startAddress, m_startAddress + size, wipe_hash );
 
-        /* Add this new texture to the data base */
+        // Add this new texture to the data base
         m_db->Add( m_startAddress, m_startAddress + size, &m_info, test_hash,
                    &texNum, use_two_textures ? &tex2Num : NULL );
 
@@ -542,52 +540,20 @@ FxU32 PGTexture::TextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
 
 FxU32 PGTexture::MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, GrTextureFormat_t format )
 {
-    /*
-    ** If the format is one of these:
-    ** GR_TEXFMT_RGB_332, GR_TEXFMT_YIQ_422, GR_TEXFMT_ALPHA_8
-    ** GR_TEXFMT_INTENSITY_8, GR_TEXFMT_ALPHA_INTENSITY_44, GR_TEXFMT_P_8
-    ** Reduces the size by 2
-    */
+    //
+    // If the format is one of these:
+    // GR_TEXFMT_RGB_332, GR_TEXFMT_YIQ_422, GR_TEXFMT_ALPHA_8
+    // GR_TEXFMT_INTENSITY_8, GR_TEXFMT_ALPHA_INTENSITY_44, GR_TEXFMT_P_8
+    // Reduces the size by 2
+    //
     return nSquareLod[ format > GR_TEXFMT_RSVD1 ][ aspectRatio ][ lod ];
 }
 
-void PGTexture::GetTexValues( TexValues *tval )
+void PGTexture::GetTexValues( TexValues * tval )
 {
-    static DWORD    nSquarePixels[ 9 ] = { 65536, 16384, 4092, 1024, 256, 64, 16, 4, 1 };
-	static DWORD    lodSize[ 9 ] = { 256, 128, 64, 32, 16, 8, 4, 2, 1 };
-
-    switch ( m_info.aspectRatio )
-    {
-    case GR_ASPECT_8x1: tval->width = lodSize[ m_info.largeLod ];      
-                        tval->height = lodSize[ m_info.largeLod ] >> 3;
-						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 3;
-                        break;
-    case GR_ASPECT_4x1: tval->width = lodSize[ m_info.largeLod ];      
-                        tval->height = lodSize[ m_info.largeLod ] >> 2;
-						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 2;
-                        break;
-    case GR_ASPECT_2x1: tval->width = lodSize[ m_info.largeLod ];
-                        tval->height = lodSize[ m_info.largeLod ] >> 1;
-						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 1;
-                        break;
-    case GR_ASPECT_1x1: tval->width = lodSize[ m_info.largeLod ];
-                        tval->height = lodSize[ m_info.largeLod ];
-						tval->nPixels = nSquarePixels[ m_info.largeLod ];
-                        break;
-    case GR_ASPECT_1x2: tval->width = lodSize[ m_info.largeLod ] >> 1; 
-                        tval->height = lodSize[ m_info.largeLod ];
-						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 1;
-                        break;
-    case GR_ASPECT_1x4: tval->width = lodSize[ m_info.largeLod ] >> 2; 
-                        tval->height = lodSize[ m_info.largeLod ];
-						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 2;
-                        break;
-    case GR_ASPECT_1x8: tval->width = lodSize[ m_info.largeLod ] >> 3; 
-                        tval->height = lodSize[ m_info.largeLod ];
-						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 3;
-                        break;
-    }
-
+    tval->width = texInfo[ m_info.aspectRatio ][ m_info.largeLod ].width;
+    tval->height = texInfo[ m_info.aspectRatio ][ m_info.largeLod ].height;
+    tval->nPixels = texInfo[ m_info.aspectRatio ][ m_info.largeLod ].numPixels;
     tval->lod = 0;
 }
 
@@ -605,11 +571,6 @@ void PGTexture::GetAspect( float *hAspect, float *wAspect )
 void PGTexture::ChromakeyValue( GrColor_t value )
 {
     m_chromakey_value = value & 0x00ffffff;
-//    m_chromakey_value = (
-//                             ( value & 0x0000ff00 )
-//                         | ( ( value & 0x00ff0000 ) >> 16 )
-//                         | ( ( value & 0x000000ff ) << 16 )
-//                         );
 
     m_palette_dirty = true;
 }

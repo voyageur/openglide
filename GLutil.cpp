@@ -18,8 +18,8 @@
 
 
 // Configuration Variables
-ConfigStruct    UserConfig,
-                InternalConfig;
+ConfigStruct    UserConfig;
+ConfigStruct    InternalConfig;
 
 // Extern prototypes
 extern unsigned long    NumberOfErrors;
@@ -244,31 +244,59 @@ void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
     switch ( Glide.State.ColorFormat )
     {
     case GR_COLORFORMAT_ARGB:   //0xAARRGGBB
-        A = (BYTE)((GlideColor & 0xFF000000) >> 24);
-        R = (BYTE)((GlideColor & 0x00FF0000) >> 16);
-        G = (BYTE)((GlideColor & 0x0000FF00) >>  8);
-        B = (BYTE)((GlideColor & 0x000000FF)      );
+        A = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
+        R = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        G = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        B = (BYTE)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_ABGR:   //0xAABBGGRR
-        A = (BYTE)((GlideColor & 0xFF000000) >> 24);
-        B = (BYTE)((GlideColor & 0x00FF0000) >> 16);
-        G = (BYTE)((GlideColor & 0x0000FF00) >>  8);
-        R = (BYTE)((GlideColor & 0x000000FF)      );
+        A = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
+        B = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        G = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        R = (BYTE)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_RGBA:   //0xRRGGBBAA
-        R = (BYTE)((GlideColor & 0xFF000000) >> 24);
-        G = (BYTE)((GlideColor & 0x00FF0000) >> 16);
-        B = (BYTE)((GlideColor & 0x0000FF00) >>  8);
-        A = (BYTE)((GlideColor & 0x000000FF)      );
+        R = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
+        G = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        B = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        A = (BYTE)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_BGRA:   //0xBBGGRRAA
-        B = (BYTE)((GlideColor & 0xFF000000) >> 24);
-        G = (BYTE)((GlideColor & 0x00FF0000) >> 16);
-        R = (BYTE)((GlideColor & 0x0000FF00) >>  8);
-        A = (BYTE)((GlideColor & 0x000000FF)      );
+        B = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
+        G = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        R = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        A = (BYTE)( ( GlideColor & 0x000000FF )       );
+        break;
+    }
+}
+
+void ConvertColor4B( GrColor_t GlideColor, DWORD &C )
+{
+    switch ( Glide.State.ColorFormat )
+    {
+    case GR_COLORFORMAT_ARGB:   //0xAARRGGBB
+        C = GlideColor;
+        break;
+
+    case GR_COLORFORMAT_ABGR:   //0xAABBGGRR
+        C = ( ( GlideColor & 0xFF00FF00 ) ||
+              ( ( GlideColor & 0x00FF0000 ) >> 16 ) ||
+              ( ( GlideColor & 0x000000FF ) <<  16 ) );
+        break;
+
+    case GR_COLORFORMAT_RGBA:   //0xRRGGBBAA
+        C = ( ( ( GlideColor & 0x00FFFFFF ) << 8 ) ||
+              ( ( GlideColor & 0xFF000000 ) >> 24 ) );
+        break;
+
+    case GR_COLORFORMAT_BGRA:   //0xBBGGRRAA
+        C = ( ( ( GlideColor & 0xFF000000 ) >> 24 ) ||
+              ( ( GlideColor & 0x00FF0000 ) >>  8 ) ||
+              ( ( GlideColor & 0x0000FF00 ) <<  8 ) ||
+              ( ( GlideColor & 0x000000FF ) << 24 ) );
         break;
     }
 }
@@ -303,31 +331,31 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
     switch ( Glide.State.ColorFormat )
     {
     case GR_COLORFORMAT_ARGB:   //0xAARRGGBB
-        A = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
-        R = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
-        G = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
-        B = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
+        A = (float)( ( GlideColor & 0xFF000000 ) >> 24 ) * D1OVER255;
+        R = (float)( ( GlideColor & 0x00FF0000 ) >> 16 ) * D1OVER255;
+        G = (float)( ( GlideColor & 0x0000FF00 ) >>  8 ) * D1OVER255;
+        B = (float)( ( GlideColor & 0x000000FF )       ) * D1OVER255;
         break;
 
     case GR_COLORFORMAT_ABGR:   //0xAABBGGRR
-        A = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
-        B = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
-        G = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
-        R = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
+        A = (float)( ( GlideColor & 0xFF000000 ) >> 24 ) * D1OVER255;
+        B = (float)( ( GlideColor & 0x00FF0000 ) >> 16 ) * D1OVER255;
+        G = (float)( ( GlideColor & 0x0000FF00 ) >>  8 ) * D1OVER255;
+        R = (float)( ( GlideColor & 0x000000FF )       ) * D1OVER255;
         break;
 
     case GR_COLORFORMAT_RGBA:   //0xRRGGBBAA
-        R = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
-        G = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
-        B = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
-        A = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
+        R = (float)( ( GlideColor & 0xFF000000 ) >> 24 ) * D1OVER255;
+        G = (float)( ( GlideColor & 0x00FF0000 ) >> 16 ) * D1OVER255;
+        B = (float)( ( GlideColor & 0x0000FF00 ) >>  8 ) * D1OVER255;
+        A = (float)( ( GlideColor & 0x000000FF )       ) * D1OVER255;
         break;
 
     case GR_COLORFORMAT_BGRA:   //0xBBGGRRAA
-        B = (float)((GlideColor & 0xFF000000) >> 24) * D1OVER255;
-        G = (float)((GlideColor & 0x00FF0000) >> 16) * D1OVER255;
-        R = (float)((GlideColor & 0x0000FF00) >>  8) * D1OVER255;
-        A = (float)((GlideColor & 0x000000FF)      ) * D1OVER255;
+        B = (float)( ( GlideColor & 0xFF000000 ) >> 24 ) * D1OVER255;
+        G = (float)( ( GlideColor & 0x00FF0000 ) >> 16 ) * D1OVER255;
+        R = (float)( ( GlideColor & 0x0000FF00 ) >>  8 ) * D1OVER255;
+        A = (float)( ( GlideColor & 0x000000FF )       ) * D1OVER255;
         break;
     }
 }

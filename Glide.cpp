@@ -20,6 +20,7 @@
 #include "GLextensions.h"
 #include "PGTexture.h"
 #include "PGUTexture.h"
+#include "OGLTables.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-char * OpenGLideVersion = "0.09rc1";
+char * OpenGLideVersion = "0.09rc2";
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -494,117 +495,28 @@ grSstWinOpen(   FxU32 hwnd,
     }
 
     Glide.Resolution = res;
-    switch ( Glide.Resolution )
+
+#ifdef OGL_DEBUG
+    if ( Glide.Resolution > GR_RESOLUTION_400x300 )
     {
-    case GR_RESOLUTION_320x200:
-        Glide.WindowWidth = 320;
-        Glide.WindowHeight = 200;
-        break;
-
-    case GR_RESOLUTION_320x240:
-        Glide.WindowWidth = 320;
-        Glide.WindowHeight = 240;
-        break;
-
-    case GR_RESOLUTION_400x256:
-        Glide.WindowWidth = 400;
-        Glide.WindowHeight = 256;
-        break;
-
-    case GR_RESOLUTION_512x384:
-        Glide.WindowWidth = 512;
-        Glide.WindowHeight = 384;
-        break;
-
-    case GR_RESOLUTION_640x200:
-        Glide.WindowWidth = 640;
-        Glide.WindowHeight = 200;
-        break;
-
-    case GR_RESOLUTION_640x350:
-        Glide.WindowWidth = 640;
-        Glide.WindowHeight = 350;
-        break;
-
-    case GR_RESOLUTION_640x400:
-        Glide.WindowWidth = 640;
-        Glide.WindowHeight = 400;
-        break;
-
-    case GR_RESOLUTION_640x480:
-        Glide.WindowWidth = 640;
-        Glide.WindowHeight = 480;
-        break;
-
-    case GR_RESOLUTION_800x600:
-        Glide.WindowWidth = 800;
-        Glide.WindowHeight = 600;
-        break;
-
-    case GR_RESOLUTION_960x720:
-        Glide.WindowWidth = 960;
-        Glide.WindowHeight = 720;
-        break;
-
-    case GR_RESOLUTION_856x480:
-        Glide.WindowWidth = 856;
-        Glide.WindowHeight = 480;
-        break;
-
-    case GR_RESOLUTION_512x256:
-        Glide.WindowWidth = 512;
-        Glide.WindowHeight = 256;
-        break;
-
-    case GR_RESOLUTION_1024x768:
-        Glide.WindowWidth = 1024;
-        Glide.WindowHeight = 768;
-        break;
-
-    case GR_RESOLUTION_1280x1024:
-        Glide.WindowWidth = 1280;
-        Glide.WindowHeight = 1024;
-        break;
-
-    case GR_RESOLUTION_1600x1200:
-        Glide.WindowWidth = 1600;
-        Glide.WindowHeight = 1200;
-        break;
-
-    case GR_RESOLUTION_400x300:
-        Glide.WindowWidth = 400;
-        Glide.WindowHeight = 300;
-        break;
-
-    case GR_RESOLUTION_NONE:
         Error( "grSstWinOpen: res = GR_RESOLUTION_NONE\n" );
         return FXFALSE;
-
-    default:
-        Error( "grSstWinOpen: Resolution Incorrect\n" );
+    }
+    if ( Glide.Refresh > GR_REFRESH_120Hz )
+    {
+        Error( "grSstWinOpen: Refresh Incorrect\n" );
         return FXFALSE;
     }
+#endif
+
+    Glide.WindowWidth = windowDimensions[ Glide.Resolution ].width;
+    Glide.WindowHeight = windowDimensions[ Glide.Resolution ].height;
     OpenGL.WindowWidth = Glide.WindowWidth;
     OpenGL.WindowHeight = Glide.WindowHeight;
     Glide.WindowTotalPixels = Glide.WindowWidth * Glide.WindowHeight;
 
     Glide.Refresh = ref;
-    switch ( Glide.Refresh )
-    {
-    case GR_REFRESH_60Hz:   OpenGL.Refresh = 60;    break;
-    case GR_REFRESH_70Hz:   OpenGL.Refresh = 70;    break;
-    case GR_REFRESH_72Hz:   OpenGL.Refresh = 72;    break;
-    case GR_REFRESH_75Hz:   OpenGL.Refresh = 75;    break;
-    case GR_REFRESH_80Hz:   OpenGL.Refresh = 80;    break;
-    case GR_REFRESH_90Hz:   OpenGL.Refresh = 90;    break;
-    case GR_REFRESH_100Hz:  OpenGL.Refresh = 100;   break;
-    case GR_REFRESH_85Hz:   OpenGL.Refresh = 85;    break;
-    case GR_REFRESH_120Hz:  OpenGL.Refresh = 120;   break;
-    case GR_REFRESH_NONE:   OpenGL.Refresh = 60;    break;
-    default:
-        Error( "grSstWinOpen: Refresh Incorrect\n" );
-        return FXFALSE;
-    }
+    OpenGL.Refresh = windowRefresh[ Glide.Refresh ];
     OpenGL.WaitSignal = (DWORD)( 1000 / OpenGL.Refresh );
 
     // Initing OpenGL Window
@@ -682,7 +594,7 @@ grSstWinOpen(   FxU32 hwnd,
     grConstantColorValue( 0xFFFFFFFF );
     grClipWindow( 0, 0, Glide.WindowWidth, Glide.WindowHeight );
 //  grGammaCorrectionValue( 1.6f );
-    grHints(GR_HINT_STWHINT, 0);
+    grHints( GR_HINT_STWHINT, 0 );
 
 #ifdef OGL_DONE
     GlideMsg( "----End of grSstWinOpen()\n" );
@@ -708,7 +620,7 @@ grSstWinClose( void )
 #ifdef OGL_DONE
     GlideMsg( "grSstWinClose()\n" );
 #endif
-    if ( !OpenGL.WinOpen )
+    if ( ! OpenGL.WinOpen )
     {
         return;
     }

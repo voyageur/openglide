@@ -245,6 +245,12 @@
 		<File
 			RelativePath=".\Glide2x.rc">
 		</File>
+		<File
+			RelativePath="OGLFogTables.cpp">
+		</File>
+		<File
+			RelativePath="OGLMiscTables.cpp">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
