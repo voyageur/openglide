@@ -665,9 +665,7 @@ FxU32 PGTexture::TextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
         total += MipMapMemRequired( i, info->aspectRatio, info->format );
     }
 
-    total = ( total + 7 ) & ~7;
-
-    return total;
+    return ( total + 7 ) & ~7;
 }
 
 FxU32 PGTexture::MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, GrTextureFormat_t format )
@@ -696,74 +694,47 @@ FxU32 PGTexture::MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, Gr
     ** GR_TEXFMT_P_8
     ** Reduces the size by 2
     */
-    if ( format <= GR_TEXFMT_RSVD1 )
+    if ( format > GR_TEXFMT_RSVD1 )
+	{
+	    return nBytes;
+	}
+	else
     {
-        nBytes >>= 1;
+        return nBytes >> 1;
     }
-
-    return nBytes;
 }
 
 void PGTexture::GetTexValues( TexValues *tval )
 {
-    static int nLength;
-
-    switch ( m_info.largeLod )
-    {
-    case GR_LOD_256:    nLength = 256;  break;
-    case GR_LOD_128:    nLength = 128;  break;
-    case GR_LOD_64:     nLength = 64;   break;
-    case GR_LOD_32:     nLength = 32;   break;
-    case GR_LOD_16:     nLength = 16;   break;
-    case GR_LOD_8:      nLength = 8;    break;
-    case GR_LOD_4:      nLength = 4;    break;
-    case GR_LOD_2:      nLength = 2;    break;
-    case GR_LOD_1:      nLength = 1;    break;
-    }
+    static DWORD    nSquarePixels[ 9 ] = { 65536, 16384, 4092, 1024, 256, 64, 16, 4, 1 };
+	static DWORD    lodSize[ 9 ] = { 256, 128, 64, 32, 16, 8, 4, 2, 1 };
 
     switch ( m_info.aspectRatio )
     {
-    case GR_ASPECT_8x1: tval->width = nLength;      tval->height = nLength >> 3;
+    case GR_ASPECT_8x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ] >> 3;
+						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 3;
                         break;
-    case GR_ASPECT_4x1: tval->width = nLength;      tval->height = nLength >> 2;
+    case GR_ASPECT_4x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ] >> 2;
+						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 2;
                         break;
-    case GR_ASPECT_2x1: tval->width = nLength;      tval->height = nLength >> 1;
+    case GR_ASPECT_2x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ] >> 1;
+						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 1;
                         break;
-    case GR_ASPECT_1x1: tval->width = nLength;      tval->height = nLength;
+    case GR_ASPECT_1x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ];
+						tval->nPixels = nSquarePixels[ m_info.largeLod ];
                         break;
-    case GR_ASPECT_1x2: tval->width = nLength >> 1; tval->height = nLength;
+    case GR_ASPECT_1x2: tval->width = lodSize[ m_info.largeLod ] >> 1; tval->height = lodSize[ m_info.largeLod ];
+						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 1;
                         break;
-    case GR_ASPECT_1x4: tval->width = nLength >> 2; tval->height = nLength;
+    case GR_ASPECT_1x4: tval->width = lodSize[ m_info.largeLod ] >> 2; tval->height = lodSize[ m_info.largeLod ];
+						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 2;
                         break;
-    case GR_ASPECT_1x8: tval->width = nLength >> 3; tval->height = nLength;
+    case GR_ASPECT_1x8: tval->width = lodSize[ m_info.largeLod ] >> 3; tval->height = lodSize[ m_info.largeLod ];
+						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 3;
                         break;
     }
-
-    tval->nPixels = tval->width * tval->height;
 
     tval->lod = 0;
-/*
-    switch(Info->format)
-    {
-    case GR_TEXFMT_RGB_332:
-    case GR_TEXFMT_YIQ_422:
-    case GR_TEXFMT_ALPHA_8:
-    case GR_TEXFMT_INTENSITY_8:
-    case GR_TEXFMT_ALPHA_INTENSITY_44:
-    case GR_TEXFMT_P_8:
-        TexPointer->NBytes = TexPointer->NPixels;
-        break;
-    case GR_TEXFMT_RGB_565:
-    case GR_TEXFMT_ARGB_8332:
-    case GR_TEXFMT_AYIQ_8422:
-    case GR_TEXFMT_ARGB_1555:
-    case GR_TEXFMT_ARGB_4444:
-    case GR_TEXFMT_ALPHA_INTENSITY_88:
-    case GR_TEXFMT_AP_88:
-        TexPointer->NBytes = TexPointer->NPixels << 1;
-        break;
-    }
-*/
 }
 
 void PGTexture::Clear( void )

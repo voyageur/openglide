@@ -87,15 +87,8 @@ grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
     {
         nTotalBytes += GetTexSize( i, texInfo->aspectRatio, texInfo->format );
     }
-    if ( nTotalBytes % 8 )
-    {
-        return ( nTotalBytes & 0xFFFFFFF8 ) + 8;
-    }
-    else
-    {
-        return nTotalBytes;
-    }
-//    nTotalBytes += ( ( nTotalBytes % 8 ) > 0 ) ? ( 8 - ( nTotalBytes % 8 ) ) : 0;
+
+	return ( nTotalBytes + 7 ) & ~7;
 }
 
 //*************************************************
@@ -347,15 +340,7 @@ grTexCalcMemRequired( GrLOD_t lodmin, GrLOD_t lodmax,
     {
         nTotalBytes += GetTexSize( i, aspect, fmt );
     }
-    if ( nTotalBytes % 8 )
-    {
-        return ( nTotalBytes & 0xFFFFFFF8 ) + 8;
-    }
-    else
-    {
-        return nTotalBytes;
-    }
-//    nTotalBytes += ( ( nTotalBytes % 8 ) > 0 ) ? ( 8 - ( nTotalBytes % 8 ) ) : 0;
+	return ( nTotalBytes + 7 ) & ~7;
 }
 
 //*************************************************
