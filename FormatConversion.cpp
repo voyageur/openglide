@@ -90,6 +90,7 @@ void MMXConvert565to5551( void *Src, void *Dst, int NumberOfPixels )
         mov ecx, NumberOfPixels
         mov eax, Src
         shl ecx, 1
+        sub ecx, 8
         mov edx, Dst
         movq mm6, [Mask565_5551_3]
         movq mm5, [Mask565_5551_2]
@@ -108,7 +109,7 @@ copying:
         
         movq [edx + ecx], mm0
         sub ecx, 8
-        jg copying
+        jge copying
         EMMS
     }
 }
@@ -123,6 +124,7 @@ void MMXConvert565Kto5551( void *Src, DWORD key, void *Dst, int NumberOfPixels )
         mov ecx, NumberOfPixels
         mov eax, Src
         shl ecx, 1
+        sub ecx, 8
         mov edx, Dst
         movq mm6, [Mask565_5551_3]
         movq mm5, [Mask565_5551_2]
@@ -155,7 +157,7 @@ copying:
         
         movq [edx + ecx], mm3
         sub ecx, 8
-        jg copying
+        jge copying
         EMMS
     }
 }
@@ -172,7 +174,8 @@ void MMXConvert5551to565( void *Src, void *Dst, int NumberOfPixels )
    {
       mov ecx, NumberOfPixels
       mov eax, Src
-        shl ecx, 1
+      shl ecx, 1
+      sub ecx, 8
       mov edx, Dst
       movq mm5, [Mask5551_565_2]
       movq mm4, [Mask5551_565_1]
@@ -188,7 +191,7 @@ copying:
         
       movq [edx + ecx], mm0
       sub ecx, 8
-      jg copying
+      jge copying
       EMMS
    }
 }
@@ -205,7 +208,8 @@ void MMXConvert4444to4444special( void *Src, void *Dst, int NumberOfPixels )
    {
       mov ecx, NumberOfPixels
       mov eax, Src
-        shl ecx, 1
+      shl ecx, 1
+      sub ecx, 8
       mov edx, Dst
       movq mm7, [Mask4444_2]
       movq mm6, [Mask4444_1]
@@ -222,7 +226,7 @@ copying:
         
       movq [edx + ecx], mm0
       sub ecx, 8
-      jg copying
+      jge copying
       EMMS
    }
 }
@@ -239,7 +243,8 @@ void MMXConvert1555to5551( void *Src, void *Dst, int NumberOfPixels )
    {
       mov ecx, NumberOfPixels
       mov eax, Src
-        shl ecx, 1
+      shl ecx, 1
+      sub ecx, 8
       mov edx, Dst
       movq mm7, [Mask4444_2]
       movq mm6, [Mask4444_1]
@@ -256,7 +261,7 @@ copying:
         
       movq [edx + ecx], mm0
       sub ecx, 8
-      jg copying
+      jge copying
       EMMS
    }
 }
