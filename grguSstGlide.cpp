@@ -14,7 +14,7 @@ grGlideGetVersion( char version[80] )
 #ifdef OGL_DONE
     GlideMsg( "grGlideGetVersion( --- )\n" );
 #endif
-    strcpy( version, "Glide 2.43" );
+    sprintf( version, "Glide 2.45 - OpenGLide %s", OpenGLideVersion );
 }
 
 //*************************************************
