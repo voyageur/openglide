@@ -134,7 +134,7 @@ inline void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2 = ( ( ( *Buffer1 ) << 8 ) | ( *Buffer1 ) );
+        *Buffer2 = ( ( ( *Buffer1 ) << 8 ) | 0xff );
         Buffer1++;
         Buffer2++;
         Pixels--;
