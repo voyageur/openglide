@@ -181,15 +181,12 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         ColorFunctionFunc = ColorFunctionScaleOther;
         Glide.COther = true;
         if ( ( other == GR_COMBINE_OTHER_TEXTURE ) && 
-             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) )
+             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) &&
+             ( factor != GR_COMBINE_FACTOR_ZERO ) )
         {
             OpenGL.ColorTexture = true;
         }
         else
-        {
-            OpenGL.ColorTexture = false;
-        }
-        if ( factor == GR_COMBINE_FACTOR_ZERO )
         {
             OpenGL.ColorTexture = false;
         }
@@ -200,15 +197,12 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         Glide.ALocal = true;
         Glide.COther = true;
         if ( ( other == GR_COMBINE_OTHER_TEXTURE ) && 
-             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) )
+             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) &&
+             ( factor != GR_COMBINE_FACTOR_ZERO ) )
         {
             OpenGL.ColorTexture = true;
         }
         else
-        {
-            OpenGL.ColorTexture = false;
-        }
-        if ( factor == GR_COMBINE_FACTOR_ZERO )
         {
             OpenGL.ColorTexture = false;
         }
@@ -219,15 +213,12 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         Glide.COther = true;
         Glide.CLocal = true;
         if ( ( other == GR_COMBINE_OTHER_TEXTURE ) && 
-             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) )
+             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) &&
+             ( factor != GR_COMBINE_FACTOR_ZERO ) )
         {
             OpenGL.ColorTexture = true;
         }
         else
-        {
-            OpenGL.ColorTexture = false;
-        }
-        if ( factor == GR_COMBINE_FACTOR_ZERO )
         {
             OpenGL.ColorTexture = false;
         }
@@ -238,15 +229,12 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         Glide.COther = true;
         Glide.CLocal = true;
         if ( ( other == GR_COMBINE_OTHER_TEXTURE ) && 
-             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) )
+             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) &&
+             ( factor != GR_COMBINE_FACTOR_ZERO ) )
         {
             OpenGL.ColorTexture = true;
         }
         else
-        {
-            OpenGL.ColorTexture = false;
-        }
-        if ( factor == GR_COMBINE_FACTOR_ZERO )
         {
             OpenGL.ColorTexture = false;
         }
@@ -257,15 +245,12 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         Glide.COther = true;
         Glide.CLocal = true;
         if ( ( other == GR_COMBINE_OTHER_TEXTURE ) &&
-             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) )
+             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) &&
+             ( factor != GR_COMBINE_FACTOR_ZERO ) )
         {
             OpenGL.ColorTexture = true;
         }
         else
-        {
-            OpenGL.ColorTexture = false;
-        }
-        if ( factor == GR_COMBINE_FACTOR_ZERO )
         {
             OpenGL.ColorTexture = false;
         }
@@ -277,15 +262,12 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         Glide.COther = true;
         Glide.CLocal = true;
         if ( ( other == GR_COMBINE_OTHER_TEXTURE ) &&
-             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) )
+             ( Glide.State.TextureCombineCFunction != GR_COMBINE_FUNCTION_ZERO ) &&
+             ( factor != GR_COMBINE_FACTOR_ZERO ) )
         {
             OpenGL.ColorTexture = true;
         }
         else
-        {
-            OpenGL.ColorTexture = false;
-        }
-        if ( factor == GR_COMBINE_FACTOR_ZERO )
         {
             OpenGL.ColorTexture = false;
         }
@@ -356,14 +338,14 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
     {
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND );
     }
-//  else
-//  if (( Glide.State.ColorCombineFactor == GR_COMBINE_FACTOR_ONE ) &&
-//      ( Glide.State.ColorCombineOther == GR_COMBINE_OTHER_TEXTURE ) &&
-//      ( ( Glide.State.ColorCombineFunction == GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA ) || 
-//        ( Glide.State.ColorCombineFunction == GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL ) ) )
-//  {
-//      glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
-//  }
+    else
+    if (( Glide.State.ColorCombineFactor == GR_COMBINE_FACTOR_ONE ) &&
+        ( Glide.State.ColorCombineOther == GR_COMBINE_OTHER_TEXTURE ) &&
+        ( ( Glide.State.ColorCombineFunction == GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA ) || 
+        ( Glide.State.ColorCombineFunction == GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL ) ) )
+    {
+        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
+    }
     else
     {
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );

@@ -330,44 +330,33 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 //----------------------------------------------------------------
 DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
 {
-    static DWORD    nLength, 
-                    nBytes;
-
-    switch ( Lod )
-    {
-    case GR_LOD_256:    nLength = 256;  break;
-    case GR_LOD_128:    nLength = 128;  break;
-    case GR_LOD_64:     nLength = 64;   break;
-    case GR_LOD_32:     nLength = 32;   break;
-    case GR_LOD_16:     nLength = 16;   break;
-    case GR_LOD_8:      nLength = 8;    break;
-    case GR_LOD_4:      nLength = 4;    break;
-    case GR_LOD_2:      nLength = 2;    break;
-    case GR_LOD_1:      nLength = 1;    break;
-    }
+    static DWORD    nSquareTex[ 9 ] = { 131072, 32768, 8192, 2048, 512, 128, 32, 8, 2 };
+    static DWORD    nBytes;
 
     switch ( aspectRatio )
     {
-    case GR_ASPECT_1x1:     nBytes = nLength * nLength;             break;
+    case GR_ASPECT_1x1:     nBytes = nSquareTex[ Lod ];             break;
     case GR_ASPECT_1x2:
-    case GR_ASPECT_2x1:     nBytes = (nLength >> 1) * nLength;      break;
+    case GR_ASPECT_2x1:     nBytes = nSquareTex[ Lod ] >> 1;        break;
     case GR_ASPECT_1x4:
-    case GR_ASPECT_4x1:     nBytes = (nLength >> 2) * nLength;      break;
+    case GR_ASPECT_4x1:     nBytes = nSquareTex[ Lod ] >> 2;        break;
     case GR_ASPECT_1x8:
-    case GR_ASPECT_8x1:     nBytes = (nLength >> 3) * nLength;      break;
+    case GR_ASPECT_8x1:     nBytes = nSquareTex[ Lod ] >> 3;        break;
     }
 
-    switch ( format )
+    /*
+    ** If the format is one of these:
+    ** GR_TEXFMT_RGB_332
+    ** GR_TEXFMT_YIQ_422
+    ** GR_TEXFMT_ALPHA_8
+    ** GR_TEXFMT_INTENSITY_8
+    ** GR_TEXFMT_ALPHA_INTENSITY_44
+    ** GR_TEXFMT_P_8
+    ** Reduces the size by 2
+    */
+    if ( format <= GR_TEXFMT_RSVD1 )
     {
-    case GR_TEXFMT_RGB_565:
-    case GR_TEXFMT_ARGB_8332:
-    case GR_TEXFMT_AYIQ_8422:
-    case GR_TEXFMT_ARGB_1555:
-    case GR_TEXFMT_ARGB_4444:
-    case GR_TEXFMT_ALPHA_INTENSITY_88:
-    case GR_TEXFMT_AP_88:
-        nBytes <<= 1;
-        break;
+        nBytes >>= 1;
     }
 
     return nBytes;
@@ -459,7 +448,7 @@ void GetOptions( void )
     UserConfig.PackedPixelsEXTEnable    = FALSE;
     UserConfig.TextureEnvEXTEnable      = FALSE;
     UserConfig.VertexArrayEXTEnable     = FALSE;
-    UserConfig.SecondaryColorEXTEnable  = FALSE;
+    UserConfig.SecondaryColorEXTEnable  = TRUE;
     UserConfig.FogCoordEXTEnable        = TRUE;
 
     UserConfig.TextureMemorySize        = 16;

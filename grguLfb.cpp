@@ -106,8 +106,8 @@ grLfbLock( GrLock_t dwType,
                 for ( i = 0; i < Glide.WindowWidth; i++ )
                 {
                     line[ i ] = (WORD)
-                        ( ( ( bufl[i] & 0x0000f8 )     << 8 )
-                        | ( ( bufl[i] & 0x00fc00 )   >> 5 )
+                        ( ( ( bufl[i] & 0x0000f8 ) <<  8 )
+                        | ( ( bufl[i] & 0x00fc00 ) >>  5 )
                         | ( ( bufl[i] & 0xf80000 ) >> 19 )
                         );
                 }
@@ -135,9 +135,8 @@ grLfbLock( GrLock_t dwType,
         lfbInfo->lfbPtr = Glide.DstBuffer.Address;
     }
 
-    lfbInfo->strideInBytes = Glide.WindowWidth * 2;
-
     lfbInfo->writeMode = GR_LFBWRITEMODE_565;
+    lfbInfo->strideInBytes = Glide.WindowWidth * 2;
 
     return FXTRUE;
 }

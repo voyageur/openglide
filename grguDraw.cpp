@@ -69,7 +69,7 @@ grDrawLine( const GrVertex *a, const GrVertex *b )
     * avoid out-of-order rendering.
     */
     RenderDrawTriangles( );
-    RenderAddLine( a, b );
+    RenderAddLine( a, b, true );
 }
 
 //*************************************************
@@ -82,7 +82,7 @@ grDrawPoint( const GrVertex *a )
     GlideMsg( "grDrawPoint( --- )\n" );
 #endif
 
-    RenderAddPoint( a );
+    RenderAddPoint( a, true );
 }
 
 //*************************************************
@@ -224,7 +224,7 @@ grAADrawLine( const GrVertex *a, const GrVertex *b )
     GlideMsg( "grAADrawLine( ---, --- )\n" );
 #endif
 
-    RenderAddLine( a, b );
+    RenderAddLine( a, b, true );
 }
 
 DLLEXPORT void __stdcall
@@ -234,7 +234,7 @@ grAADrawPoint(const GrVertex *a )
     GlideMsg("grAADrawPoint( --- )\n");
 #endif
 
-    RenderAddPoint( a );
+    RenderAddPoint( a, true );
 }
 
 DLLEXPORT void __stdcall

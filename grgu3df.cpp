@@ -14,7 +14,7 @@
 
 #include "glogl.h"
 
-// extern variables
+// extern variables and functions
 DWORD GetTexSize( const int Lod, const int aspectRatio, const int format );
 
 // prototypes
