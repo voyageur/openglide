@@ -79,10 +79,6 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 	hDC = GetDC( hwnd );
 	BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
 
-    if(hwnd)
-		MoveWindow( hwnd, x, y, width, height+30, true ); 
-
-
 	ZeroMemory( &pfd, sizeof(pfd) );
 	pfd.nSize        = sizeof(pfd);
 	pfd.nVersion     = 1;
