@@ -50,6 +50,7 @@ public:
 	void NCCTable(GrNCCTable_t tab);
     FxU32 m_tex_memory_size;
 
+    static FxU32 LodOffset( FxU32 evenOdd, GrTexInfo *info );
     static FxU32 MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, 
                                     GrTextureFormat_t format );
     void ChromakeyMode( GrChromakeyMode_t mode );
