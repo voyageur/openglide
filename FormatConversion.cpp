@@ -14,7 +14,7 @@ void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 	}
 }
 
-void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
+/*void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
 	while ( Pixels )
 	{
@@ -22,6 +22,56 @@ void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
 					(((*Buffer1++) & 0x001F) << 1) |
 					0x0001;
 		Pixels--;
+	}
+}
+*/
+void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
+{
+	while ( Pixels > 0 )
+	{
+		*Buffer2++ = (   (*Buffer1) & 0xFFC0FFC0 ) |
+					 ( ( (*Buffer1++) & 0x001F001F ) << 1 ) |
+                     0x00010001;
+		Pixels -= 2;
+//        ++Buffer1;
+	}
+}
+
+unsigned __int64 Mask565_5551_1 = 0xFFC0FFC0FFC0FFC0;
+unsigned __int64 Mask565_5551_2 = 0x001F001F001F001F;
+unsigned __int64 Mask565_5551_3 = 0x0001000100010001;
+
+void MMXConvert565to5551( void *Src, void *Dst, DWORD NumberOfPixels )
+{
+	__asm
+	{
+		mov ECX, NumberOfPixels
+		MOVQ MM6, [Mask565_5551_3]
+		mov EAX, Src
+		MOVQ MM5, [Mask565_5551_2]
+		shr ECX, 2
+		MOVQ MM4, [Mask565_5551_1]
+		mov EDX, Dst
+    align 16
+copying:
+		MOVQ MM0, [EAX]
+		add EAX, 8
+		MOVQ MM2, MM0
+		MOVQ MM1, MM0
+
+		PAND MM0, MM5 
+		PAND MM2, MM4 
+		PSLLQ MM0, 1
+
+		POR MM2, MM6
+        POR MM0, MM2
+
+		// Storing Unpacked 
+		MOVQ [EDX], MM0
+		add EDX, 8
+		sub ECX, 1
+		jnz copying
+		EMMS
 	}
 }
 
