@@ -37,25 +37,14 @@ grDitherMode( GrDitherMode_t mode )
 
     if ( mode != GR_DITHER_DISABLE )
     {
+        // GR_DITHER_2x2 or GR_DITHER_4x4
         glEnable( GL_DITHER );
     }
     else
     {
         glDisable( GL_DITHER );
     }
-/*
-    switch ( Glide.State.DitherMode )
-    {
-    case GR_DITHER_DISABLE:
-        glDisable( GL_DITHER );
-        break;
 
-    case GR_DITHER_2x2:
-    case GR_DITHER_4x4:
-        glEnable( GL_DITHER );
-        break;
-    }
-*/
 #ifdef OPENGL_DEBUG
     GLErro( "grDitherMode" );
 #endif

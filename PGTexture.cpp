@@ -257,77 +257,56 @@ void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 
     switch( info->aspectRatio )
     {
-    case GR_ASPECT_8x1: m_wAspect = D1OVER256;  m_hAspect = D8OVER256;          
-        break;
-
-    case GR_ASPECT_4x1: m_wAspect = D1OVER256;  m_hAspect = D4OVER256;          
-        break;
-
-    case GR_ASPECT_2x1: m_wAspect = D1OVER256;  m_hAspect = D2OVER256;          
-        break;
-
-    case GR_ASPECT_1x1: m_wAspect = D1OVER256;  m_hAspect = D1OVER256;          
-        break;
-
-    case GR_ASPECT_1x2: m_wAspect = D2OVER256;  m_hAspect = D1OVER256;          
-        break;
-
-    case GR_ASPECT_1x4: m_wAspect = D4OVER256;  m_hAspect = D1OVER256;          
-        break;
-
-    case GR_ASPECT_1x8: m_wAspect = D8OVER256;  m_hAspect = D1OVER256;          
-        break;
+    case GR_ASPECT_8x1: m_wAspect = D1OVER256;  m_hAspect = D8OVER256;  break;
+    case GR_ASPECT_4x1: m_wAspect = D1OVER256;  m_hAspect = D4OVER256;  break;
+    case GR_ASPECT_2x1: m_wAspect = D1OVER256;  m_hAspect = D2OVER256;  break;
+    case GR_ASPECT_1x1: m_wAspect = D1OVER256;  m_hAspect = D1OVER256;  break;
+    case GR_ASPECT_1x2: m_wAspect = D2OVER256;  m_hAspect = D1OVER256;  break;
+    case GR_ASPECT_1x4: m_wAspect = D4OVER256;  m_hAspect = D1OVER256;  break;
+    case GR_ASPECT_1x8: m_wAspect = D8OVER256;  m_hAspect = D1OVER256;  break;
     }
 
     m_valid = ( ( startAddress + size ) <= m_tex_memory_size );
 }
 
-void PGTexture::DownloadTable( GrTexTable_t type, void *data, int first, int count )
+void PGTexture::DownloadTable( GrTexTable_t type, FxU32 *data, int first, int count )
 {
-    switch ( type )
+    if ( type == GR_TEXTABLE_PALETTE )
     {
-    case GR_TEXTABLE_PALETTE:
+        for ( int i = 0; i < count; i++ )
         {
-            FxU32   * idata = (FxU32 *)data;
-            
-            for ( int i = 0; i < count; i++ )
-            {
-                m_palette[first+i] = (    ( idata[ i ] & 0xff00ff00 )
-                    | ( ( idata[ i ] & 0x00ff0000 ) >> 16 )
-                    | ( ( idata[ i ] & 0x000000ff ) << 16 )
-                    );
-            }
-            
-            m_palette_dirty = true;
+            m_palette[first+i] = (  ( data[ i ] & 0xff00ff00 )
+                | ( ( data[ i ] & 0x00ff0000 ) >> 16 )
+                | ( ( data[ i ] & 0x000000ff ) << 16 )
+                );
         }
-        break;
+        
+        m_palette_dirty = true;
+    }
+    else
+    {
+        // GR_TEXTABLE_NCC0 or GR_TEXTABLE_NCC1
+        int         i;
+        GuNccTable *ncc = &(m_ncc[ type ]);
 
-    case GR_TEXTABLE_NCC0:
-    case GR_TEXTABLE_NCC1:
+        memcpy( ncc, data, sizeof( GuNccTable ) );
+
+        for ( i = 0; i < 4; i++ )
         {
-            int         i;
-            GuNccTable *ncc = &(m_ncc[ type ]);
+            if ( ncc->iRGB[ i ][ 0 ] & 0x100 )
+                ncc->iRGB[ i ][ 0 ] |= 0xff00;
+            if ( ncc->iRGB[ i ][ 1 ] & 0x100 )
+                ncc->iRGB[ i ][ 1 ] |= 0xff00;
+            if ( ncc->iRGB[ i ][ 2 ] & 0x100 )
+                ncc->iRGB[ i ][ 2 ] |= 0xff00;
 
-            memcpy( ncc, data, sizeof( GuNccTable ) );
-
-            for ( i = 0; i < 4; i++ )
-            {
-                if ( ncc->iRGB[ i ][ 0 ] & 0x100 )
-                    ncc->iRGB[ i ][ 0 ] |= 0xff00;
-                if ( ncc->iRGB[ i ][ 1 ] & 0x100 )
-                    ncc->iRGB[ i ][ 1 ] |= 0xff00;
-                if ( ncc->iRGB[ i ][ 2 ] & 0x100 )
-                    ncc->iRGB[ i ][ 2 ] |= 0xff00;
-
-                if ( ncc->qRGB[ i ][ 0 ] & 0x100 )
-                    ncc->qRGB[ i ][ 0 ] |= 0xff00;
-                if ( ncc->qRGB[ i ][ 1 ] & 0x100 )
-                    ncc->qRGB[ i ][ 1 ] |= 0xff00;
-                if ( ncc->qRGB[ i ][ 2 ] & 0x100 )
-                    ncc->qRGB[ i ][ 2 ] |= 0xff00;
-            }
+            if ( ncc->qRGB[ i ][ 0 ] & 0x100 )
+                ncc->qRGB[ i ][ 0 ] |= 0xff00;
+            if ( ncc->qRGB[ i ][ 1 ] & 0x100 )
+                ncc->qRGB[ i ][ 1 ] |= 0xff00;
+            if ( ncc->qRGB[ i ][ 2 ] & 0x100 )
+                ncc->qRGB[ i ][ 2 ] |= 0xff00;
         }
-        break;
     }
 }
 
@@ -354,17 +333,17 @@ bool PGTexture::MakeReady( void )
     test_hash        = 0;
     wipe_hash        = 0;
     palette_changed  = false;
-    use_mipmap_ext   = (InternalConfig.EnableMipMaps && !InternalConfig.BuildMipMaps);
+    use_mipmap_ext   = ( InternalConfig.EnableMipMaps && !InternalConfig.BuildMipMaps );
     use_mipmap_ext2  = use_mipmap_ext;
     use_two_textures = false;
     pal_change_ptr   = NULL;
     
-    data = m_memory + m_startAddress;
+    data             = m_memory + m_startAddress;
+
+    size             = TextureMemRequired( m_evenOdd, &m_info );
 
     GetTexValues( &texVals );
     
-    size = TextureMemRequired( m_evenOdd, &m_info );
-
     switch ( m_info.format )
     {
     case GR_TEXFMT_P_8:
@@ -657,15 +636,45 @@ FxU32 PGTexture::LodOffset( FxU32 evenOdd, GrTexInfo *info )
 
 FxU32 PGTexture::TextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
 {
-    FxU32   total = 0;
-    GrLOD_t i;
+    static DWORD    nBytes;
+    static DWORD    nSquareTexLod[ 9 ][ 9 ] = 
+    { 
+        { 131072, 163840, 172032, 174080, 174592, 174720, 174752, 174760, 174762 },
+        {      0,  32768,  40960,  43008,  43520,  43648,  43680,  43688,  43690 },
+        {      0,      0,   8192,  10240,  10752,  10880,  10912,  10920,  10922 },
+        {      0,      0,      0,   2048,   2560,   2688,   2720,   2728,   2730 },
+        {      0,      0,      0,      0,    512,    640,    672,    680,    682 },
+        {      0,      0,      0,      0,      0,    128,    160,    168,    170 },
+        {      0,      0,      0,      0,      0,      0,     32,     40,     42 },
+        {      0,      0,      0,      0,      0,      0,      0,      8,     10 },
+        {      0,      0,      0,      0,      0,      0,      0,      0,      2 }
+    };
 
-    for( i = info->largeLod; i <= info->smallLod; i++ )
+    switch ( info->aspectRatio )
     {
-        total += MipMapMemRequired( i, info->aspectRatio, info->format );
+    case GR_ASPECT_1x1:     nBytes = nSquareTexLod[ info->largeLod ][ info->smallLod ];         break;
+    case GR_ASPECT_1x2:
+    case GR_ASPECT_2x1:     nBytes = nSquareTexLod[ info->largeLod ][ info->smallLod ] >> 1;    break;
+    case GR_ASPECT_1x4:
+    case GR_ASPECT_4x1:     nBytes = nSquareTexLod[ info->largeLod ][ info->smallLod ] >> 2;    break;
+    case GR_ASPECT_1x8:
+    case GR_ASPECT_8x1:     nBytes = nSquareTexLod[ info->largeLod ][ info->smallLod ] >> 3;    break;
     }
 
-    return ( total + 7 ) & ~7;
+    /*
+    ** If the format is one of these:
+    ** GR_TEXFMT_RGB_332, GR_TEXFMT_YIQ_422, GR_TEXFMT_ALPHA_8
+    ** GR_TEXFMT_INTENSITY_8, GR_TEXFMT_ALPHA_INTENSITY_44, GR_TEXFMT_P_8
+    ** Reduces the size by 2
+    */
+    if ( info->format > GR_TEXFMT_RSVD1 )
+	{
+	    return ( nBytes + 7 ) & ~7;
+	}
+	else
+    {
+        return ( ( nBytes >> 1 ) + 7 ) & ~7;
+    }
 }
 
 FxU32 PGTexture::MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, GrTextureFormat_t format )
@@ -686,12 +695,8 @@ FxU32 PGTexture::MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, Gr
 
     /*
     ** If the format is one of these:
-    ** GR_TEXFMT_RGB_332
-    ** GR_TEXFMT_YIQ_422
-    ** GR_TEXFMT_ALPHA_8
-    ** GR_TEXFMT_INTENSITY_8
-    ** GR_TEXFMT_ALPHA_INTENSITY_44
-    ** GR_TEXFMT_P_8
+    ** GR_TEXFMT_RGB_332, GR_TEXFMT_YIQ_422, GR_TEXFMT_ALPHA_8
+    ** GR_TEXFMT_INTENSITY_8, GR_TEXFMT_ALPHA_INTENSITY_44, GR_TEXFMT_P_8
     ** Reduces the size by 2
     */
     if ( format > GR_TEXFMT_RSVD1 )

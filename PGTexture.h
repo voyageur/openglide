@@ -38,7 +38,7 @@ public:
     void Clear( void );
     static FxU32 TextureMemRequired( FxU32 evenOdd, GrTexInfo *info );
     bool MakeReady( void );
-    void DownloadTable( GrTexTable_t type, void *data, int first, int count );
+    void DownloadTable( GrTexTable_t type, FxU32 *data, int first, int count );
     void Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info );
     void DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info );
     PGTexture( int mem_size );

@@ -14,10 +14,6 @@
 #include "GLextensions.h"
 
 
-// extern functions
-DWORD GetTexSize(const int Lod, const int aspectRatio, const int format );
-
-
 // Functions
 
 //*************************************************
@@ -82,13 +78,7 @@ grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
     GlideMsg( "grTexTextureMemRequired( %u, --- )\n", dwEvenOdd );
 #endif
 
-    DWORD nTotalBytes = 0;
-    for( int i = texInfo->largeLod; i <= texInfo->smallLod; i++ )
-    {
-        nTotalBytes += GetTexSize( i, texInfo->aspectRatio, texInfo->format );
-    }
-
-	return ( nTotalBytes + 7 ) & ~7;
+    return Textures->TextureMemRequired( dwEvenOdd, texInfo );
 }
 
 //*************************************************
@@ -335,12 +325,13 @@ grTexCalcMemRequired( GrLOD_t lodmin, GrLOD_t lodmax,
         lodmin, lodmax, aspect, fmt );
 #endif
 
-    DWORD nTotalBytes = 0;
-    for ( int i = lodmax; i <= lodmin; i++ )
-    {
-        nTotalBytes += GetTexSize( i, aspect, fmt );
-    }
-	return ( nTotalBytes + 7 ) & ~7;
+    static GrTexInfo texInfo;
+    texInfo.aspectRatio = aspect;
+    texInfo.format      = fmt;
+    texInfo.largeLod    = lodmax;
+    texInfo.smallLod    = lodmin;
+
+    return Textures->TextureMemRequired( 0, &texInfo );
 }
 
 //*************************************************
@@ -365,7 +356,7 @@ grTexDownloadTablePartial( GrChipID_t   tmu,
 
     RenderDrawTriangles( );
 
-    Textures->DownloadTable( type, data, start, end + 1 - start );
+    Textures->DownloadTable( type, (FxU32*)data, start, end + 1 - start );
 }
 
 //*************************************************
@@ -387,7 +378,7 @@ grTexDownloadTable( GrChipID_t   tmu,
 
     RenderDrawTriangles( );
 
-    Textures->DownloadTable( type, data, 0, 256 );
+    Textures->DownloadTable( type, (FxU32*)data, 0, 256 );
 }
 
 //----------------------------------------------------------------
