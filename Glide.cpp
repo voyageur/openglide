@@ -81,14 +81,14 @@ BOOL ClearAndGenerateLogFile( void )
     char    tmpbuf[ 128 ];
 
     remove( ERRORFILE );
-    GlideFile = fopen( GLIDEFILE, "w");
+    GlideFile = fopen( GLIDEFILE, "w" );
     if ( !GlideFile )
     {
         return FALSE;
     }
 
     fprintf( GlideFile, OGL_LOG_SEPARATE );
-    fprintf( GlideFile, "OpenGLide Log File\n");
+    fprintf( GlideFile, "OpenGLide Log File\n" );
     fprintf( GlideFile, OGL_LOG_SEPARATE );
     fprintf( GlideFile, "***** OpenGLide %s *****\n", OpenGLideVersion );
     fprintf( GlideFile, OGL_LOG_SEPARATE );
@@ -99,7 +99,7 @@ BOOL ClearAndGenerateLogFile( void )
     fprintf( GlideFile, OGL_LOG_SEPARATE );
     fprintf( GlideFile, OGL_LOG_SEPARATE );
     ClockFreq = ClockFrequency( );
-    fprintf( GlideFile, "Clock Frequency: %-4.2f Mhz\n", ClockFreq / 1000000.0f);
+    fprintf( GlideFile, "Clock Frequency: %-4.2f Mhz\n", ClockFreq / 1000000.0f );
     fprintf( GlideFile, OGL_LOG_SEPARATE );
     fprintf( GlideFile, OGL_LOG_SEPARATE );
 
@@ -110,7 +110,7 @@ BOOL ClearAndGenerateLogFile( void )
 
 void CloseLogFile( void )
 {
-    char tmpbuf[128];
+    char tmpbuf[ 128 ];
     GlideMsg( OGL_LOG_SEPARATE );
     _strtime( tmpbuf );
     GlideMsg( "Time: %s\n", tmpbuf );
@@ -188,33 +188,13 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
 
         switch ( UserConfig.Priority )
         {
-        case 0:
-            Priority = THREAD_PRIORITY_HIGHEST;
-            break;
-
-        case 1:
-            Priority = THREAD_PRIORITY_ABOVE_NORMAL;
-            break;
-
-        case 2:
-            Priority = THREAD_PRIORITY_NORMAL;
-            break;
-
-        case 3:
-            Priority = THREAD_PRIORITY_BELOW_NORMAL;
-            break;
-
-        case 4:
-            Priority = THREAD_PRIORITY_LOWEST;
-            break;
-
-        case 5:
-            Priority = THREAD_PRIORITY_IDLE;
-            break;
-
-        default:
-            Priority = THREAD_PRIORITY_NORMAL;
-            break;
+        case 0:     Priority = THREAD_PRIORITY_HIGHEST;         break;
+        case 1:     Priority = THREAD_PRIORITY_ABOVE_NORMAL;    break;
+        case 2:     Priority = THREAD_PRIORITY_NORMAL;          break;
+        case 3:     Priority = THREAD_PRIORITY_BELOW_NORMAL;    break;
+        case 4:     Priority = THREAD_PRIORITY_LOWEST;          break;
+        case 5:     Priority = THREAD_PRIORITY_IDLE;            break;
+        default:    Priority = THREAD_PRIORITY_NORMAL;          break;
         }
         if ( SetThreadPriority( GetCurrentThread(), Priority ) == 0 )
         {
@@ -336,13 +316,14 @@ grGlideInit( void )
 #ifdef OGL_DONE
     GlideMsg( "grGlideInit( )\n" );
 #endif
+
     if ( OpenGL.GlideInit )
     {
-        grGlideShutdown();
+        grGlideShutdown( );
     }
 
-    ZeroMemory( &Glide, sizeof(GlideStruct) );
-    ZeroMemory( &OpenGL, sizeof(OpenGLStruct) );
+    ZeroMemory( &Glide, sizeof( GlideStruct ) );
+    ZeroMemory( &OpenGL, sizeof( OpenGLStruct ) );
 
     Glide.ActiveVoodoo      = 0;
     Glide.State.VRetrace    = FXTRUE;
@@ -405,6 +386,7 @@ grGlideSetState( const GrState *state )
 #ifdef OGL_PARTDONE
     GlideMsg( "grGlideSetState( --- )\n" );
 #endif
+
     GlideState StateTemp;
 
     CopyMemory( &StateTemp, state, sizeof( GlideState ) );

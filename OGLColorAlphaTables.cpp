@@ -27,7 +27,7 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
     { // GR_COMBINE_FACTOR_LOCAL         0x1
         { false, false, false, false, ColorFactor3Local, ColorFunctionZero },                               // GR_COMBINE_FUNCTION_ZERO        0x0
         {  true, false, false, false, ColorFactor3Local, ColorFunctionLocal },                              // GR_COMBINE_FUNCTION_LOCAL       0x1
-        {  true, false,  true, false, ColorFactor3Local, ColorFunctionLocalAlpha },                         // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
+        { false, false,  true, false, ColorFactor3Local, ColorFunctionLocalAlpha },                         // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
         {  true,  true, false, false, ColorFactor3Local, ColorFunctionScaleOther },                         // GR_COMBINE_FUNCTION_SCALE_OTHER 0x3
         {  true,  true, false, false, ColorFactor3Local, ColorFunctionScaleOtherAddLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL 0x4
         {  true,  true,  true, false, ColorFactor3Local, ColorFunctionScaleOtherAddLocalAlpha },            // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
@@ -87,10 +87,10 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false,  true, false, ColorFactor3One, ColorFunctionLocalAlpha },                           // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
         { false,  true, false, false, ColorFactor3One, ColorFunctionScaleOther },                           // GR_COMBINE_FUNCTION_SCALE_OTHER 0x3
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL 0x4
-        { false, false,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
-        { false, false, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
+        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
+        {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocal },         // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL 0x7
-        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
+        {  true,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
         {  true, false, false, false, ColorFactor3One, ColorFunctionMinusLocalAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL 0x9
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xa
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xb
@@ -98,7 +98,7 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xd
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xe
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xf
-        { false, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
+        {  true, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
     },
     { // GR_COMBINE_FACTOR_TEXTURE_RGB   0x5
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // GR_COMBINE_FUNCTION_ZERO        0x0
@@ -106,10 +106,10 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false,  true, false, ColorFactor3One, ColorFunctionLocalAlpha },                           // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
         { false,  true, false, false, ColorFactor3One, ColorFunctionScaleOther },                           // GR_COMBINE_FUNCTION_SCALE_OTHER 0x3
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL 0x4
-        { false, false,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
-        { false, false, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
+        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
+        {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocal },         // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL 0x7
-        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
+        {  true,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
         {  true, false, false, false, ColorFactor3One, ColorFunctionMinusLocalAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL 0x9
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xa
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xb
@@ -117,7 +117,7 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xd
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xe
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xf
-        { false, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
+        {  true, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
     },
     { // 6
         { false, false, false, false, ColorFactor3Zero, ColorFunctionZero },                                // GR_COMBINE_FUNCTION_ZERO        0x0
@@ -163,10 +163,10 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false,  true, false, ColorFactor3One, ColorFunctionLocalAlpha },                           // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
         { false,  true, false, false, ColorFactor3One, ColorFunctionScaleOther },                           // GR_COMBINE_FUNCTION_SCALE_OTHER 0x3
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL 0x4
-        { false, false,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
-        { false, false, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
+        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
+        {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocal },         // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL 0x7
-        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
+        {  true,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
         {  true, false, false, false, ColorFactor3One, ColorFunctionMinusLocalAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL 0x9
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xa
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xb
@@ -174,7 +174,7 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xd
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xe
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xf
-        { false, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
+        {  true, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
     },
     { // GR_COMBINE_FACTOR_ONE_MINUS_LOCAL 0x9
         { false, false, false, false, ColorFactor3OneMinusLocal, ColorFunctionZero },                       // GR_COMBINE_FUNCTION_ZERO        0x0
@@ -239,10 +239,10 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false,  true, false, ColorFactor3One, ColorFunctionLocalAlpha },                           // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
         { false,  true, false, false, ColorFactor3One, ColorFunctionScaleOther },                           // GR_COMBINE_FUNCTION_SCALE_OTHER 0x3
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL 0x4
-        { false, false,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
-        { false, false, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
+        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
+        {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocal },         // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL 0x7
-        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
+        {  true,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
         {  true, false, false, false, ColorFactor3One, ColorFunctionMinusLocalAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL 0x9
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xa
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xb
@@ -250,7 +250,7 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xd
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xe
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xf
-        { false, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
+        {  true, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
     },
     { // GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION 0xd
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // GR_COMBINE_FUNCTION_ZERO        0x0
@@ -258,10 +258,10 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false,  true, false, ColorFactor3One, ColorFunctionLocalAlpha },                           // GR_COMBINE_FUNCTION_LOCAL_ALPHA 0x2
         { false,  true, false, false, ColorFactor3One, ColorFunctionScaleOther },                           // GR_COMBINE_FUNCTION_SCALE_OTHER 0x3
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL 0x4
-        { false, false,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
-        { false, false, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
+        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherAddLocalAlpha },              // GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA 0x5 
+        {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocal },                 // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL 0x6
         {  true,  true, false, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocal },         // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL 0x7
-        { false,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
+        {  true,  true,  true, false, ColorFactor3One, ColorFunctionScaleOtherMinusLocalAddLocalAlpha },    // GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x8
         {  true, false, false, false, ColorFactor3One, ColorFunctionMinusLocalAddLocal },                   // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL 0x9
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xa
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xb
@@ -269,7 +269,7 @@ OGLColorTable colorCombineTable[ 14 ][ 17 ] =
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xd
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xe
         { false, false, false, false, ColorFactor3One, ColorFunctionZero },                                 // 0xf
-        { false, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
+        {  true, false,  true, false, ColorFactor3One, ColorFunctionMinusLocalAddLocalAlpha }               // GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA 0x10
     }
 };
 
