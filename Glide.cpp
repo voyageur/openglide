@@ -722,8 +722,6 @@ grSstWinClose( void )
 
     FinaliseOpenGLWindow();
 
-	ChangeDisplaySettings( NULL, 0 );
-
 	delete[] Glide.SrcBuffer.Address;
 //	delete[] Glide.DstBuffer.Address;
 }
