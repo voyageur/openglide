@@ -184,11 +184,15 @@ void ValidateUserConfig( void )
         }
     }
 
-    if ( UserConfig.SecondaryColorEXTEnable )
+//    if ( UserConfig.SecondaryColorEXTEnable )
     {
         if ( isExtensionSupported( "GL_EXT_secondary_color" ) )
         {
             InternalConfig.SecondaryColorEXTEnable      = true;
+        }
+        else
+        {
+            MessageBox( NULL, "Current video does not support Secondary Color Extension, colors may be wrong", "Error", MB_OK );
         }
     }
 
