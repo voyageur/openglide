@@ -323,7 +323,12 @@ bool PGTexture::MakeReady( void )
         switch ( m_info.format )
         {
         case GR_TEXFMT_RGB_565:
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( m_chromakey_mode )
+            {
+                Convert565Kto8888( (WORD*)data, m_chromakey_value, m_tex_temp, texVals.nPixels );
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
+            else if ( InternalConfig.OGLVersion > 1 )
             {
                 OGL_LOAD_CREATE_TEXTURE( 3, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
             }

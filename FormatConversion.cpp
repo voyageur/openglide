@@ -14,6 +14,22 @@ void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 	}
 }
 
+void Convert565Kto8888( WORD *Buffer1, DWORD key, DWORD *Buffer2, DWORD Pixels )
+{
+    WORD key565 = (WORD)( ( key & 0x00F80000) >> 8 |
+                          ( key & 0x0000FC00) >> 5 |
+                          ( key & 0x000000F8) >> 3 );
+
+	while ( Pixels )
+	{
+        *Buffer2++ = ( ((*Buffer1) == key565) ? 0x00000000 : 0xFF000000 ) |					// A
+			((*Buffer1)		& 0x001F) << 19 |		// B
+			((*Buffer1)		& 0x07E0) << 5  |		// G
+			((*Buffer1++)	& 0xF800) >> 8;			// R
+		Pixels--;
+	}
+}
+
 // This functions processes 2 pixels at a time, there is no problem in
 // passing odd numbers or a number less than 2 for the pixels, but
 // the buffers should be large enough

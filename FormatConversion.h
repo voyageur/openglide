@@ -5,6 +5,7 @@
 #include "glogl.h"
 
 void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels );
+void Convert565Kto8888( WORD *Buffer1, DWORD key, DWORD *Buffer2, DWORD Pixels );
 void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, int Pixels );
 void Convert5551to565( DWORD *Buffer1, DWORD *Buffer2, int Pixels );
 void Convert4444to4444special( DWORD *Buffer1, DWORD *Buffer2, int Pixels );
