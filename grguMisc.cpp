@@ -89,7 +89,7 @@ DLLEXPORT void __stdcall
 grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("grClipWindow( %d, %d, %d, %d )\n", minx, miny, maxx, maxy );
+    GlideMsg( "grClipWindow( %d, %d, %d, %d )\n", minx, miny, maxx, maxy );
 #endif
 
     RenderDrawTriangles( );
@@ -101,8 +101,8 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 
     if ( ( Glide.State.ClipMinX != 0 ) || 
          ( Glide.State.ClipMinY != 0 ) ||
-         ( Glide.State.ClipMaxX != (FxU32) ( Glide.WindowWidth - 1 ) ) ||
-         ( Glide.State.ClipMaxY != (FxU32) ( Glide.WindowHeight - 1 ) ) )
+         ( Glide.State.ClipMaxX != (FxU32) Glide.WindowWidth ) ||
+         ( Glide.State.ClipMaxY != (FxU32) Glide.WindowHeight ) )
     {
         OpenGL.Clipping = true;
     }
