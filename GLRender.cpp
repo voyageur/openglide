@@ -1295,7 +1295,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 		}
 	}
 
-	if (a->x > 2048)
+	if (0 && a->x > 2048)
 	{
 		pV->ax = a->x - vertex_snap;
 		pV->ay = a->y - vertex_snap;
@@ -1811,7 +1811,7 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 		}
 	}
 
-	if (a->x > 2048)
+	if (0 && a->x > 2048)
 	{
 		pV->ax = a->x - vertex_snap;
 		pV->ay = a->y - vertex_snap;
@@ -2244,7 +2244,7 @@ void RenderAddPoint( const GrVertex *a )
 		}
 	}
 
-	if (a->x > 2048)
+	if (0 && a->x > 2048)
 	{
 		pV->ax = a->x - vertex_snap;
 		pV->ay = a->y - vertex_snap;
