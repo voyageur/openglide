@@ -31,13 +31,16 @@ struct stExtensionSupport
     bool *          internalVar;
 };
 
+// It is important that dummyExtVariable retains the value true, so
+// we pass dummyExtVariable2 in places where the value may be altered.
 bool dummyExtVariable = true;
+bool dummyExtVariable2 = true;
 
 stExtensionSupport glNecessaryExt[] =
 {
-    { "GL_EXT_packed_pixels",           OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_abgr",                    OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_bgra",                    OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_packed_pixels",           OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_abgr",                    OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_bgra",                    OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable2 },
     { "GL_EXT_secondary_color",         OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_secondary_color },
     { "GL_ARB_multitexture",            OGL_EXT_DESIRED,    &UserConfig.ARB_multitexture,       &InternalConfig.ARB_multitexture },
     { "GL_EXT_fog_coord",               OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_fog_coord },
@@ -48,31 +51,31 @@ stExtensionSupport glNecessaryExt[] =
     { "GL_EXT_paletted_texture",        OGL_EXT_DESIRED,    &UserConfig.EXT_paletted_texture,   &InternalConfig.EXT_paletted_texture },
     { "GL_EXT_vertex_array",            OGL_EXT_DESIRED,    &UserConfig.EXT_vertex_array,       &InternalConfig.EXT_vertex_array },
     { "GL_EXT_blend_func_separate",     OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_blend_func_separate },
-    { "GL_ARB_imaging",                 OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_ARB_texture_env_add",         OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_ARB_transpose_matrix",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_compiled_vertex_array",   OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_draw_range_elements",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_multi_draw_arrays",       OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_point_parameters",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_rescale_normal",          OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_separate_specular_color", OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_stencil_wrap",            OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_texture_edge_clamp",      OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_texture_object",          OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_EXT_vertex_weighting",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_IBM_texture_mirrored_repeat", OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_KTX_buffer_region",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_NV_blend_square",             OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_NV_evaluators",               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_NV_fog_distance",             OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_NV_packed_depth_stencil",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_NV_texgen_reflection",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_NV_texture_env_combine4",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_SGIS_multitexture",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "GL_WIN_swap_hint",               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "WGL_EXT_swap_control",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
-    { "",                               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable }
+    { "GL_ARB_imaging",                 OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_ARB_texture_env_add",         OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_ARB_transpose_matrix",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_compiled_vertex_array",   OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_draw_range_elements",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_multi_draw_arrays",       OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_point_parameters",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_rescale_normal",          OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_separate_specular_color", OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_stencil_wrap",            OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_texture_edge_clamp",      OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_texture_object",          OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_EXT_vertex_weighting",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_IBM_texture_mirrored_repeat", OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_KTX_buffer_region",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_NV_blend_square",             OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_NV_evaluators",               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_NV_fog_distance",             OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_NV_packed_depth_stencil",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_NV_texgen_reflection",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_NV_texture_env_combine4",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_SGIS_multitexture",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "GL_WIN_swap_hint",               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "WGL_EXT_swap_control",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 },
+    { "",                               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable2 }
 }; 
 
 //Functions
@@ -277,6 +280,9 @@ void ValidateUserConfig( void )
         }
         ++index;
     }
+    // The above loop leaves InternalConfig.BuildMipMaps set to the negation of its correct value.
+    InternalConfig.BuildMipMaps = !InternalConfig.BuildMipMaps;
+
     GlideMsg( OGL_LOG_SEPARATE );
 
     if ( InternalConfig.EXT_texture_env_add  && 
