@@ -262,33 +262,61 @@ void RenderDrawTriangles( void )
             glEnd( );
         }
     }
-
-/*  
-    I will do that correctly later, it is not right yet
-
+  
     if ( ! InternalConfig.SecondaryColorEXTEnable )
     {
-        glDisable( GL_TEXTURE_2D );
-        glEnable( GL_BLEND );
         glBlendFunc( GL_ONE, GL_ONE );
+        glEnable( GL_BLEND );
+        glDisable( GL_TEXTURE_2D );
 
-        glBegin( GL_TRIANGLES );
-        for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+        if ( OpenGL.DepthBufferType )
         {
-            glColor3fv( &OGLRender.TColor2[ i ].ar );
-            glVertex3fv( &OGLRender.TVertex[ i ].ax );
-            
-            glColor3fv( &OGLRender.TColor2[ i ].br );
-            glVertex3fv( &OGLRender.TVertex[ i ].bx );
-            
-            glColor3fv( &OGLRender.TColor2[ i ].cr );
-            glVertex3fv( &OGLRender.TVertex[ i ].cx );
+            glPolygonOffset( 1.0f, 0.5f );
         }
-        glEnd( );
+        else
+        {
+            glPolygonOffset( -1.0f, -0.5f );
+        }
 
-        glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
+        glEnable( GL_POLYGON_OFFSET_FILL );
+
+        if ( 0 && InternalConfig.VertexArrayEXTEnable ) // ????
+        {
+            glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor2 );
+            glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
+            glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor );
+        }
+        else
+        {
+            glBegin( GL_TRIANGLES );
+            for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+            {
+                glColor4fv( &OGLRender.TColor2[ i ].ar );
+                glVertex3fv( &OGLRender.TVertex[ i ].ax );
+
+                glColor4fv( &OGLRender.TColor2[ i ].br );
+                glVertex3fv( &OGLRender.TVertex[ i ].bx );
+
+                glColor4fv( &OGLRender.TColor2[ i ].cr );
+                glVertex3fv( &OGLRender.TVertex[ i ].cx );
+            }
+            glEnd( );
+        }
+
+        if ( Glide.State.DepthBiasLevel )
+        {
+            glPolygonOffset( 1.0f, OpenGL.DepthBiasLevel );
+        }
+        else
+        {
+            glDisable( GL_POLYGON_OFFSET_FILL );
+        }
+
+        if ( OpenGL.Blend )
+        {
+            glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
+        }
     }
-*/
 
     if ( use_two_tex )
     {

@@ -17,9 +17,9 @@
 //#define OGL_ALL
 //#define OGL_PARTDONE
 //#define OGL_NOTDONE
-//#define OGL_DEBUG
+#define OGL_DEBUG
 //#define OGL_CRITICAL
-//#define OPENGL_DEBUG
+#define OPENGL_DEBUG
 //#define OGL_PROFILING
 //#define OGL_UTEX
 
@@ -55,6 +55,7 @@
 
 #define D1OVER255               0.003921568627451f      // 1 / 255
 #define D1OVER65536             0.0000152587890625f     // 1 / 65536
+#define D1OVER65535             0.000015259021896696421759365224689097f     // 1 / 65535
 #define D1OVER256               0.00390625f             // 1 / 256
 #define D2OVER256               0.0078125f              // 2 / 256
 #define D4OVER256               0.015625f               // 4 / 256
@@ -135,6 +136,7 @@ struct GlideState
     FxU32                   ClipMaxY;
     GrColorFormat_t         ColorFormat;
     FxU32                   STWHint;
+    FxBool                  VRetrace;
 };
 
 struct GlideStruct
@@ -183,6 +185,7 @@ struct OpenGLStruct
     GLuint                  Refresh;
     GLboolean               ColorMask;
     GLfloat                 ConstantColor[4];
+    GLfloat                 AlphaColor[4];///////////////
     GLfloat                 ZNear, ZFar;
     GLfloat                 FogColor[4];
     BYTE                    FogTable[OPENGLFOGTABLESIZE];

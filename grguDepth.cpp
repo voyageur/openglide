@@ -61,13 +61,22 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
 
     if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
     {
-        glOrtho( 0, Glide.WindowWidth, 0, Glide.WindowHeight, OpenGL.ZNear, OpenGL.ZFar );
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
+                 Glide.State.ClipMinY, Glide.State.ClipMaxY, 
+                 OpenGL.ZNear, OpenGL.ZFar );
+        glViewport( Glide.State.ClipMinX, Glide.State.ClipMinY, 
+                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
+                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
     }
     else
     {
-        glOrtho( 0, Glide.WindowWidth, Glide.WindowHeight, 0, OpenGL.ZNear, OpenGL.ZFar );
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
+                 Glide.State.ClipMaxY, Glide.State.ClipMinY, 
+                 OpenGL.ZNear, OpenGL.ZFar );
+        glViewport( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
+                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
+                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
     }
-    glViewport( 0,0, OpenGL.WindowWidth, OpenGL.WindowHeight ); 
 
     glMatrixMode( GL_MODELVIEW );
 
@@ -114,19 +123,7 @@ grDepthBufferFunction( GrCmpFnc_t func )
     // We can do this just because we know the constant values for both OpenGL and Glide
     // To port it to anything else than OpenGL we NEED to change this code
     OpenGL.DepthFunction = GL_NEVER + func;
-/*
-    switch ( func )
-    {
-    case GR_CMP_NEVER:      OpenGL.DepthFunction = GL_NEVER;        break;
-    case GR_CMP_LESS:       OpenGL.DepthFunction = GL_LESS;         break;
-    case GR_CMP_EQUAL:      OpenGL.DepthFunction = GL_EQUAL;        break;
-    case GR_CMP_LEQUAL:     OpenGL.DepthFunction = GL_LEQUAL;       break;
-    case GR_CMP_GREATER:    OpenGL.DepthFunction = GL_GREATER;      break;
-    case GR_CMP_NOTEQUAL:   OpenGL.DepthFunction = GL_NOTEQUAL;     break;
-    case GR_CMP_GEQUAL:     OpenGL.DepthFunction = GL_GEQUAL;       break;
-    case GR_CMP_ALWAYS:     OpenGL.DepthFunction = GL_ALWAYS;       break;
-    }
-*/
+
     glDepthFunc( OpenGL.DepthFunction );
 
 #ifdef OPENGL_DEBUG

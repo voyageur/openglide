@@ -34,9 +34,9 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 DLLEXPORT void __stdcall
 grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 {
-#ifdef OGL_CRITICAL
+//#ifdef OGL_CRITICAL
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
-#endif
+//#endif
     static GrColor_t    old_color = 0;
     static float        BR = 0.0f, 
                         BG = 0.0f, 
@@ -64,7 +64,7 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
         
         if ( Glide.State.DepthBufferWritting )
         {
-            glClearDepth( depth * D1OVER65536 );
+            glClearDepth( depth * D1OVER65535 );
             Bits |= GL_DEPTH_BUFFER_BIT;
         }
         
@@ -76,11 +76,26 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
         static FxU32        oldDepth = 0x10000;
         static GLuint       clearList = glGenLists( 1 );  
 
-        if ( depth != oldDepth )
+        if ( color != old_color )
+        {
+            old_color = color;
+            ConvertColorF( color, BR, BG, BB, BA );
+        }
+
+        //
+        // Remember alpha-test state because it is
+        // unclear how it relates to the stored
+        // Glide state
+        //
+        alpha_test = glIsEnabled( GL_ALPHA_TEST );
+
+        glColor3f( BR, BG, BB );
+
+//        if ( depth != oldDepth )
         {
             oldDepth = depth;
 
-            glNewList( clearList, GL_COMPILE );
+            glNewList( clearList, GL_COMPILE_AND_EXECUTE );
 
                 glDisable( GL_TEXTURE_2D );
                 glDisable( GL_ALPHA_TEST );
@@ -88,31 +103,46 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
                 glDisable( GL_DEPTH_TEST );
                 glDisable( GL_CULL_FACE );
 
+/*                glMatrixMode( GL_PROJECTION );
+                glLoadIdentity( );
+
+                if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
+                {
+                    glOrtho( 0, Glide.WindowWidth, 0, Glide.WindowHeight, 
+                            -1.0f, 0.0f );
+                }
+                else
+                {
+                    glOrtho( 0, Glide.WindowWidth, Glide.WindowHeight, 0, 
+                            -1.0f, 0.0f );
+                }
+*/
+                float gldepth = (float)depth * D1OVER65535;
+
                 glBegin( GL_TRIANGLE_STRIP );
-                    glVertex3f( 0.0f,                      0.0f,                       depth * D1OVER65536 );
-                    glVertex3f( 0.0f,                      (float) Glide.WindowHeight, depth * D1OVER65536 );
-                    glVertex3f( (float) Glide.WindowWidth, 0.0f,                       depth * D1OVER65536 );
-                    glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, depth * D1OVER65536 );
+                    glVertex3f( 0.0f,                      0.0f,                       gldepth );
+                    glVertex3f( 0.0f,                      (float) Glide.WindowHeight, gldepth );
+                    glVertex3f( (float) Glide.WindowWidth, 0.0f,                       gldepth );
+                    glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, gldepth );
                 glEnd( );
 
+  /*              if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
+                {
+                    glOrtho( 0, Glide.WindowWidth, 0, Glide.WindowHeight, 
+                            OpenGL.ZNear, OpenGL.ZFar );
+                }
+                else
+                {
+                    glOrtho( 0, Glide.WindowWidth, Glide.WindowHeight, 0, 
+                            OpenGL.ZNear, OpenGL.ZFar );
+                }
+*/
+                glMatrixMode( GL_MODELVIEW );
+    
             glEndList( );
         }
 
-        if ( color != old_color )
-        {
-            old_color = color;
-            ConvertColorF( color, BR, BG, BB, BA );
-        }
-
-       /*
-        * Remember alpha-test state because it is
-        * unclear how it relates to the stored
-        * Glide state
-        */
-        alpha_test = glIsEnabled( GL_ALPHA_TEST );
-
-        glColor3f( BR, BG, BB );
-        glCallList( clearList );
+//        glCallList( clearList );
 
         if ( alpha_test )
         {
@@ -199,21 +229,8 @@ grRenderBuffer(GrBuffer_t dwBuffer)
 
     Glide.State.RenderBuffer = dwBuffer;
 
-    switch ( dwBuffer )
-    {
-    case GR_BUFFER_FRONTBUFFER:
-        OpenGL.RenderBuffer = GL_FRONT;
-        break;
-    case GR_BUFFER_BACKBUFFER:
-        OpenGL.RenderBuffer = GL_BACK;
-        break;
-    case GR_BUFFER_AUXBUFFER:
-    case GR_BUFFER_DEPTHBUFFER:
-    case GR_BUFFER_ALPHABUFFER:
-    case GR_BUFFER_TRIPLEBUFFER:
-        Error("Unsupported parameter in grRenderBuffer();\n");
-        return;
-    }
+    // Valid parameters are only FRONT and BACK ( 0x0 and 0x1 )
+    OpenGL.RenderBuffer = GL_FRONT + dwBuffer;
 
     glDrawBuffer( OpenGL.RenderBuffer );
 

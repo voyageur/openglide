@@ -340,7 +340,7 @@ DLLEXPORT void __stdcall
 grGlideInit( void )
 {
 #ifdef OGL_DONE
-    GlideMsg( "grGlideInit()\n" );
+    GlideMsg( "grGlideInit( )\n" );
 #endif
     if ( OpenGL.GlideInit )
     {
@@ -350,7 +350,8 @@ grGlideInit( void )
     ZeroMemory( &Glide, sizeof(GlideStruct) );
     ZeroMemory( &OpenGL, sizeof(OpenGLStruct) );
 
-    Glide.ActiveVoodoo  = 0;
+    Glide.ActiveVoodoo      = 0;
+    Glide.State.VRetrace    = FXTRUE;
 
     ExternErrorFunction = NULL;
 
@@ -867,7 +868,7 @@ grSstOrigin( GrOriginLocation_t  origin )
 
 //----------------------------------------------------------------
 DLLEXPORT void __stdcall
-grSstPerfStats(GrSstPerfStats_t *pStats)
+grSstPerfStats( GrSstPerfStats_t * pStats )
 {
 #ifdef OGL_NOTDONE
     GlideMsg( "grSstPerfStats\n" );
@@ -876,10 +877,10 @@ grSstPerfStats(GrSstPerfStats_t *pStats)
 
 //----------------------------------------------------------------
 DLLEXPORT void __stdcall
-grSstResetPerfStats(void)
+grSstResetPerfStats( void )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg( "grSstResetPerfStats\n" );
+    GlideMsg( "grSstResetPerfStats( )\n" );
 #endif
 }
 
@@ -888,10 +889,10 @@ DLLEXPORT FxU32 __stdcall
 grSstVideoLine( void )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg( "grSstVideoLine()\n" );
+    GlideMsg( "grSstVideoLine( )\n" );
 #endif
 
-    return 1;
+    return 0;
 }
 
 //----------------------------------------------------------------
@@ -899,10 +900,10 @@ DLLEXPORT FxBool __stdcall
 grSstVRetraceOn( void )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg( "grSstVRetraceOn()\n" );
+    GlideMsg( "grSstVRetraceOn( )\n" );
 #endif
 
-    return FXTRUE;
+    return Glide.State.VRetrace;
 }
 
 //----------------------------------------------------------------
@@ -910,7 +911,7 @@ DLLEXPORT FxBool __stdcall
 grSstIsBusy( void )
 { 
 #ifdef OGL_NOTDONE
-    GlideMsg( "grSstIsBusy()\n" ); 
+    GlideMsg( "grSstIsBusy( )\n" ); 
 #endif
 
     return FXFALSE; 
@@ -956,10 +957,16 @@ DLLEXPORT FxU32 __stdcall
 grSstStatus( void )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("grSstStatus()\n");
+    GlideMsg( "grSstStatus( )\n" );
 #endif
 
-    return 0x0FFFF43F;
+//    FxU32 Status = 0x0FFFF43F;
+    FxU32 Status = 0x0FFFF03F;
+    
+    // Vertical Retrace
+    Status      |= ( ! Glide.State.VRetrace ) << 6;
+
+    return Status;
 // Bits
 // 5:0      PCI FIFO free space (0x3F = free)
 // 6        Vertical Retrace ( 0 = active, 1 = inactive )

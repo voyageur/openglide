@@ -116,15 +116,22 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 
     if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
     {
-        glOrtho( minx, maxx, miny, maxy, OpenGL.ZNear, OpenGL.ZFar );
-        glViewport( minx, miny, maxx - minx, maxy - miny ); 
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
+                 Glide.State.ClipMinY, Glide.State.ClipMaxY, 
+                 OpenGL.ZNear, OpenGL.ZFar );
+        glViewport( Glide.State.ClipMinX, Glide.State.ClipMinY, 
+                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
+                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
     }
     else
     {
-        glOrtho( minx, maxx, maxy, miny, OpenGL.ZNear, OpenGL.ZFar );
-        glViewport( minx, OpenGL.WindowHeight - maxy, maxx - minx, maxy - miny ); 
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
+                 Glide.State.ClipMaxY, Glide.State.ClipMinY, 
+                 OpenGL.ZNear, OpenGL.ZFar );
+        glViewport( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
+                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
+                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
     }
-
 
     glMatrixMode( GL_MODELVIEW );
 }

@@ -540,7 +540,7 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_ONE_MINUS_SRC_ALPHA:  OpenGL.DstBlend = GL_ONE_MINUS_SRC_ALPHA;   break;
     case GR_BLEND_DST_ALPHA:            OpenGL.DstBlend = GL_DST_ALPHA;             break;
     case GR_BLEND_ONE_MINUS_DST_ALPHA:  OpenGL.DstBlend = GL_ONE_MINUS_DST_ALPHA;   break;
-    case GR_BLEND_PREFOG_COLOR:         OpenGL.DstBlend = GL_SRC_COLOR;             break;
+    case GR_BLEND_PREFOG_COLOR:         OpenGL.DstBlend = GL_ONE;                   break;
 
 #ifdef OGL_DEBUG
     default:
@@ -576,13 +576,13 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_PREFOG_COLOR:         OpenGL.DstAlphaBlend = GL_ONE;                  break;
     }
 
-    if ( ! InternalConfig.BlendFuncSeparateEXTEnable )
+//    if ( ! InternalConfig.BlendFuncSeparateEXTEnable )
     {
         glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
     }
-    else
+//    else
     {
-        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
+//        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
     }
 
     OpenGL.Blend = !(( rgb_sf == GR_BLEND_ONE ) && ( rgb_df == GR_BLEND_ZERO ));
