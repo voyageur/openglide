@@ -605,7 +605,7 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ARGB_4444:
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( false && InternalConfig.OGLVersion > 1 )
             {
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data );
             }
