@@ -16,6 +16,10 @@
 
 #define BLUE_SCREEN (0x7ff)
 
+// Will need to change this later
+static FxU32 tempBuf[ 2048 * 2048 ];
+
+
 inline void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
@@ -49,42 +53,51 @@ grLfbLock( GrLock_t dwType,
            GrLfbInfo_t *lfbInfo )
 { 
 #ifdef CRITICAL
-    GlideMsg("grLfbLock( %d, %d, %d, %d, %d, --- )\n", dwType, dwBuffer, dwWriteMode, dwOrigin, bPixelPipeline); 
+    GlideMsg( "grLfbLock( %d, %d, %d, %d, %d, --- )\n", dwType, dwBuffer, dwWriteMode, dwOrigin, bPixelPipeline ); 
 #endif
-
-    int width = Glide.WindowWidth;
-    int height = Glide.WindowHeight;
 
     RenderDrawTriangles( );
 
-    if ( ( dwType & 1) == 0 )
+    static int numPixels = Glide.WindowWidth * Glide.WindowHeight;
+    if ( ( dwType & 1 ) == 0 )
     {
-        FxU32 *buf = new FxU32[ width * height ];
         int i, 
             j;
 
         glReadBuffer( dwBuffer == GR_BUFFER_BACKBUFFER
                       ? GL_BACK : GL_FRONT );
 
-        glReadPixels( 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void *)buf );
-        
-        for ( j = 0; j < height; j++ )
+        if ( InternalConfig.OGLVersion > 1 )
         {
-            WORD    * line = Glide.SrcBuffer.Address + ( height - 1 - j ) * width;
-            FxU32   * bufl = buf + j * width;
-
-            for ( i = 0; i < width; i++ )
+            glReadPixels( 0, 0, 
+                          Glide.WindowWidth, Glide.WindowHeight, 
+                          GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
+                          (void *)Glide.SrcBuffer.Address );
+        }
+        else
+        {
+            glReadPixels( 0, 0, 
+                          Glide.WindowWidth, Glide.WindowHeight, 
+                          GL_RGBA, GL_UNSIGNED_BYTE, 
+                          (void *)tempBuf );
+        
+            for ( j = 0; j < Glide.WindowHeight; j++ )
             {
-                line[ i ] = (WORD)
-                    ( ( ( bufl[i] & 0xf8 )     << 8 )
-                    | ( ( bufl[i] & 0xfc00 )   >> 5 )
-                    | ( ( bufl[i] & 0xf80000 ) >> 19 )
-                    );
+                WORD    * line = Glide.SrcBuffer.Address + 
+                            ( Glide.WindowHeight - 1 - j ) * Glide.WindowWidth;
+                FxU32   * bufl = tempBuf + j * Glide.WindowWidth;
+
+                for ( i = 0; i < Glide.WindowWidth; i++ )
+                {
+                    line[ i ] = (WORD)
+                        ( ( ( bufl[i] & 0x0000f8 )     << 8 )
+                        | ( ( bufl[i] & 0x00fc00 )   >> 5 )
+                        | ( ( bufl[i] & 0xf80000 ) >> 19 )
+                        );
+                }
             }
         }
         
-        delete[] buf;
-
         Glide.SrcBuffer.Lock = true;
         Glide.SrcBuffer.Type = dwType;
         Glide.SrcBuffer.Buffer = dwBuffer;
@@ -94,11 +107,10 @@ grLfbLock( GrLock_t dwType,
     }
     else
     {
-        for ( int i = 0; i < width * height; i++ )
+        for ( int i = numPixels - 1; i >= 0; --i )
         {
             Glide.DstBuffer.Address[ i ] = BLUE_SCREEN;
         }
-
         Glide.DstBuffer.Lock = true;
         Glide.DstBuffer.Type = dwType;
         Glide.DstBuffer.Buffer = dwBuffer;
@@ -122,12 +134,9 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif
     
-    int width = Glide.WindowWidth;
-    int height = Glide.WindowHeight;
-
     if ( ( dwType & 1 ) == 0 )
     {
-        if ( !Glide.SrcBuffer.Lock )
+        if ( ! Glide.SrcBuffer.Lock )
         {
             return FXFALSE;
         }
@@ -145,16 +154,16 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             minx = 2048, 
             miny = 2048;
 
-        if( !Glide.DstBuffer.Lock )
+        if( ! Glide.DstBuffer.Lock )
         {
             return FXFALSE;
         }
 
-        for ( y = 0; y < height; y++ )
+        for ( y = 0; y < Glide.WindowHeight; y++ )
         {
-            for ( x = 0; x < width; x++ )
+            for ( x = 0; x < Glide.WindowWidth; x++ )
             {
-                if ( Glide.DstBuffer.Address[ y * width + x ] != BLUE_SCREEN )
+                if ( Glide.DstBuffer.Address[ y * Glide.WindowWidth + x ] != BLUE_SCREEN )
                 {
                     if ( x > maxx ) maxx = x;
                     if ( y > maxy ) maxy = y;
@@ -168,43 +177,77 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
         {
             int xsize = maxx + 1 - minx;
             int ysize = maxy + 1 - miny;
-            FxU32 *buf = new FxU32[ xsize * ysize ];
 
             glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
                           ? GL_BACK : GL_FRONT );
 
-            glReadPixels( minx, height - miny-ysize, 
-                          xsize, ysize, 
-                          GL_RGBA, GL_UNSIGNED_BYTE, (void *) buf );
-
-            for ( y = 0; y < ysize; y++ )
+            if ( InternalConfig.OGLVersion > 1 )
             {
-                WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
-                                 width + minx;
-                FxU32   * bufl = buf + y * xsize;
+                glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
+                            xsize, ysize, 
+                            GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
 
-                for ( x = 0; x < xsize; x++ )
+                for ( y = 0; y < ysize; y++ )
                 {
-                    if ( line[ x ] != BLUE_SCREEN )
+                    WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
+                                     Glide.WindowWidth + minx;
+                    WORD    * bufl = (WORD*)tempBuf + y * xsize;
+
+                    for ( x = 0; x < xsize; x++ )
                     {
-                        bufl[ x ] = ( ( (line[x] & 0x001f ) << 19)
-                                  |   ( (line[x] & 0x07e0 ) << 5 )
-                                  |   ( (line[x] & 0xf100 ) >> 8 )
-                                  | 0xff000000);
+                        if ( line[ x ] != BLUE_SCREEN )
+                        {
+                            bufl[ x ] = line[ x ];
+                        }
                     }
                 }
+
+                glDisable( GL_BLEND );
+
+                glDisable( GL_TEXTURE_2D );
+
+                glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
+                            ? GL_BACK : GL_FRONT );
+
+                glRasterPos2i( minx,  miny + ysize );
+
+                glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
             }
+            else
+            {
+                glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
+                            xsize, ysize, 
+                            GL_RGBA, GL_UNSIGNED_BYTE, (void *)tempBuf );
 
-            glDisable( GL_BLEND );
+                for ( y = 0; y < ysize; y++ )
+                {
+                    WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
+                                    Glide.WindowWidth + minx;
+                    FxU32   * bufl = tempBuf + y * xsize;
 
-            glDisable( GL_TEXTURE_2D );
+                    for ( x = 0; x < xsize; x++ )
+                    {
+                        if ( line[ x ] != BLUE_SCREEN )
+                        {
+                            bufl[ x ] = ( ( ( line[ x ] & 0x001f ) << 19 )
+                                    |   ( ( line[ x ] & 0x07e0 ) <<  5 )
+                                    |   ( ( line[ x ] & 0xf100 ) >>  8 )
+                                    | 0xff000000 );
+                        }
+                    }
+                }
 
-            glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
-                          ? GL_BACK : GL_FRONT );
+                glDisable( GL_BLEND );
 
-            glRasterPos2i( minx,  miny + ysize );
+                glDisable( GL_TEXTURE_2D );
 
-            glDrawPixels( xsize, ysize, GL_RGBA, GL_UNSIGNED_BYTE, (void *) buf );
+                glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
+                            ? GL_BACK : GL_FRONT );
+
+                glRasterPos2i( minx,  miny + ysize );
+
+                glDrawPixels( xsize, ysize, GL_RGBA, GL_UNSIGNED_BYTE, (void *)tempBuf );
+            }
 
             glDrawBuffer( OpenGL.RenderBuffer );
 
@@ -218,8 +261,6 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             {
                 glFlush( );
             }
-
-            delete[] buf;
         }
 
         Glide.DstBuffer.Lock = false;
