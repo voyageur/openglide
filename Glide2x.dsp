@@ -98,11 +98,7 @@ SOURCE=.\3dfx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\custom_time.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\def.h
+SOURCE=.\amd3dx.h
 # End Source File
 # Begin Source File
 
@@ -126,15 +122,19 @@ SOURCE=.\glideutl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\GlOgl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GLRender.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\PGTexture.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\PGUTexture.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\profile.h
 # End Source File
 # Begin Source File
 
@@ -144,19 +144,10 @@ SOURCE=.\Sst1vid.h
 
 SOURCE=.\TexDB.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\text.h
-# End Source File
 # End Group
-# Begin Source File
+# Begin Group "Source"
 
-SOURCE=.\3dnow.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\custom_time.cpp
-# End Source File
+# PROP Default_Filter ".c .cpp"
 # Begin Source File
 
 SOURCE=.\GLExtensions.cpp
@@ -167,19 +158,7 @@ SOURCE=.\Glide.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Glide2x.rc
-# End Source File
-# Begin Source File
-
-SOURCE=.\GlOgl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\GLRender.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\GLRender.h
 # End Source File
 # Begin Source File
 
@@ -231,15 +210,12 @@ SOURCE=.\PGUTexture.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\profile.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TexDB.cpp
 # End Source File
+# End Group
 # Begin Source File
 
-SOURCE=.\text.cpp
+SOURCE=.\Glide2x.rc
 # End Source File
 # End Target
 # End Project
