@@ -7,7 +7,9 @@
  * below is included in the resulting source code, for example:
  * "Portions Copyright (C) Steve Rabin, 2000"
  */
-#include 	<GL/glut.h>
+#include <windows.h>
+#include <wingdi.h>
+#include 	<GL/gl.h>
 #ifndef _WIN32
 #include	<string.h>
 #include	<malloc.h>
