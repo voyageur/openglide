@@ -43,10 +43,7 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
                         BB = 0.0f, 
                         BA = 0.0f;
 
-    if ( ( Glide.State.ClipMinX == 0 ) && 
-         ( Glide.State.ClipMinY == 0 ) && 
-         ( Glide.State.ClipMaxX == (FxU32) Glide.WindowWidth ) &&
-         ( Glide.State.ClipMaxY == (FxU32) Glide.WindowHeight ) )
+    if ( ! OpenGL.Clipping )
     {
         static unsigned int Bits;
         

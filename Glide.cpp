@@ -684,7 +684,7 @@ grSstWinOpen(   FxU32 hwnd,
     grDepthBiasLevel( 0x00 );
     grFogColorValue( 0x00 );
     grConstantColorValue( 0xFFFFFFFF );
-    grClipWindow( 0, 0, Glide.WindowWidth, Glide.WindowHeight );
+    grClipWindow( 0, 0, Glide.WindowWidth - 1, Glide.WindowHeight - 1 );
 //  grGammaCorrectionValue( 1.6f );
     grHints(GR_HINT_STWHINT, 0);
 

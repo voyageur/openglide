@@ -99,6 +99,18 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
     Glide.State.ClipMinY = miny;
     Glide.State.ClipMaxY = maxy;
 
+    if ( ( Glide.State.ClipMinX != 0 ) || 
+         ( Glide.State.ClipMinY != 0 ) ||
+         ( Glide.State.ClipMaxX != (FxU32) ( Glide.WindowWidth - 1 ) ) ||
+         ( Glide.State.ClipMaxY != (FxU32) ( Glide.WindowHeight - 1 ) ) )
+    {
+        OpenGL.Clipping = true;
+    }
+    else
+    {
+        OpenGL.Clipping = false;
+    }
+
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
 

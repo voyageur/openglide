@@ -194,6 +194,7 @@ struct OpenGLStruct
     bool                    Blend;
     bool                    AlphaBuffer;
     bool                    ChromaKey;
+    bool                    Clipping;
     int                     MultiTextureTMUs;
     int                     DepthBufferType;
     BYTE                    PTable[256][4];
