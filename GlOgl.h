@@ -51,6 +51,13 @@
 #define GLIDEFILE               "OpenGLid.LOG"
 #define INIFILE                 "OpenGLid.INI"
 
+#define OGL_LOG_SEPARATE        "--------------------------------------------------------\n"
+
+#define OGL_MIN_FRAME_BUFFER    2
+#define OGL_MAX_FRAME_BUFFER    16
+#define OGL_MIN_TEXTURE_BUFFER  2
+#define OGL_MAX_TEXTURE_BUFFER  32
+
 #define OPENGLBUFFERMEMORY      OpenGL.WindowWidth * OpenGL.WindowHeight
 
 #define OPENGLFOGTABLESIZE      64 * 1024
@@ -151,14 +158,15 @@ struct GlideStruct
     int                     WindowTotalPixels;
     GrScreenResolution_t    Resolution;
     GrScreenRefresh_t       Refresh;
-    int                     NumBuffers,
-                            AuxBuffers;
+    int                     NumBuffers;
+    int                     AuxBuffers;
     // States and Constants
-    FxU8                    FogTable[GR_FOG_TABLE_SIZE];
-//  GuTexPalette            ColorPalette;
+    FxU8                    FogTable[ GR_FOG_TABLE_SIZE ];
     FxU32                   TexMemoryMaxPosition;
-    bool                    CLocal, COther;
-    bool                    ALocal, AOther;
+    bool                    CLocal;
+    bool                    COther;
+    bool                    ALocal;
+    bool                    AOther;
     GlideState              State;
     BufferStruct            SrcBuffer;
     BufferStruct            DstBuffer;
@@ -169,7 +177,8 @@ struct OpenGLStruct
 {
     bool                    GlideInit;
     bool                    WinOpen;
-    long                    WindowWidth, WindowHeight;
+    long                    WindowWidth;
+    long                    WindowHeight;
     GLfloat                 Gamma;
     GLfloat                 AlphaReferenceValue;
     GLenum                  AlphaTestFunction;
@@ -188,11 +197,12 @@ struct OpenGLStruct
     GLenum                  DstAlphaBlend;
     GLuint                  Refresh;
     GLboolean               ColorMask;
-    GLfloat                 ConstantColor[4];
-    GLfloat                 AlphaColor[4];///////////////
-    GLfloat                 ZNear, ZFar;
-    GLfloat                 FogColor[4];
-    BYTE                    FogTable[OPENGLFOGTABLESIZE];
+    GLfloat                 ConstantColor[ 4 ];
+    GLfloat                 AlphaColor[ 4 ];
+    GLfloat                 ZNear;
+    GLfloat                 ZFar;
+    GLfloat                 FogColor[ 4 ];
+    BYTE                    FogTable[ OPENGLFOGTABLESIZE ];
     BYTE                    ChromaColor[4];
     bool                    Fog;
     bool                    Texture;
@@ -204,47 +214,49 @@ struct OpenGLStruct
     bool                    Clipping;
     int                     MultiTextureTMUs;
     int                     DepthBufferType;
-    BYTE                    PTable[256][4];
+    BYTE                    PTable[ 256 ][ 4 ];
     DWORD                   WaitSignal;
 };
 
 struct ConfigStruct
 {
-    int     OGLVersion;
-    int     FogEnable;
-    int     InitFullScreen;
-    int     PrecisionFixEnable;
-    int     Priority;
-    int     EnableMipMaps;
-    int     BuildMipMaps;
-    int     IgnorePaletteChange;
-    int     Wrap565Enable;
-
-    int     MultiTextureEXTEnable;
-    int     PaletteEXTEnable;
-    int     TextureEnvEXTEnable;
-    int     VertexArrayEXTEnable;
-    int     FogCoordEXTEnable;
-    int     BlendFuncSeparateEXTEnable;
-    int     TextureLodBiasEXTEnable;
-    int     SecondaryColorEXTEnable;
-
-    int     MMXEnable;
-    int     CreateWindow;
-
+    DWORD   OGLVersion;
+    DWORD   Priority;
     DWORD   TextureMemorySize;
     DWORD   FrameBufferMemorySize;
+
+    bool    FogEnable;
+    bool    InitFullScreen;
+    bool    PrecisionFix;
+    bool    EnableMipMaps;
+    bool    BuildMipMaps;
+    bool    IgnorePaletteChange;
+    bool    Wrap565to5551;
+    bool    TextureEnv;
+    bool    MMXEnable;
+    bool    CreateWindow;
+
+    bool    EXT_secondary_color;
+    bool    ARB_multitexture;
+    bool    EXT_fog_coord;
+    bool    EXT_texture_env_add;
+    bool    EXT_texture_env_combine;
+    bool    EXT_texture_lod_bias;
+    bool    SGIS_generate_mipmap;
+    bool    EXT_paletted_texture;
+    bool    EXT_vertex_array;
+    bool    EXT_blend_func_separate;
 };
 
 // Extern variables
 extern GlideStruct      Glide;                  // Glide Internal
 extern OpenGLStruct     OpenGL;                 // OpenGL equivalents
-extern ConfigStruct     UserConfig,
-                        InternalConfig;
+extern ConfigStruct     UserConfig;
+extern ConfigStruct     InternalConfig;
 
 // Genral Prototypes
-void __cdecl GlideMsg(char *szString, ...);
-void __cdecl Error(char *szString, ...);
+void __cdecl GlideMsg( char *szString, ... );
+void __cdecl Error( char *szString, ... );
 void GLErro( char *Funcao );
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );

@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-char *OpenGLideVersion = "Version0.09a3";
+char * OpenGLideVersion = "0.09a5";
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -81,21 +81,21 @@ BOOL ClearAndGenerateLogFile( void )
         return FALSE;
     }
 
-    fprintf( GlideFile, "-------------------------------------------\n" );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
     fprintf( GlideFile, "OpenGLide Log File\n");
-    fprintf( GlideFile, "-------------------------------------------\n" );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
     fprintf( GlideFile, "***** OpenGLide %s *****\n", OpenGLideVersion );
-    fprintf( GlideFile, "-------------------------------------------\n" );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
     _strdate( tmpbuf );
     fprintf( GlideFile, "Date: %s\n", tmpbuf );
     _strtime( tmpbuf );
     fprintf( GlideFile, "Time: %s\n", tmpbuf );
-    fprintf( GlideFile, "-------------------------------------------\n" );
-    fprintf( GlideFile, "-------------------------------------------\n" );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
     ClockFreq = ClockFrequency( );
     fprintf( GlideFile, "Clock Frequency: %-4.2f Mhz\n", ClockFreq / 1000000.0f);
-    fprintf( GlideFile, "-------------------------------------------\n" );
-    fprintf( GlideFile, "-------------------------------------------\n" );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
+    fprintf( GlideFile, OGL_LOG_SEPARATE );
 
     fclose( GlideFile );
 
@@ -105,15 +105,15 @@ BOOL ClearAndGenerateLogFile( void )
 void CloseLogFile( void )
 {
     char tmpbuf[128];
-    GlideMsg( "-------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     _strtime( tmpbuf );
     GlideMsg( "Time: %s\n", tmpbuf );
-    GlideMsg( "-------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
 
 #ifdef OGL_DEBUG
     Fps = (float) Frame * ClockFreq / FpsAux;
     GlideMsg( "FPS = %f\n", Fps );
-    GlideMsg( "-------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
 #endif
 }
 
@@ -128,15 +128,15 @@ BOOL GenerateErrorFile( void )
         return FALSE;
     }
 
-    fprintf( ErrorFile, "-------------------------------------------\n" );
+    fprintf( ErrorFile, OGL_LOG_SEPARATE );
     fprintf( ErrorFile, "OpenGLide Error File\n");
-    fprintf( ErrorFile, "-------------------------------------------\n" );
+    fprintf( ErrorFile, OGL_LOG_SEPARATE );
     _strdate( tmpbuf );
     fprintf( ErrorFile, "Date: %s\n", tmpbuf );
     _strtime( tmpbuf );
     fprintf( ErrorFile, "Time: %s\n", tmpbuf );
-    fprintf( ErrorFile, "-------------------------------------------\n" );
-    fprintf( ErrorFile, "-------------------------------------------\n" );
+    fprintf( ErrorFile, OGL_LOG_SEPARATE );
+    fprintf( ErrorFile, OGL_LOG_SEPARATE );
 
     fclose( ErrorFile );
 
@@ -176,7 +176,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
         }
         else
         {
-            GlideMsg( "-----------------------------------------\n" );
+            GlideMsg( OGL_LOG_SEPARATE );
             GlideMsg( "Wrapper Class Priority of %d\n", NORMAL_PRIORITY_CLASS );
         }
 
@@ -217,7 +217,7 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
         else
         {
             GlideMsg( "Wrapper Priority of %d\n", UserConfig.Priority );
-            GlideMsg( "-----------------------------------------\n" );
+            GlideMsg( OGL_LOG_SEPARATE );
         }
         break;
 
@@ -243,41 +243,28 @@ bool InitWindow( HWND hwnd )
 
     ValidateUserConfig( );
 
-    GlideMsg( "-------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( " Setting in Use: \n" );
-    GlideMsg( "-------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( "Init Full Screen = %s\n", InternalConfig.InitFullScreen ? "true" : "false" );
     GlideMsg( "Fog = %s\n", InternalConfig.FogEnable ? "true" : "false" );
-    GlideMsg( "Precision Fix = %s\n", InternalConfig.PrecisionFixEnable ? "true" : "false" );
-    GlideMsg( "Wrap 565 to 5551 = %s\n", InternalConfig.Wrap565Enable ? "true" : "false" );
-    GlideMsg( "MultiTexture = %s\n", InternalConfig.MultiTextureEXTEnable ? "true" : "false" );
-    GlideMsg( "Palette Extension = %s\n", InternalConfig.PaletteEXTEnable ? "true" : "false" );
-    GlideMsg( "Vertex Array Extension = %s\n", InternalConfig.VertexArrayEXTEnable ? "true" : "false" );
-    GlideMsg( "Fog Coord Extension = %s\n", InternalConfig.FogCoordEXTEnable ? "true" : "false" );
-    GlideMsg( "Blend Function Separate = %s\n", InternalConfig.BlendFuncSeparateEXTEnable ? "true" : "false" );
-    GlideMsg( "Texture LOD bias = %s\n", InternalConfig.TextureLodBiasEXTEnable ? "true" : "false" );
+    GlideMsg( "Precision Fix = %s\n", InternalConfig.PrecisionFix ? "true" : "false" );
+    GlideMsg( "Wrap 565 to 5551 = %s\n", InternalConfig.Wrap565to5551 ? "true" : "false" );
     GlideMsg( "Texture Memory Size = %d Mb\n", InternalConfig.TextureMemorySize );
     GlideMsg( "Frame Buffer Memory Size = %d Mb\n", InternalConfig.FrameBufferMemorySize );
     GlideMsg( "MMX is %s\n", InternalConfig.MMXEnable ? "enabled" : "disabled" );
-    GlideMsg( "-------------------------------------------\n" );
-    GlideMsg( "-------------------------------------------\n" );
-    GlideMsg( "** OpenGL Information **\n" );
-    GlideMsg( "-------------------------------------------\n" );
-    GlideMsg( "Vendor:      %s\n", glGetString( GL_VENDOR ) );
-    GlideMsg( "Renderer:    %s\n", glGetString( GL_RENDERER ) );
-    GlideMsg( "Version:     %s\n", glGetString( GL_VERSION ) );
-    GlideMsg( "Extensions:  %s\n", glGetString( GL_EXTENSIONS ) );
+    GlideMsg( OGL_LOG_SEPARATE );
 
 #ifdef OGL_DEBUG
-    GlideMsg( "-------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( "GlideState size = %d\n", sizeof( GlideState ) );
     GlideMsg( "GrState size = %d\n", sizeof( GrState ) );
-    GlideMsg( "-------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
 #endif
 
-    GlideMsg( "-------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( "** Glide Calls **\n" );
-    GlideMsg( "-------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
 
     return true;
 }
@@ -460,7 +447,7 @@ grGlideGetState( GrState *state )
     CopyMemory( state, &Glide.State, sizeof( GlideState ) );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grGlideShamelessPlug( const FxBool on )
 {
@@ -723,9 +710,9 @@ grSstWinClose( void )
     OpenGL.WinOpen = false;
 
 #ifdef OGL_DEBUG
-    GlideMsg( "-----------------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( "** Debug Information **\n" );
-    GlideMsg( "-----------------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( "MaxTriangles in Frame = %d\n", OGLRender.MaxTriangles );
     GlideMsg( "MaxTriangles in Sequence = %d\n", OGLRender.MaxSequencedTriangles );
     GlideMsg( "MaxZ = %f\nMinZ = %f\n", OGLRender.MaxZ, OGLRender.MinZ );
@@ -738,7 +725,7 @@ grSstWinClose( void )
     GlideMsg( "MaxG = %f\nMinG = %f\n", OGLRender.MaxG, OGLRender.MinG );
     GlideMsg( "MaxB = %f\nMinB = %f\n", OGLRender.MaxB, OGLRender.MinR );
     GlideMsg( "MaxA = %f\nMinA = %f\n", OGLRender.MaxA, OGLRender.MinA );
-    GlideMsg( "-----------------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
     GlideMsg( "Texture Information:\n" );
     GlideMsg( "  565 = %d\n", Textures->Num_565_Tex );
     GlideMsg( " 1555 = %d\n", Textures->Num_1555_Tex );
@@ -754,8 +741,8 @@ grSstWinClose( void )
     GlideMsg( "  YIQ = %d\n", Textures->Num_YIQ_Tex );
     GlideMsg( " AYIQ = %d\n", Textures->Num_AYIQ_Tex );
     GlideMsg( "Other = %d\n", Textures->Num_Other_Tex );
-    GlideMsg( "-----------------------------------------------------\n" );
-    GlideMsg( "-----------------------------------------------------\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( OGL_LOG_SEPARATE );
 #endif
 
     Textures->Clear( );
@@ -868,7 +855,7 @@ grSstOrigin( GrOriginLocation_t  origin )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grSstPerfStats( GrSstPerfStats_t * pStats )
 {
@@ -877,7 +864,7 @@ grSstPerfStats( GrSstPerfStats_t * pStats )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grSstResetPerfStats( void )
 {
@@ -886,7 +873,7 @@ grSstResetPerfStats( void )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxU32 __stdcall 
 grSstVideoLine( void )
 {
@@ -897,7 +884,7 @@ grSstVideoLine( void )
     return 0;
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall 
 grSstVRetraceOn( void )
 {
@@ -908,7 +895,7 @@ grSstVRetraceOn( void )
     return Glide.State.VRetrace;
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall 
 grSstIsBusy( void )
 { 
@@ -919,7 +906,7 @@ grSstIsBusy( void )
     return FXFALSE; 
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall
 grSstControl( FxU32 code )
 { 
@@ -930,7 +917,7 @@ grSstControl( FxU32 code )
     return GR_CONTROL_ACTIVATE; 
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall
 grSstControlMode( GrControl_t mode )
 { 
@@ -988,7 +975,7 @@ DLLEXPORT void __stdcall
 grSstIdle( void )
 {
 #ifdef OGL_DONE
-    GlideMsg( "grSetIdle()\n" );
+    GlideMsg( "grSetIdle( )\n" );
 #endif
 
     RenderDrawTriangles( );

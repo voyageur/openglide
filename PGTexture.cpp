@@ -245,7 +245,7 @@ bool PGTexture::MakeReady( void )
     {
     case GR_TEXFMT_P_8:
         ApplyKeyToPalette( );
-        if ( InternalConfig.PaletteEXTEnable )
+        if ( InternalConfig.EXT_paletted_texture )
         {
            /*
             * OpenGL's mipmap generation doesn't seem
@@ -264,7 +264,7 @@ bool PGTexture::MakeReady( void )
 
     case GR_TEXFMT_AP_88:
         ApplyKeyToPalette( );
-        if ( InternalConfig.PaletteEXTEnable && InternalConfig.MultiTextureEXTEnable )
+        if ( InternalConfig.EXT_paletted_texture && InternalConfig.ARB_multitexture )
         {
             use_mipmap_ext   = false;
             pal_change_ptr   = &palette_changed;
@@ -341,7 +341,7 @@ bool PGTexture::MakeReady( void )
             }
             else
             {
-				if ( InternalConfig.Wrap565Enable )
+				if ( InternalConfig.Wrap565to5551 )
 				{
                     if ( InternalConfig.MMXEnable )
                     {
@@ -407,7 +407,7 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_P_8:
-            if ( InternalConfig.PaletteEXTEnable )
+            if ( InternalConfig.EXT_paletted_texture )
             {
                 glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette );
                 

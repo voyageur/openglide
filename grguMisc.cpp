@@ -140,7 +140,7 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
     glMatrixMode( GL_MODELVIEW );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 grDisableAllEffects( void )
 {
@@ -155,7 +155,7 @@ grDisableAllEffects( void )
     grFogMode( GR_FOG_DISABLE );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grResetTriStats( void )
 {
@@ -164,7 +164,7 @@ grResetTriStats( void )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 {
@@ -173,7 +173,7 @@ grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grHints( GrHint_t hintType, FxU32 hintMask )
 {
@@ -189,7 +189,7 @@ grHints( GrHint_t hintType, FxU32 hintMask )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grSplash( float x, float y, float width, float height, FxU32 frame )
 {
@@ -199,7 +199,7 @@ grSplash( float x, float y, float width, float height, FxU32 frame )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 ConvertAndDownloadRle( GrChipID_t        tmu,
                        FxU32             startAddress,
@@ -225,7 +225,7 @@ ConvertAndDownloadRle( GrChipID_t        tmu,
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 grCheckForRoom( FxI32 n )
 {
@@ -234,7 +234,7 @@ grCheckForRoom( FxI32 n )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grParameterData( FxU32 param, FxU32 components, FxU32 type, FxI32 offset )
 {
@@ -244,7 +244,7 @@ grParameterData( FxU32 param, FxU32 components, FxU32 type, FxI32 offset )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT int __stdcall
 guEncodeRLE16( void *dst, 
                void *src, 
@@ -258,7 +258,7 @@ guEncodeRLE16( void *dst,
     return 1; 
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxU32 __stdcall
 guEndianSwapWords( FxU32 value )
 {
@@ -269,7 +269,7 @@ guEndianSwapWords( FxU32 value )
     return ( value << 16 ) | ( value >> 16 );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxU16 __stdcall
 guEndianSwapBytes( FxU16 value )
 {

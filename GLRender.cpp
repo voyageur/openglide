@@ -110,18 +110,18 @@ void RenderUpdateArrays( void )
 {
     glVertexPointer( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TVertex[0] );
     glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor[0] );
-    if ( InternalConfig.MultiTextureEXTEnable )
+    if ( InternalConfig.ARB_multitexture )
     {
         glClientActiveTexture( GL_TEXTURE0_ARB );
     }
     glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
-    if ( InternalConfig.MultiTextureEXTEnable )
+    if ( InternalConfig.ARB_multitexture )
     {
         glClientActiveTexture( GL_TEXTURE1_ARB );
         glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
     }
     glSecondaryColorPointerEXT( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TColor2[0] );
-    if ( InternalConfig.FogCoordEXTEnable )
+    if ( InternalConfig.EXT_fog_coord )
     {
         glFogCoordPointerEXT( 1, GL_FLOAT, &OGLRender.TFog[0] );
     }
@@ -220,7 +220,7 @@ void RenderDrawTriangles( void )
     }
     else
     {
-        if ( InternalConfig.VertexArrayEXTEnable )
+        if ( InternalConfig.EXT_vertex_array )
         {
             glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
         }
@@ -263,7 +263,7 @@ void RenderDrawTriangles( void )
         }
     }
   
-    if ( ! InternalConfig.SecondaryColorEXTEnable )
+    if ( ! InternalConfig.EXT_secondary_color )
     {
         glBlendFunc( GL_ONE, GL_ONE );
         glEnable( GL_BLEND );
@@ -280,7 +280,7 @@ void RenderDrawTriangles( void )
 
         glEnable( GL_POLYGON_OFFSET_FILL );
 
-        if ( 0 && InternalConfig.VertexArrayEXTEnable ) // ????
+        if ( 0 && InternalConfig.EXT_vertex_array ) // ????
         {
             glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor2 );
             glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
@@ -580,7 +580,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             pV->az = pV->bz = pV->cz = 0.9f;
         }
         else 
-        if ( InternalConfig.PrecisionFixEnable )
+        if ( InternalConfig.PrecisionFix )
         {
             w = 1.0f / a->oow;
             pV->az = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
@@ -1066,7 +1066,7 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
             pV->az = pV->bz = pV->cz = 0.9f;
         }
         else 
-        if ( InternalConfig.PrecisionFixEnable )
+        if ( InternalConfig.PrecisionFix )
         {
             w = 1.0f / a->oow;
             pV->az = 1.0f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
@@ -1458,7 +1458,7 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
     }
     else
     {
-        if ( InternalConfig.PrecisionFixEnable )
+        if ( InternalConfig.PrecisionFix )
         {
             w = 1.0f / a->oow;
             pV->az = 1.0f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);

@@ -108,7 +108,7 @@ grTexDownloadMipMap( GrChipID_t tmu,
     Textures->DownloadMipMap( startAddress, evenOdd, info );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexDownloadMipMapLevel( GrChipID_t        tmu,
                           FxU32             startAddress,
@@ -141,7 +141,7 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
     Textures->DownloadMipMap( startAddress, evenOdd, &info );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexDownloadMipMapLevelPartial( GrChipID_t        tmu,
                                  FxU32             startAddress,
@@ -383,7 +383,7 @@ grTexDownloadTable( GrChipID_t   tmu,
     Textures->DownloadTable( type, (FxU32*)data, 0, 256 );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexLodBiasValue( GrChipID_t tmu, float bias )
 {
@@ -392,13 +392,13 @@ grTexLodBiasValue( GrChipID_t tmu, float bias )
         tmu, bias );
 #endif
 
-    if ( InternalConfig.TextureLodBiasEXTEnable )
+    if ( InternalConfig.EXT_texture_lod_bias )
     {
         glTexEnvf( GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, bias );
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexCombine( GrChipID_t tmu,
               GrCombineFunction_t rgb_function,
@@ -617,7 +617,7 @@ grTexCombine( GrChipID_t tmu,
     */
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
 {
@@ -634,7 +634,7 @@ grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
 	Textures->NCCTable( NCCTable );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 grTexDetailControl( GrChipID_t tmu,
                     int lod_bias,
@@ -647,7 +647,7 @@ grTexDetailControl( GrChipID_t tmu,
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 grTexMultibase( GrChipID_t tmu,
                 FxBool     enable )
@@ -662,7 +662,7 @@ grTexMultibase( GrChipID_t tmu,
 //    }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexMultibaseAddress( GrChipID_t       tmu,
                        GrTexBaseRange_t range,
@@ -676,7 +676,7 @@ grTexMultibaseAddress( GrChipID_t       tmu,
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
@@ -754,7 +754,7 @@ guTexMemQueryAvail( GrChipID_t tmu )
     return UTextures.MemQueryAvail( tmu );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
@@ -813,7 +813,7 @@ guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT GrMipMapId_t __stdcall 
 guTexGetCurrentMipMap( GrChipID_t tmu )
 {
@@ -830,7 +830,7 @@ guTexGetCurrentMipMap( GrChipID_t tmu )
     return UTextures.GetCurrentMipMap( tmu );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall 
 guTexChangeAttributes( GrMipMapId_t mmid,
                        int width, int height,
@@ -854,7 +854,7 @@ guTexChangeAttributes( GrMipMapId_t mmid,
         minFilterMode, magFilterMode );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT GrMipMapInfo * __stdcall 
 guTexGetMipMapInfo( GrMipMapId_t mmid )
 {
@@ -865,7 +865,7 @@ guTexGetMipMapInfo( GrMipMapId_t mmid )
     return UTextures.GetMipMapInfo( mmid );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 guTexMemReset( void )
 {
@@ -877,7 +877,7 @@ guTexMemReset( void )
     Textures->Clear( );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 {
@@ -888,7 +888,7 @@ guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
     UTextures.DownloadMipMapLevel( mmid, lod, src );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table )
 {
@@ -899,7 +899,7 @@ guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table
     UTextures.DownloadMipMap( mmid, src, table );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT GrMipMapId_t __stdcall 
 guTexAllocateMemory( GrChipID_t tmu,
                      FxU8 odd_even_mask,
@@ -932,7 +932,7 @@ guTexAllocateMemory( GrChipID_t tmu,
         minfilter_mode, magfilter_mode, lod_bias, trilinear );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall 
 guTexSource( GrMipMapId_t id )
 {
@@ -945,7 +945,7 @@ guTexSource( GrMipMapId_t id )
     UTextures.Source( id );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxU16 * __stdcall
 guTexCreateColorMipMap( void )
 {

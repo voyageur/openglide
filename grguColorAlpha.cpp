@@ -336,7 +336,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
     OpenGL.Texture = ( OpenGL.ColorTexture || ( OpenGL.Blend && OpenGL.AlphaTexture ) );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 guColorCombineFunction( GrColorCombineFnc_t fnc )
 {
@@ -475,7 +475,7 @@ grAlphaTestFunction( GrCmpFnc_t function )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
                       GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df )
@@ -577,8 +577,7 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 #endif
 }
 
-//----------------------------------------------------------------
-//grAlphaCombine( 3, 8, 1, 2, 0 ) from Unreal
+//*************************************************
 DLLEXPORT void __stdcall
 grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
@@ -685,7 +684,7 @@ grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 //      OpenGL.TextureMode = GL_ADD;
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grAlphaControlsITRGBLighting( FxBool enable )
 {
@@ -694,7 +693,7 @@ grAlphaControlsITRGBLighting( FxBool enable )
 #endif
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 guAlphaSource( GrAlphaSource_t dwMode )
 {
@@ -774,7 +773,7 @@ grChromakeyMode( GrChromakeyMode_t mode )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grGammaCorrectionValue( float value )
 {

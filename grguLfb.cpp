@@ -20,7 +20,7 @@
 static FxU32 tempBuf[ 2048 * 2048 ];
 
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall
 grLfbLock( GrLock_t dwType, 
            GrBuffer_t dwBuffer, 
@@ -92,7 +92,7 @@ grLfbLock( GrLock_t dwType,
     return FXTRUE;
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall
 grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 { 
@@ -219,7 +219,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall
 grLfbReadRegion( GrBuffer_t src_buffer,
                  FxU32 src_x, FxU32 src_y,
@@ -256,7 +256,7 @@ grLfbReadRegion( GrBuffer_t src_buffer,
     return FXTRUE; 
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT FxBool __stdcall
 grLfbWriteRegion( GrBuffer_t dst_buffer,
                   FxU32 dst_x, FxU32 dst_y,

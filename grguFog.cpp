@@ -65,7 +65,7 @@ grFogTable( const GrFog_t *ft )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grFogColorValue( GrColor_t fogcolor )
 {
@@ -84,7 +84,7 @@ grFogColorValue( GrColor_t fogcolor )
     glFogfv( GL_FOG_COLOR, &OpenGL.FogColor[0] );
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 grFogMode( GrFogMode_t mode )
 {
@@ -104,7 +104,7 @@ grFogMode( GrFogMode_t mode )
     if ( modeSource )
     {
         OpenGL.Fog = true;
-        if ( InternalConfig.FogCoordEXTEnable )
+        if ( InternalConfig.EXT_fog_coord )
         {
             glEnable( GL_FOG );
         }
@@ -131,7 +131,7 @@ grFogMode( GrFogMode_t mode )
 //    Glide.State.FogMode = mode;
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 guFogGenerateExp( GrFog_t *fogtable, float density )
 {
@@ -164,7 +164,7 @@ guFogGenerateExp( GrFog_t *fogtable, float density )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 guFogGenerateExp2( GrFog_t *fogtable, float density )
 {
@@ -182,7 +182,7 @@ guFogGenerateExp2( GrFog_t *fogtable, float density )
     }
 }
 
-//----------------------------------------------------------------
+//*************************************************
 DLLEXPORT void __stdcall
 guFogGenerateLinear( GrFog_t *fogtable,
                      float nearZ, float farZ )

@@ -9,11 +9,71 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
+#include <stdio.h>
 #include <string.h>
 
 #include "GlOgl.h"
 #include "GLRender.h"
 #include "Glextensions.h"
+
+enum enExtensionType
+{
+    OGL_EXT_UNUSED = 0,
+    OGL_EXT_REQUIRED,
+    OGL_EXT_DESIRED,
+};
+
+struct stExtensionSupport
+{
+    char *          name;
+    enExtensionType type;
+    bool *          userVar;
+    bool *          internalVar;
+};
+
+bool dummyExtVariable = true;
+
+stExtensionSupport glNecessaryExt[] =
+{
+    { "GL_EXT_packed_pixels",           OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_abgr",                    OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_bgra",                    OGL_EXT_REQUIRED,   &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_secondary_color",         OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_secondary_color },
+    { "GL_ARB_multitexture",            OGL_EXT_DESIRED,    &UserConfig.ARB_multitexture,       &InternalConfig.ARB_multitexture },
+    { "GL_EXT_fog_coord",               OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_fog_coord },
+    { "GL_EXT_texture_env_add",         OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_texture_env_add },
+    { "GL_EXT_texture_env_combine",     OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_texture_env_combine },
+    { "GL_EXT_texture_lod_bias",        OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_texture_lod_bias },
+    { "GL_SGIS_generate_mipmap",        OGL_EXT_DESIRED,    &UserConfig.EnableMipMaps,          &InternalConfig.BuildMipMaps },
+    { "GL_EXT_paletted_texture",        OGL_EXT_DESIRED,    &UserConfig.EXT_paletted_texture,   &InternalConfig.EXT_paletted_texture },
+    { "GL_EXT_vertex_array",            OGL_EXT_DESIRED,    &UserConfig.EXT_vertex_array,       &InternalConfig.EXT_vertex_array },
+    { "GL_EXT_blend_func_separate",     OGL_EXT_DESIRED,    &dummyExtVariable,                  &InternalConfig.EXT_blend_func_separate },
+    { "GL_ARB_imaging",                 OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_ARB_texture_env_add",         OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_ARB_transpose_matrix",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_compiled_vertex_array",   OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_draw_range_elements",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_multi_draw_arrays",       OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_point_parameters",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_rescale_normal",          OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_separate_specular_color", OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_stencil_wrap",            OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_texture_edge_clamp",      OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_texture_object",          OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_EXT_vertex_weighting",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_IBM_texture_mirrored_repeat", OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_KTX_buffer_region",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_NV_blend_square",             OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_NV_evaluators",               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_NV_fog_distance",             OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_NV_packed_depth_stencil",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_NV_texgen_reflection",        OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_NV_texture_env_combine4",     OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_SGIS_multitexture",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "GL_WIN_swap_hint",               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "WGL_EXT_swap_control",           OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable },
+    { "",                               OGL_EXT_UNUSED,     &dummyExtVariable,                  &dummyExtVariable }
+}; 
 
 //Functions
 PFNGLCLIENTACTIVETEXTUREPROC            glClientActiveTexture = NULL;
@@ -56,8 +116,8 @@ void APIENTRY Dummy3ub( GLubyte a, GLubyte b, GLubyte c )
 
 
 // check to see if Extension is Supported
-// code by Mark J. Kilgard of NVidia
-int isExtensionSupported( const char *extension )
+// code by Mark J. Kilgard of NVidia modified by Fabio Barros
+bool OGLIsExtensionSupported( const char * extension )
 {
     const char  * extensions;
     const char  * start;
@@ -65,9 +125,9 @@ int isExtensionSupported( const char *extension )
                 * terminator;
 
     where = (char *) strchr( extension, ' ' );
-    if ( where || *extension == '\0' )
+    if ( where || ( *extension == '\0' ) )
     {
-        return 0;
+        return false;
     }
 
     extensions = (char*)glGetString( GL_EXTENSIONS );
@@ -77,10 +137,10 @@ int isExtensionSupported( const char *extension )
     if ( *start == '\0' )
     {
         Error( "No OpenGL extension supported, using all emulated.\n" );
-        return 0;
+        return false;
     }
 
-    for ( ; ; )
+    while ( true )
     {
         where = (char *)strstr( start, extension );
         if ( !where )
@@ -92,121 +152,147 @@ int isExtensionSupported( const char *extension )
         {
             if ( ( *terminator == ' ' ) || ( *terminator == '\0' ) )
             {
-                return 1;
+                return true;
             }
         }
         start = terminator;
     }
 
-    return 0;
+    return false;
 }
 
-void ValidateUserConfig( void )
+void ResetInternalConfig( void )
 {
-    InternalConfig.FogEnable                    = UserConfig.FogEnable;
-    InternalConfig.InitFullScreen               = UserConfig.InitFullScreen;
-    InternalConfig.PrecisionFixEnable           = UserConfig.PrecisionFixEnable;
-    InternalConfig.EnableMipMaps                = UserConfig.EnableMipMaps;
-    InternalConfig.BuildMipMaps                 = false;
-    InternalConfig.IgnorePaletteChange          = UserConfig.IgnorePaletteChange;
-    InternalConfig.Wrap565Enable                = UserConfig.Wrap565Enable;
+    InternalConfig.OGLVersion                   = 1;
+    InternalConfig.Priority                     = 2;
 
-    InternalConfig.MultiTextureEXTEnable        = false;
-    InternalConfig.PaletteEXTEnable             = false;
-    InternalConfig.TextureEnvEXTEnable          = false;
-    InternalConfig.VertexArrayEXTEnable         = false;
-    InternalConfig.FogCoordEXTEnable            = false;
-    InternalConfig.BlendFuncSeparateEXTEnable   = false;
-    InternalConfig.TextureLodBiasEXTEnable      = false;
-    InternalConfig.SecondaryColorEXTEnable      = false;
+    InternalConfig.FogEnable                    = false;
+    InternalConfig.InitFullScreen               = false;
+    InternalConfig.PrecisionFix                 = false;
+    InternalConfig.EnableMipMaps                = false;
+    InternalConfig.BuildMipMaps                 = false;
+    InternalConfig.IgnorePaletteChange          = false;
+    InternalConfig.Wrap565to5551                = false;
+    InternalConfig.TextureEnv                   = false;
+
+    InternalConfig.ARB_multitexture             = false;
+    InternalConfig.EXT_paletted_texture         = false;
+    InternalConfig.EXT_texture_env_add          = false;
+    InternalConfig.EXT_texture_env_combine      = false;
+    InternalConfig.EXT_vertex_array             = false;
+    InternalConfig.EXT_fog_coord                = false;
+    InternalConfig.EXT_blend_func_separate      = false;
+    InternalConfig.EXT_texture_lod_bias         = false;
+    InternalConfig.EXT_secondary_color          = false;
 
     InternalConfig.TextureMemorySize            = 16;
     InternalConfig.FrameBufferMemorySize        = 8;
 
     InternalConfig.MMXEnable                    = false;
+    InternalConfig.CreateWindow                 = false;
+}
+
+void ValidateUserConfig( void )
+{
+    ResetInternalConfig( );
+
+    InternalConfig.InitFullScreen               = UserConfig.InitFullScreen;
+    InternalConfig.PrecisionFix                 = UserConfig.PrecisionFix;
+    InternalConfig.EnableMipMaps                = UserConfig.EnableMipMaps;
+    InternalConfig.IgnorePaletteChange          = UserConfig.IgnorePaletteChange;
+    InternalConfig.Wrap565to5551                = UserConfig.Wrap565to5551;
     
-    int TexSize = UserConfig.TextureMemorySize;
-    if ( ( TexSize > 1 ) && ( TexSize <= 16 ) )
+    if ( ( UserConfig.TextureMemorySize >= OGL_MIN_TEXTURE_BUFFER ) && 
+         ( UserConfig.TextureMemorySize <= OGL_MAX_TEXTURE_BUFFER ) )
     {
-        InternalConfig.TextureMemorySize    = UserConfig.TextureMemorySize;
+        InternalConfig.TextureMemorySize        = UserConfig.TextureMemorySize;
     }
 
-    int FrameSize = UserConfig.FrameBufferMemorySize;
-    if ( ( FrameSize > 1 ) && ( FrameSize <= 8 ) )
+    if ( ( UserConfig.FrameBufferMemorySize >= OGL_MIN_FRAME_BUFFER ) && 
+         ( UserConfig.FrameBufferMemorySize <= OGL_MAX_FRAME_BUFFER ) )
     {
         InternalConfig.FrameBufferMemorySize    = UserConfig.FrameBufferMemorySize;
     }
 
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( "** OpenGL Information **\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( "Vendor:      %s\n", glGetString( GL_VENDOR ) );
+    GlideMsg( "Renderer:    %s\n", glGetString( GL_RENDERER ) );
+    GlideMsg( "Version:     %s\n", glGetString( GL_VERSION ) );
+    GlideMsg( "Extensions:  %s\n", glGetString( GL_EXTENSIONS ) );
+
+    GlideMsg( OGL_LOG_SEPARATE );
     InternalConfig.OGLVersion = glGetString( GL_VERSION )[ 2 ] - '0';
-    GlideMsg( "Using OpenGL version = %d\n", InternalConfig.OGLVersion );
 
-    if ( UserConfig.MultiTextureEXTEnable )
+    GlideMsg( "OpenGL Extensions:\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
+
+    int index = 0;
+    while ( strlen( glNecessaryExt[ index ].name ) > 0 )
     {
-        if ( isExtensionSupported( "GL_ARB_multitexture" ) )
+        switch ( glNecessaryExt[ index ].type )
         {
-            InternalConfig.MultiTextureEXTEnable    = true;
+        case OGL_EXT_REQUIRED:
+            if ( ! OGLIsExtensionSupported( glNecessaryExt[ index ].name ) )
+            {
+                char szError[ 256 ];
+                sprintf( szError, "Severe Problem: OpenGL %s extension is required for OpenGLide!", 
+                    glNecessaryExt[ index ].name );
+                Error( szError );
+                GlideMsg( szError );
+                MessageBox( 0, szError, "Warning", MB_OK ); 
+            }
+            break;
+
+        case OGL_EXT_DESIRED:
+            if ( ! OGLIsExtensionSupported( glNecessaryExt[ index ].name ) )
+            {
+                char szError[ 256 ];
+                sprintf( szError, "Note: OpenGL %s extension is not supported, emulating behavior.\n", 
+                    glNecessaryExt[ index ].name );
+                GlideMsg( szError );
+            }
+            else
+            {
+                if ( *glNecessaryExt[ index ].userVar )
+                {
+                    *glNecessaryExt[ index ].internalVar = true;
+                    GlideMsg( "Extension %s is present and ENABLED\n", glNecessaryExt[ index ].name );
+                }
+                else
+                {
+                    char szError[ 256 ];
+                    sprintf( szError, "Note: OpenGL %s extension is supported but disabled by user\n", 
+                        glNecessaryExt[ index ].name );
+                    GlideMsg( szError );
+
+                    *glNecessaryExt[ index ].internalVar = false;
+                }
+            }
+            break;
+
+        case OGL_EXT_UNUSED:
+            break;
         }
+        ++index;
+    }
+    GlideMsg( OGL_LOG_SEPARATE );
+
+    if ( InternalConfig.EXT_texture_env_add  && 
+         InternalConfig.EXT_texture_env_combine )
+    {
+        InternalConfig.TextureEnv   = true;
     }
 
-    if ( UserConfig.EnableMipMaps )
+    if ( InternalConfig.EXT_fog_coord )
     {
-        if( !isExtensionSupported( "GL_SGIS_generate_mipmap" ) )
-        {
-            InternalConfig.BuildMipMaps = true;
-        }
-    }
-
-    if ( UserConfig.PaletteEXTEnable )
-    {
-        if ( isExtensionSupported( "GL_EXT_paletted_texture" ) )
-        {
-            InternalConfig.PaletteEXTEnable         = true;
-        }
-    }
-
-    if ( UserConfig.TextureEnvEXTEnable )
-    {
-        if ( isExtensionSupported( "GL_EXT_texture_env_add" )  && 
-             isExtensionSupported( "GL_EXT_texture_env_combine" ) )
-        {
-            InternalConfig.TextureEnvEXTEnable      = true;
-        }
-    }
-
-    if ( UserConfig.VertexArrayEXTEnable )
-    {
-        if ( isExtensionSupported( "GL_EXT_vertex_array" ) )
-        {
-            InternalConfig.VertexArrayEXTEnable     = true;
-        }
-    }
-
-    if ( UserConfig.FogCoordEXTEnable )
-    {
-        if ( isExtensionSupported( "GL_EXT_fog_coord" ) )
-        {
-            InternalConfig.FogCoordEXTEnable        = true;
-        }
-    }
-
-    if ( isExtensionSupported( "GL_EXT_blend_func_separate" ) )
-    {
-        InternalConfig.BlendFuncSeparateEXTEnable   = true;
-    }
-
-    if ( isExtensionSupported( "GL_EXT_texture_lod_bias" ) )
-    {
-        InternalConfig.TextureLodBiasEXTEnable      = true;
-    }
-
-    if ( isExtensionSupported( "GL_EXT_secondary_color" ) )
-    {
-        InternalConfig.SecondaryColorEXTEnable      = true;
+        InternalConfig.FogEnable    = true;
     }
 
     if ( DetectMMX( ) )
     {
-        InternalConfig.MMXEnable = true;
+        InternalConfig.MMXEnable    = true;
     }
 
     GLExtensions( );
@@ -223,7 +309,7 @@ void GLExtensions( void )
     glSecondaryColor3fvEXT  = (PFNGLSECONDARYCOLOR3FVEXTPROC) DummyV;
     glFogCoordfEXT          = (PFNGLFOGCOORDFEXTPROC) DummyF;
 
-    if ( InternalConfig.MultiTextureEXTEnable )
+    if ( InternalConfig.ARB_multitexture )
     {
         glGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &NumberOfTMUs );
         GlideMsg( "MultiTexture Textures Units = %x\n", NumberOfTMUs );
@@ -234,24 +320,28 @@ void GLExtensions( void )
         glMultiTexCoord4fARB        = (PFNGLMULTITEXCOORD4FARBPROC) wglGetProcAddress( "glMultiTexCoord4fARB" );
         glMultiTexCoord4fvARB       = (PFNGLMULTITEXCOORD4FVARBPROC) wglGetProcAddress( "glMultiTexCoord4fvARB" );
 
-        if ( ( glActiveTextureARB == NULL ) || ( glMultiTexCoord4fARB == NULL )
-                                            || ( glMultiTexCoord4fvARB == NULL ) )
+        if ( ( glActiveTextureARB == NULL ) || 
+             ( glMultiTexCoord4fARB == NULL ) || 
+             ( glMultiTexCoord4fvARB == NULL ) )
         {
             Error( "Could not get the address of MultiTexture functions!\n" );
-            InternalConfig.MultiTextureEXTEnable = false;
+            InternalConfig.ARB_multitexture = false;
         }
     }
 
-    if ( InternalConfig.SecondaryColorEXTEnable )
+    if ( InternalConfig.EXT_secondary_color )
     {
         glSecondaryColor3ubvEXT     = (PFNGLSECONDARYCOLOR3UBVEXTPROC) wglGetProcAddress( "glSecondaryColor3ubvEXT" );
         glSecondaryColor3ubEXT      = (PFNGLSECONDARYCOLOR3UBEXTPROC) wglGetProcAddress( "glSecondaryColor3ubEXT" );
         glSecondaryColor3fvEXT      = (PFNGLSECONDARYCOLOR3FVEXTPROC) wglGetProcAddress( "glSecondaryColor3fvEXT" );
         glSecondaryColorPointerEXT  = (PFNGLSECONDARYCOLORPOINTEREXTPROC) wglGetProcAddress( "glSecondaryColorPointerEXT" );
-        if ( ( glSecondaryColor3ubvEXT == NULL ) || ( glSecondaryColor3ubEXT == NULL )  || 
-             ( glSecondaryColorPointerEXT == NULL ) || (glSecondaryColor3fvEXT == NULL) )
+        if ( ( glSecondaryColor3ubvEXT == NULL ) || 
+             ( glSecondaryColor3ubEXT == NULL )  || 
+             ( glSecondaryColorPointerEXT == NULL ) || 
+             ( glSecondaryColor3fvEXT == NULL ) )
         {
             Error( "Could not get address of function glSecondaryColorEXT.\n" );
+            InternalConfig.EXT_secondary_color = false;
         }
         else
         {
@@ -259,14 +349,15 @@ void GLExtensions( void )
         }
     }
 
-    if ( InternalConfig.FogCoordEXTEnable )
+    if ( InternalConfig.EXT_fog_coord )
     {
         glFogCoordfEXT = (PFNGLFOGCOORDFEXTPROC) wglGetProcAddress( "glFogCoordfEXT" );
         glFogCoordPointerEXT = (PFNGLFOGCOORDPOINTEREXTPROC) wglGetProcAddress( "glFogCoordPointerEXT" );
-        if ( ( glFogCoordfEXT == NULL ) || ( glFogCoordPointerEXT == NULL ) )
+        if ( ( glFogCoordfEXT == NULL ) || 
+             ( glFogCoordPointerEXT == NULL ) )
         {
             Error( "Could not get address of function glFogCoordEXT.\n" );
-            InternalConfig.FogCoordEXTEnable = false;
+            InternalConfig.EXT_fog_coord = false;
         }
         else
         {
@@ -277,13 +368,13 @@ void GLExtensions( void )
         }
     }
 
-    if ( InternalConfig.VertexArrayEXTEnable )
+    if ( InternalConfig.EXT_vertex_array )
     {
         glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_COLOR_ARRAY );
         glEnableClientState( GL_TEXTURE_COORD_ARRAY );
         glEnableClientState( GL_SECONDARY_COLOR_ARRAY_EXT );
-        if ( InternalConfig.FogCoordEXTEnable )
+        if ( InternalConfig.EXT_fog_coord )
         {
             glEnableClientState( GL_FOG_COORDINATE_ARRAY_EXT );
         }
@@ -291,7 +382,7 @@ void GLExtensions( void )
         RenderUpdateArrays( );
     }
 
-    if ( InternalConfig.PaletteEXTEnable )
+    if ( InternalConfig.EXT_paletted_texture )
     {
         glColorTableEXT                 = (PFNGLCOLORTABLEEXTPROC) wglGetProcAddress( "glColorTableEXT" );
         glColorSubTableEXT              = (PFNGLCOLORSUBTABLEEXTPROC) wglGetProcAddress( "glColorSubTableEXT" );
@@ -299,12 +390,14 @@ void GLExtensions( void )
         glGetColorTableParameterivEXT   = (PFNGLGETCOLORTABLEPARAMETERIVEXTPROC) wglGetProcAddress( "glGetColorTableParameterivEXT" );
         glGetColorTableParameterfvEXT   = (PFNGLGETCOLORTABLEPARAMETERFVEXTPROC) wglGetProcAddress( "glGetColorTableParameterfvEXT" );
 
-        if ( ( glColorTableEXT == NULL ) || ( glColorSubTableEXT == NULL ) || 
-             ( glGetColorTableEXT == NULL ) || ( glGetColorTableParameterivEXT == NULL ) || 
+        if ( ( glColorTableEXT == NULL ) || 
+             ( glColorSubTableEXT == NULL ) || 
+             ( glGetColorTableEXT == NULL ) || 
+             ( glGetColorTableParameterivEXT == NULL ) || 
              ( glGetColorTableParameterfvEXT == NULL ) )
         {
             Error( "Could not get address of function for PaletteEXT.\n" );
-            InternalConfig.PaletteEXTEnable = false;
+            InternalConfig.EXT_paletted_texture = false;
         }
         else
         {
