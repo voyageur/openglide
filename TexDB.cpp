@@ -86,10 +86,21 @@ bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
 void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
 {
     Record  ** p;
-    FxU32   stt_sect;
-    FxU32   end_sect;
+    FxI32   stt_sect;
+    FxI32   end_sect;
 
     stt_sect = startAddress / ( 32 * 1024 );
+
+   /*
+    * Textures can be as large as 128K, so
+    * one that starts 3 sections back can
+    * extend into this one.
+    */
+    stt_sect -= 4;
+    if ( stt_sect < 0 )
+    {
+        stt_sect = 0;
+    }
  
     if ( stt_sect >= TEX_SECTIONS )
     {
@@ -103,7 +114,7 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
         end_sect = TEX_SECTIONS - 1;
     }
 
-    for ( FxU32 i = stt_sect; i <= end_sect; i++ )
+    for ( FxI32 i = stt_sect; i <= end_sect; i++ )
     {
         p = &( m_first[ i ] );
         while ( *p != NULL )
