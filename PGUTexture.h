@@ -12,7 +12,7 @@
 #ifndef __PGUTEXTURE_H__
 #define __PGUTEXTURE_H__
 
-#include "Glide.h"
+#include "sdk2_glide.h"
 
 class PGUTexture  
 {

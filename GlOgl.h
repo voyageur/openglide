@@ -38,7 +38,7 @@
 #include <GL\gl.h>
 #include <GL\glu.h>
 
-#include "Glide.h"
+#include "sdk2_glide.h"
 
 #define RDTSC(v)    __asm _emit 0x0f                \
                     __asm _emit 0x31                \

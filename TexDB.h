@@ -13,7 +13,7 @@
 #define __TEXDB_H__
 
 #include <windows.h>
-#include "glide.h"
+#include "sdk2_glide.h"
 #include "GL/gl.h"
 
 class TexDB  
