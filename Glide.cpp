@@ -73,6 +73,7 @@ void InitMainVariables( void )
 //*************************************************
 //* Initializes the DLL
 //*************************************************
+#ifdef __WIN32__
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
 {
     int Priority;
@@ -130,14 +131,41 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
     }
     return TRUE;
 }
+#else
 
-bool InitWindow( HWND hwnd )
+#include <stdlib.h>
+class InitLibrary
 {
-    InitialiseOpenGLWindow( hwnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
+public:
+    InitLibrary( )
+    {
+        if ( !ClearAndGenerateLogFile( ) )
+        {
+            exit( 0 );
+        }
+        InitMainVariables( );            
+    }
+    ~InitLibrary( )
+    {
+        grGlideShutdown( );
+        CloseLogFile( );
+    }
+};
+static InitLibrary initLibrary;
+
+#endif // __WIN32__
+
+bool InitWindow( FxU32 hWnd )
+{
+    InitialiseOpenGLWindow( hWnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
 
     if ( !strcmp( (char*)glGetString( GL_RENDERER ), "GDI Generic" ) )
     {
+#ifdef __WIN32__
         MessageBox( NULL, "You are running in a Non-Accelerated OpenGL!!!\nThings can become really slow", "Warning", MB_OK );
+#else
+        printf ("You are running in a Non-Accelerated OpenGL!!!\nThings can become really slow\n");
+#endif
     }
 
     ValidateUserConfig( );

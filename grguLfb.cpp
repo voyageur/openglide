@@ -196,9 +196,9 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 
             for ( y = 0; y < ysize; y++ )
             {
-                WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
+                FxU16   * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
                                     Glide.WindowWidth + minx;
-                WORD    * bufl = (WORD*)tempBuf + y * xsize;
+                FxU16   * bufl = (FxU16*)tempBuf + y * xsize;
 
                 for ( x = 0; x < xsize; x++ )
                 {
@@ -291,11 +291,6 @@ grLfbReadRegion( GrBuffer_t src_buffer,
         src_buffer, src_x, src_y, src_width, src_height, dst_stride );
 #endif
 
-    static WORD *Buffer1;
-    static DWORD *Buffer2;
-    static DWORD PixelsX, PixelsY;
-    static DWORD Stride;
-
     RenderDrawTriangles( );
 
     switch ( src_buffer )
@@ -328,10 +323,6 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
     GlideMsg("grLfbWriteRegion( %d, %d, %d, %d, %d, %d, %d, --- )\n",
         dst_buffer, dst_x, dst_y, src_format, src_width, src_height, src_stride );
 #endif
-
-    static WORD *Buffer1;
-    static DWORD *Buffer2;
-    static DWORD Pixels;
 
     RenderDrawTriangles( );
 

@@ -8,25 +8,24 @@ grguMisc.cpp \
 grgu3df.cpp \
 grguDraw.cpp \
 grguSstGlide.cpp \
-grguBuffer.cpp \
 grguFog.cpp \
 grguTex.cpp \
-grguColorAlpha.cpp \
 grguLfb.cpp \
-GLExtensions.cpp \
 GLRender.cpp \
-GLutil.cpp \
 OGLFogTables.cpp \
 OGLMiscTables.cpp \
 OGLTextureTables.cpp \
 OGLColorAlphaTables.cpp \
-PGTexture.cpp \
-PGUTexture.cpp \
 TexDB.cpp \
+PGUTexture.cpp \
 Glide.cpp \
+GLExtensions.cpp \
+PGTexture.cpp \
 FormatConversion.cpp \
+grguBuffer.cpp \
+grguColorAlpha.cpp \
+GLutil.cpp \
 \
-amd3dx.h \
 FormatConversion.h \
 glext.h \
 Glextensions.h \
@@ -43,4 +42,4 @@ sdk2_sst1vid.h \
 TexDB.h
 
 # We substitute the libtool-specific library version in configure.in.
-libglide2x_la_LDFLAGS = -version-info $(LIBVERSION) -lgl
+libglide2x_la_LDFLAGS = -version-info $(LIBVERSION) -lGL -lGLU -lXxf86vm

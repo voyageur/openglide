@@ -12,9 +12,9 @@
 #ifndef __TEXDB_H__
 #define __TEXDB_H__
 
-#include <windows.h>
+//#include <windows.h>
 #include "sdk2_glide.h"
-#include "GL/gl.h"
+#include <GL/gl.h>
 
 class TexDB  
 {

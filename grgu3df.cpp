@@ -15,7 +15,7 @@
 #include "GlOgl.h"
 
 // extern variables and functions
-DWORD GetTexSize( const int Lod, const int aspectRatio, const int format );
+FxU32 GetTexSize( const int Lod, const int aspectRatio, const int format );
 
 // prototypes
 int Read3dfHeader( const char *filename, Gu3dfInfo *data );
@@ -188,7 +188,7 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
         break;
         
     default:
-        fread( data->data, sizeof( BYTE ), data->mem_required, file3df );
+        fread( data->data, sizeof( FxU8 ), data->mem_required, file3df );
         break;
     }
 

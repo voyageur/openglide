@@ -210,10 +210,10 @@ grSstWinOpen(   FxU32 hwnd,
 
     Glide.Refresh = ref;
     OpenGL.Refresh = windowRefresh[ Glide.Refresh ];
-    OpenGL.WaitSignal = (DWORD)( 1000 / OpenGL.Refresh );
+    OpenGL.WaitSignal = (int)( 1000 / OpenGL.Refresh );
 
     // Initing OpenGL Window
-    if ( !InitWindow( (HWND)hwnd ) )
+    if ( !InitWindow( hwnd ) )
     {
         return FXFALSE;
     }
@@ -230,8 +230,8 @@ grSstWinOpen(   FxU32 hwnd,
     // Initializing Glide and OpenGL
     InitOpenGL( );
 
-    Glide.SrcBuffer.Address = new WORD[ OPENGLBUFFERMEMORY * 2 ];
-    Glide.DstBuffer.Address = new WORD[ OPENGLBUFFERMEMORY * 2 ];
+    Glide.SrcBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
+    Glide.DstBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
     
     // Just checking
     if ( ( !Glide.SrcBuffer.Address ) || ( !Glide.DstBuffer.Address ) )

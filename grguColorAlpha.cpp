@@ -409,8 +409,8 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 //    }
 //    else
 //    {
-//        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
-//                                OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
+//        p_glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
+//                                  OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
 //    }
 
     OpenGL.Blend = !(( rgb_sf == GR_BLEND_ONE ) && ( rgb_df == GR_BLEND_ZERO ));
@@ -510,7 +510,7 @@ grChromakeyValue( GrColor_t value )
 
     RenderDrawTriangles( );
 
-    ConvertColor4B( value, OpenGL.ChromaColor.C );
+    ConvertColor4B( value, OpenGL.ChromaColor );
 
 //    ConvertColorB(  value, 
 //                    OpenGL.ChromaColor.R, 
@@ -519,7 +519,7 @@ grChromakeyValue( GrColor_t value )
 //                    OpenGL.ChromaColor.A );
 
 //    Textures->ChromakeyValue( value );
-    Textures->ChromakeyValue( OpenGL.ChromaColor.C );
+    Textures->ChromakeyValue( OpenGL.ChromaColor );
 
     Glide.State.ChromakeyValue = value;
 }
@@ -560,6 +560,9 @@ grGammaCorrectionValue( float value )
     RenderDrawTriangles();
 
     OpenGL.Gamma = value;
+
+// @FIXME@: Whats linux/X11 equivalent?
+#ifdef __WIN32__
     {
         struct
         {
@@ -581,6 +584,7 @@ grGammaCorrectionValue( float value )
 
         ReleaseDC( NULL, pDC );
     }
+#endif
 
 #ifdef OPENGL_DEBUG
     GLErro( "grGammaCorrectionValue" );

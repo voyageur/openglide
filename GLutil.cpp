@@ -9,14 +9,33 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
+#include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <io.h>
 
 #include "GlOgl.h"
 #include "Glextensions.h"
 #include "OGLTables.h"
 
+#ifdef __unix__
+#include <unistd.h>
+#include <GL/glx.h>
+#include <X11/extensions/xf86vmode.h>
+#define _strtime(s) {time_t t = time(0); strftime(s, 99, "%H:%M:%S", localtime (&t));}
+#define _strdate(s) {time_t t = time(0); strftime(s, 99, "%d %b %Y", localtime (&t));}
+#define KEY_MASK (KeyPressMask | KeyReleaseMask)
+#define MOUSE_MASK (ButtonPressMask | ButtonReleaseMask | \
+		    PointerMotionMask | ButtonMotionMask )
+#define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | StructureNotifyMask )
+
+static Display *dpy = NULL;
+static int scrnum;
+static Window win;
+static GLXContext ctx = NULL;
+static bool vidmode_ext = false;
+static XF86VidModeModeInfo **vidmodes;
+#endif
 
 // Configuration Variables
 ConfigStruct    UserConfig;
@@ -25,22 +44,26 @@ ConfigStruct    InternalConfig;
 // Extern prototypes
 extern unsigned long    NumberOfErrors;
 
+#ifdef __WIN32__
+#include <io.h>
 HDC hDC;
 static HGLRC hRC;
 static HWND hWND;
 static struct
 {
-    WORD red[ 256 ];
-    WORD green[ 256 ];
-    WORD blue[ 256 ];
+    FxU16 red[ 256 ];
+    FxU16 green[ 256 ];
+    FxU16 blue[ 256 ];
 } old_ramp;
 
-static BOOL ramp_stored = FALSE;
-static BOOL mode_changed = FALSE;
+static bool ramp_stored = false;
+#endif // __WIN32__
+
+static bool mode_changed = false;
 
 // Functions
 
-void __cdecl GlideMsg( char *szString, ... )
+extern "C" void GlideMsg( char *szString, ... )
 {
     va_list( Arg );
     va_start( Arg, szString );
@@ -57,7 +80,7 @@ void __cdecl GlideMsg( char *szString, ... )
     va_end( Arg );
 }
 
-void __cdecl Error( char *szString, ... )
+extern "C" void Error( char *szString, ... )
 {
     va_list( Arg );
     va_start( Arg, szString );
@@ -90,29 +113,30 @@ void GLErro( char *Funcao )
     }
 }
 
-static BOOL SetScreenMode( HWND hWnd, int xsize, int ysize )
+#ifdef __WIN32__
+static bool SetScreenMode( HWND hWnd, int xsize, int ysize )
 {
     HDC     hdc;
-    DWORD   bits_per_pixel;
-    BOOL    found;
+    FxU32   bits_per_pixel;
+    bool    found;
     DEVMODE DevMode;
 
     hdc = GetDC( hWnd );
     bits_per_pixel = GetDeviceCaps( hdc, BITSPIXEL );
     ReleaseDC( hWnd, hdc );
     
-    found = FALSE;
+    found = false;
     DevMode.dmSize = sizeof( DEVMODE );
     
     for ( int i = 0; 
-          !found && EnumDisplaySettings( NULL, i, &DevMode ) != FALSE; 
+          !found && EnumDisplaySettings( NULL, i, &DevMode ) != false; 
           i++ )
     {
-        if ( ( DevMode.dmPelsWidth == (DWORD)xsize ) && 
-             ( DevMode.dmPelsHeight == (DWORD)ysize ) && 
+        if ( ( DevMode.dmPelsWidth == (FxU32)xsize ) && 
+             ( DevMode.dmPelsHeight == (FxU32)ysize ) && 
              ( DevMode.dmBitsPerPel == bits_per_pixel ) )
         {
-            found = TRUE;
+            found = true;
         }
     }
     
@@ -123,13 +147,70 @@ static void ResetScreenMode( void )
 {
     ChangeDisplaySettings( NULL, 0 );
 }
+#endif // __WIN32__
 
-void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
+#ifdef __unix__
+static bool SetScreenMode( int &width, int &height )
 {
+    int best_fit, best_dist, dist, x, y, i;
+    int num_vidmodes;
+    best_dist = 9999999;
+    best_fit = -1;
+
+    XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
+
+    for (i = 0; i < num_vidmodes; i++)
+    {
+        if (width > vidmodes[i]->hdisplay ||
+            height > vidmodes[i]->vdisplay)
+            continue;
+
+        x = width - vidmodes[i]->hdisplay;
+        y = height - vidmodes[i]->vdisplay;
+        dist = (x * x) + (y * y);
+        if (dist < best_dist)
+        {
+            best_dist = dist;
+            best_fit = i;
+        }
+    }
+
+    if (best_fit != -1)
+    {
+        width  = vidmodes[best_fit]->hdisplay;
+        height = vidmodes[best_fit]->vdisplay;
+
+        // change to the mode
+        XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[best_fit]);
+        // Move the viewport to top left
+        XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
+        return true;
+    }
+    return false;
+}
+
+static void ResetScreenMode( void )
+{
+    if (mode_changed)
+        XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
+}
+
+void SwapBuffers ( void )
+{
+    glFlush( );
+    glXSwapBuffers( dpy, win );
+}
+
+#endif // __unix__
+
+void InitialiseOpenGLWindow( FxU32 hWnd, int x, int y, int width, int height )
+{
+#ifdef __WIN32__
     PIXELFORMATDESCRIPTOR   pfd;
     int                     PixFormat;
     unsigned int            BitsPerPixel;
-    
+    HWND                    hwnd = (HWND) hWnd;
+
     if( hwnd == NULL )
     {
         hwnd = GetActiveWindow();
@@ -141,14 +222,14 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
         exit( 1 );
     }
 
-    mode_changed = FALSE;
+    mode_changed = false;
 
     if ( UserConfig.InitFullScreen )
     {
         SetWindowLong( hwnd, 
                        GWL_STYLE, 
                        WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS );
-        MoveWindow( hwnd, 0, 0, width, height, FALSE );
+        MoveWindow( hwnd, 0, 0, width, height, false );
         mode_changed = SetScreenMode( hwnd, width, height );
     }
     else
@@ -167,7 +248,7 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
                    x, y, 
                    x + ( rect.right - rect.left ),
                    y + ( rect.bottom - rect.top ),
-                   TRUE );
+                   true );
     }
 
     hWND = hwnd;
@@ -205,7 +286,7 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 
     if ( pfd.cDepthBits > 16 )
     {
-        UserConfig.PrecisionFix = FALSE;
+        UserConfig.PrecisionFix = false;
     }
 
     hRC = wglCreateContext( hDC );
@@ -216,15 +297,95 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
     ramp_stored = GetDeviceGammaRamp( pDC, &old_ramp );
 
     ReleaseDC( NULL, pDC );
+#endif // __WIN32__
+
+#ifdef __unix__
+    Window root;
+    XVisualInfo *visinfo;
+    XSetWindowAttributes attr;
+    unsigned long mask;
+
+    if (!(dpy = XOpenDisplay(NULL)))
+    {
+        fprintf(stderr, "Error couldn't open the X display\n");
+        return;
+    }
+
+    scrnum = DefaultScreen(dpy);
+    root = RootWindow(dpy, scrnum);
+
+    {
+        int attrib[] =
+        {
+            GLX_RGBA,
+            GLX_DOUBLEBUFFER,
+            GLX_DEPTH_SIZE, DefaultDepthOfScreen(ScreenOfDisplay(dpy, scrnum)),
+            None
+        };
+        visinfo = glXChooseVisual(dpy, scrnum, attrib);
+    }
+
+    if (!visinfo)
+    {
+        fprintf(stderr, "Error couldn't get an RGB, Double-buffered, Depth visual\n");
+        return;
+    }
+
+    {   // Determine presence of video mode extension
+        int major = 0, minor = 0;
+        vidmode_ext = XF86VidModeQueryVersion (dpy, &major, &minor) != 0;
+    }
+        
+    if (vidmode_ext && UserConfig.InitFullScreen)
+        mode_changed = SetScreenMode( width, height );
+
+    // window attributes
+    attr.background_pixel = 0;
+    attr.border_pixel = 0;
+    attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
+    attr.event_mask = X_MASK;
+    if (mode_changed)
+    {
+        mask = CWBackPixel | CWColormap | CWSaveUnder | CWBackingStore | 
+               CWEventMask | CWOverrideRedirect;
+        attr.override_redirect = True;
+        attr.backing_store = NotUseful;
+        attr.save_under = False;
+    }
+    else
+        mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
+
+    win = XCreateWindow(dpy, root, 0, 0, width, height,
+                        0, visinfo->depth, InputOutput,
+                        visinfo->visual, mask, &attr);
+    XMapWindow(dpy, win);
+
+    if (mode_changed)
+    {
+        XMoveWindow(dpy, win, 0, 0);
+        XRaiseWindow(dpy, win);
+        XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
+        XFlush(dpy);
+        // Move the viewport to top left
+        XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
+    }
+
+    XFlush(dpy);
+
+    ctx = glXCreateContext(dpy, visinfo, NULL, True);
+
+    glXMakeCurrent(dpy, win, ctx);
+#endif // __unix__
 }    
 
 void FinaliseOpenGLWindow( void )
 {
+#ifdef __WIN32__
     if ( ramp_stored )
     {
         HDC pDC = GetDC( NULL );
 
-        BOOL res = SetDeviceGammaRamp( pDC, &old_ramp );
+        bool res = SetDeviceGammaRamp( pDC, &old_ramp );
 
         ReleaseDC( NULL, pDC );
     }
@@ -237,43 +398,59 @@ void FinaliseOpenGLWindow( void )
     {
         ResetScreenMode( );
     }
+#endif // __WIN32__
+
+#ifdef __unix__
+    if (dpy)
+    {
+        if (ctx)
+            glXDestroyContext(dpy, ctx);
+        if (win)
+            XDestroyWindow(dpy, win);
+        ResetScreenMode( );
+        XCloseDisplay(dpy);
+    }
+    ctx = NULL;
+    dpy = NULL;
+    win = 0;
+#endif // __unix__
 }
 
-void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
+void ConvertColorB( GrColor_t GlideColor, FxU8 &R, FxU8 &G, FxU8 &B, FxU8 &A )
 {
     switch ( Glide.State.ColorFormat )
     {
     case GR_COLORFORMAT_ARGB:   //0xAARRGGBB
-        A = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        R = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        G = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        B = (BYTE)( ( GlideColor & 0x000000FF )       );
+        A = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        R = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        G = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        B = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_ABGR:   //0xAABBGGRR
-        A = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        B = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        G = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        R = (BYTE)( ( GlideColor & 0x000000FF )       );
+        A = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        B = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        G = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        R = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_RGBA:   //0xRRGGBBAA
-        R = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        G = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        B = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        A = (BYTE)( ( GlideColor & 0x000000FF )       );
+        R = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        G = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        B = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        A = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_BGRA:   //0xBBGGRRAA
-        B = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        G = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        R = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        A = (BYTE)( ( GlideColor & 0x000000FF )       );
+        B = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        G = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        R = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        A = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
     }
 }
 
-void ConvertColor4B( GrColor_t GlideColor, DWORD &C )
+void ConvertColor4B( GrColor_t GlideColor, FxU32 &C )
 {
     switch ( Glide.State.ColorFormat )
     {
@@ -361,7 +538,7 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 }
 
 //*************************************************
-DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
+FxU32 GetTexSize( const int Lod, const int aspectRatio, const int format )
 {
     /*
     ** If the format is one of these:
@@ -377,6 +554,7 @@ DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
 }
 
 // Calculates the frequency of the processor clock
+#ifdef __WIN32__
 #pragma optimize( "", off )
 float ClockFrequency( void )
 {
@@ -408,11 +586,33 @@ float ClockFrequency( void )
     return (float)d_clock_freq;
 }
 #pragma optimize( "", on )
+#endif // __WIN32__
+
+#ifdef __linux__
+float ClockFrequency( void )
+{
+    char  str[35];
+    float freq = 0.0;
+    FILE *f = fopen ("/proc/cpuinfo", "r");
+    while (fgets (str, sizeof (str), f))
+    {
+        if (!strncmp ("cpu MHz", str, 7))
+        {
+            sscanf (strchr(str, ':')+1, "%f", &freq);
+            break;
+        }
+    }
+    fclose (f);
+    return freq * 1000000.0;
+}
+#endif // __linux__
 
 char * FindConfig( char *IniFile, char *IniConfig )
 {
-    char    Buffer1[ 256 ], 
-            * EqLocation, 
+    // Cannot return pointer to local buffer, unless
+    // static.
+    static char Buffer1[ 256 ];
+    char    * EqLocation, 
             * Find;
     FILE    * file;
 
@@ -500,7 +700,7 @@ void GetOptions( void )
     else
     {
         Pointer = FindConfig( Path, "Version" );
-        if ( !strcmp( Pointer, OpenGLideVersion ) )
+        if ( Pointer && !strcmp( Pointer, OpenGLideVersion ) )
         {
             Pointer = FindConfig( Path, "CreateWindow" );
             UserConfig.CreateWindow = atoi( Pointer ) ? true : false;
@@ -610,8 +810,9 @@ bool GenerateErrorFile( void )
 // Detect if Processor has MMX Instructions
 int DetectMMX( void )
 {
-    DWORD Result;
+    FxU32 Result;
 
+#ifdef _MSC_VER
     __asm
     {
         push EAX
@@ -622,13 +823,24 @@ int DetectMMX( void )
         pop EDX
         pop EAX
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("mov $1, %%eax;"
+         "CPUID;"
+         : "=d" (Result) /* Outputs */
+         : /* No inputs */
+         : "%eax" /* Clobbers */
+        );
+#endif
 
     return Result & 0x00800000;
 }
 
 // Copy Blocks of Memory Using MMX
-void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes )
+void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
+#ifdef _MSC_VER
     __asm
     {
         mov ECX, NumberOfBytes
@@ -642,10 +854,26 @@ start:  sub ECX, 8
         jae copying
         EMMS
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("jmp   MMXCopyMemory_start;"
+         "MMXCopyMemory_copying:"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm0, (%2,%0);"
+         "MMXCopyMemory_start:"
+         "subl  $8, %0;"
+         "jae   MMXCopyMemory_copying;"
+         : /* No outputs */
+         : "r" (NumberOfBytes), "r" (Src), "r" (Dst) /* Inputs */
+         : "%mm0", "memory" /* Clobbers */
+        );
+#endif
 }
 
-void MMXSetShort( void *Dst, short Value, DWORD NumberOfBytes )
+void MMXSetShort( void *Dst, short Value, FxU32 NumberOfBytes )
 {
+#ifdef _MSC_VER
     __asm
     {
         xor EAX, EAX
@@ -662,10 +890,28 @@ start:  sub ECX, 8
         jae copying
         EMMS
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("movd  %1, %%mm0;"
+         "PUNPCKLWD %%mm0, %%mm0;"
+         "PUNPCKLWD %%mm0, %%mm0;"
+         "jmp   MMXSetShort_start;"
+         "MMXSetShort_copying:"
+         "movq  %%mm0, (%2,%0);"
+         "MMXSetShort_start:"
+         "subl  $8, %0;"
+         "jae   MMXSetShort_copying;"
+         : /* No outputs */
+         : "r" (NumberOfBytes), "r" ((long) Value), "r" (Dst) /* Inputs */
+         : "%mm0", "memory" /* Clobbers */
+        );
+#endif
 }
 
-void MMXCopyByteFlip( void *Dst, void *Src, DWORD NumberOfBytes )
+void MMXCopyByteFlip( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
+#ifdef _MSC_VER
     __asm
     {       
       mov ESI, Src
@@ -712,5 +958,55 @@ align 16
       jnz mcbf_loopd
     mcbf_breakd:
     }
-}
+#endif
 
+#ifdef __GNUC__
+    asm ("movl  %%ecx, %%eax;"
+         "movl  $~0xff, %%ecx;"
+         "subl  %%ecx, %%eax;"
+         "push  %%eax;"
+         "test  %%ecx, %%ecx;"
+         "jz    MMXCopyByteFlip_breakc;"
+         /* init. for inner loop */
+         "leal  (%%esi,%%ecx), %%esi;"
+         "leal  -8(%%edi,%%ecx), %%edi;"
+         "neg   %%ecx;"
+
+       ".align 16;"
+       "MMXCopyByteFlip_loopc:"
+         "movq  (%%esi,%%ecx), %%mm0;"
+         "movq  %%mm0, %%mm1;"
+         "psrlw $8, %%mm0;"
+         "addl  $8, %%ecx;"
+         "psllw $8, %%mm1;"
+         "por   %%mm0, %%mm1;"
+         "movq  %%mm1, (%%edi,%%ecx);"
+         "jnz   MMXCopyByteFlip_loopc;"
+         "addl  $8, %%edi;"
+         "emms;"
+
+       "MMXCopyByteFlip_breakc:"
+         "pop   %%ecx;"
+         "test  %%ecx, %%ecx;"
+         "jz    MMXCopyByteFlip_breakd;"
+         "andl  $~1, %%ecx;"
+         "leal  (%%esi,%%ecx), %%esi;"
+         "leal  (%%edi,%%ecx), %%edi;"
+         "neg   %%ecx;"
+
+       /* trailing data, one pixel at a time */
+       "MMXCopyByteFlip_loopd:"
+         "movb  (%%esi,%%ecx), %%al;"
+         "movb  %%al, 1(%%edi,%%ecx);"
+         "movb  1(%%esi,%%ecx), %%dl;"
+         "movb  %%dl, (%%edi,%%ecx);"
+         "addl  $2, %%ecx;"
+         "jnz   MMXCopyByteFlip_loopd;"
+         
+       "MMXCopyByteFlip_breakd:"
+         : /* No outputs */
+         : "c" (NumberOfBytes), "S" (Src), "D" (Dst) /* Inputs */
+         : "%eax", "%edx", "%mm0", "%mm1", "memory" /* Clobbers */
+        );
+#endif
+}

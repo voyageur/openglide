@@ -1,7 +1,7 @@
 
 #include "OGLTables.h"
 
-DWORD intStartEnd[ GR_FOG_TABLE_SIZE + 1 ] = 
+FxU32 intStartEnd[ GR_FOG_TABLE_SIZE + 1 ] = 
 {
     1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 5, 6, 8, 9, 11, 13, 16, 19, 22, 26, 32, 38, 45, 53, 
     64, 76, 90, 107, 128, 152, 181, 215, 256, 304, 362, 430, 512, 608, 724, 861, 
@@ -9,7 +9,7 @@ DWORD intStartEnd[ GR_FOG_TABLE_SIZE + 1 ] =
     9741, 11585, 13777, 16384, 19483, 23170, 27554, 32768, 38967, 46340, 55108, 65536
 };
 
-DWORD intEndMinusStart[ GR_FOG_TABLE_SIZE ] = 
+FxU32 intEndMinusStart[ GR_FOG_TABLE_SIZE ] = 
 {
     0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 2, 1, 2, 2, 3, 3, 3, 4, 6, 6, 7, 8, 11, 12, 14,
     17, 21, 24, 29, 34, 41, 48, 58, 68, 82, 96, 116, 137, 163, 193, 231, 274, 326,

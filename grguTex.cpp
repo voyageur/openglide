@@ -74,7 +74,7 @@ grTexSource( GrChipID_t tmu,
 //* Return the texture memory consumed by a texture
 //*************************************************
 FX_ENTRY FxU32 FX_CALL
-grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
+grTexTextureMemRequired( FxU32 dwEvenOdd, GrTexInfo *texInfo )
 {
 #ifdef OGL_DONE
     GlideMsg( "grTexTextureMemRequired( %u, --- )\n", dwEvenOdd );

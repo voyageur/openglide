@@ -17,11 +17,13 @@
 // extern variables
 extern __int64          InitialTick,
                         FinalTick;
-extern DWORD            Frame;
+extern int              Frame;
 extern double           Fps, 
                         FpsAux, 
                         ClockFreq;
+#ifdef __WIN32__
 extern HDC              hDC;
+#endif
 
 
 // extern functions
@@ -105,7 +107,13 @@ grBufferSwap( int swap_interval )
     OGLRender.FrameTriangles = 0;
 #endif
 
+#ifdef __WIN32__
     SwapBuffers( hDC );
+#endif
+
+#ifdef __unix__
+    SwapBuffers( );
+#endif
 
 #ifdef OGL_DEBUG
     RDTSC( FinalTick );

@@ -71,8 +71,8 @@ private:
     FxU32           m_palette_hash;
     TexDB *         m_db;
     GrChromakeyMode_t m_chromakey_mode;
-    DWORD           m_chromakey_value_8888;
-    WORD            m_chromakey_value_565;
+    FxU32           m_chromakey_value_8888;
+    FxU16           m_chromakey_value_565;
     float           m_wAspect;
     float           m_hAspect;
 

@@ -12,8 +12,6 @@
 #ifndef __GLOGL_H__
 #define __GLOGL_H__
 
-#define __WIN32__
-
 //#define OGL_ALL
 //#define OGL_PARTDONE
 //#define OGL_NOTDONE
@@ -36,21 +34,45 @@
  #define OGL_COMBINE
 #endif
 
+#ifdef __WIN32__
 #include <windows.h>
+#define __uint64 unsigned __int64
+#define __UINT64_C(c) c
+#else
+#include <string.h>
+#define __STDC_LIMIT_MACROS
+#include <stdint.h> // Ansi C99 header
+#define ZeroMemory(d,l) memset(d,0,l)
+#define CopyMemory(d,s,l) memcpy(d,s,l)
+#define max(x,y) ((x) < (y) ? (y) : (x))
+#define __int64  int64_t
+#define __uint64 uint64_t
+#endif
+
+#ifdef __GNUC__
+#define __fastcall __attribute__((__fastcall__))
+#endif
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdio.h>
 
 #include "sdk2_glide.h"
 
+#ifdef _MSC_VER
 #define RDTSC(v)    __asm _emit 0x0f                \
                     __asm _emit 0x31                \
                     __asm mov dword ptr v, eax      \
                     __asm mov dword ptr v+4, edx
+#endif
 
-#define ERRORFILE               "OpenGLid.ERR"
-#define GLIDEFILE               "OpenGLid.LOG"
-#define INIFILE                 "OpenGLid.INI"
+#ifdef __GNUC__
+#define RDTSC(v)    asm volatile ("rdtsc;" : "=A" (v) : : "%eax", "%edx")
+#endif
+
+#define ERRORFILE               "OpenGLid.err"
+#define GLIDEFILE               "OpenGLid.log"
+#define INIFILE                 "OpenGLid.ini"
 
 #define OGL_LOG_SEPARATE        "--------------------------------------------------------\n"
 
@@ -87,7 +109,7 @@ struct BufferStruct
     GrLfbWriteMode_t        WriteMode;
     GrBuffer_t              Buffer;
     FxBool                  PixelPipeline;
-    WORD                    *Address;
+    FxU16                   *Address;
 };
 
 struct TexSourceStruct
@@ -97,6 +119,12 @@ struct TexSourceStruct
     GrTexInfo   Info;
 };
 
+/*
+ * Anonymous structs are not Ansi and
+ * only support by Visual C++.  They must
+ * be removed.  Luckily we don't use the
+ * individual bytes which would be prown
+ * to endian and compiler ordering problems!
 union OGLByteColor
 {
     struct
@@ -108,6 +136,8 @@ union OGLByteColor
     };
     DWORD   C;
 };
+*/
+typedef FxU32 OGLByteColor;
 
 struct GlideState
 {
@@ -185,15 +215,15 @@ struct GlideStruct
     GlideState              State;
     BufferStruct            SrcBuffer;
     BufferStruct            DstBuffer;
-    DWORD                   TextureMemory;
+    int                     TextureMemory;
 };
 
 struct OpenGLStruct
 {
     bool                    GlideInit;
     bool                    WinOpen;
-    long                    WindowWidth;
-    long                    WindowHeight;
+    int                     WindowWidth;
+    int                     WindowHeight;
     GLfloat                 Gamma;
     GLfloat                 AlphaReferenceValue;
     GLenum                  AlphaTestFunction;
@@ -217,7 +247,7 @@ struct OpenGLStruct
     GLfloat                 ZNear;
     GLfloat                 ZFar;
     GLfloat                 FogColor[ 4 ];
-    BYTE                    FogTable[ OPENGLFOGTABLESIZE ];
+    FxU8                    FogTable[ OPENGLFOGTABLESIZE ];
     OGLByteColor            ChromaColor;
     bool                    Fog;
     bool                    Texture;
@@ -229,16 +259,16 @@ struct OpenGLStruct
     bool                    Clipping;
     int                     MultiTextureTMUs;
     int                     DepthBufferType;
-    BYTE                    PTable[ 256 ][ 4 ];
-    DWORD                   WaitSignal;
+//    FxU8                    PTable[ 256 ][ 4 ];
+    int                     WaitSignal;
 };
 
 struct ConfigStruct
 {
-    DWORD   OGLVersion;
-    DWORD   Priority;
-    DWORD   TextureMemorySize;
-    DWORD   FrameBufferMemorySize;
+    int     OGLVersion;
+    int     Priority;
+    int     TextureMemorySize;
+    int     FrameBufferMemorySize;
 
     bool    FogEnable;
     bool    InitFullScreen;
@@ -276,30 +306,34 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
     // Profiling variables
     extern __int64          InitialTick;
     extern __int64          FinalTick;
-    extern DWORD            Frame;
+    extern int              Frame;
     extern double           Fps;
     extern double           FpsAux;
 #endif
 
 // Genral Prototypes
-void __cdecl GlideMsg( char *szString, ... );
-void __cdecl Error( char *szString, ... );
+extern "C" void GlideMsg( char *szString, ... );
+extern "C" void Error( char *szString, ... );
 void GLErro( char *Funcao );
-void ConvertColor4B( GrColor_t GlideColor, DWORD &C );
-void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
+void ConvertColor4B( GrColor_t GlideColor, FxU32 &C );
+void ConvertColorB( GrColor_t GlideColor, FxU8 &R, FxU8 &G, FxU8 &B, FxU8 &A );
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
 GrColor_t ConvertConstantColor( float R, float G, float B, float A );
 bool GenerateErrorFile( void );
 bool ClearAndGenerateLogFile( void );
 void CloseLogFile( void );
-bool InitWindow( HWND hwnd );
+bool InitWindow( FxU32 hWnd );
 void InitOpenGL( void );
 void GetOptions( void );
-void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height );
+void InitialiseOpenGLWindow( FxU32 hWnd, int x, int y, int width, int height );
 void FinaliseOpenGLWindow( void );
 
-void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes );
+void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes );
 
 int DetectMMX();
+
+#ifdef __unix__
+void SwapBuffers( void );
+#endif
 
 #endif
