@@ -1157,8 +1157,6 @@ void CPalette::Init( void )
 
 	TextureNumbers = new GLuint[PMaxTextures];
 	PaletteNumbers = new FxU32[PMaxTextures];
-    if(TextureNumbers == NULL || PaletteNumbers == NULL)
-        Clear();
 
 //	Clear();
 
