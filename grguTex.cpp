@@ -389,6 +389,11 @@ grTexLodBiasValue( GrChipID_t tmu, float bias )
     GlideMsg( "grTexLodBiasValue( %d, %d )\n",
         tmu, bias );
 #endif
+
+    if ( InternalConfig.TextureLodBias )
+    {
+        glTexEnvf( GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, bias );
+    }
 }
 
 //----------------------------------------------------------------

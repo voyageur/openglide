@@ -109,9 +109,11 @@ void CloseLogFile( void )
     GlideMsg( "Time: %s\n", tmpbuf );
     GlideMsg( "-------------------------\n" );
 
+#ifdef OGL_DEBUG
     Fps = (float) Frame * ClockFreq / FpsAux;
     GlideMsg( "FPS = %f\n", Fps );
     GlideMsg( "-------------------------\n" );
+#endif
 }
 
 BOOL GenerateErrorFile( void )
@@ -248,7 +250,6 @@ bool InitWindow( HWND hwnd )
     GlideMsg( "Precision Fix = %s\n", InternalConfig.PrecisionFixEnable ? "true" : "false" );
     GlideMsg( "MultiTexture = %s\n", InternalConfig.MultiTextureEXTEnable ? "true" : "false" );
     GlideMsg( "Palette Extension = %s\n", InternalConfig.PaletteEXTEnable ? "true" : "false" );
-//  GlideMsg( "Texture Env Extension = %s\n", InternalConfig.TextureEnvEXTEnable ? "true" : "false" );
     GlideMsg( "Vertex Array Extension = %s\n", InternalConfig.VertexArrayEXTEnable ? "true" : "false" );
     GlideMsg( "Fog Coord Extension = %s\n", InternalConfig.FogCoordEXTEnable ? "true" : "false" );
     GlideMsg( "Texture Memory Size = %d Mb\n", InternalConfig.TextureMemorySize );
@@ -350,9 +351,11 @@ grGlideInit( void )
 
     ExternErrorFunction = NULL;
 
+#ifdef OGL_DEBUG
     RDTSC( FinalTick );
     RDTSC( InitialTick );
     Fps = FpsAux = Frame = 0;
+#endif
 
     OpenGL.GlideInit = true;
 

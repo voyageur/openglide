@@ -187,6 +187,8 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
         exit( 1 );
     } 
 
+    // the window must have WS_CLIPCHILDREN and WS_CLIPSIBLINGS for this call to
+    // work correctly, so we SHOULD set this attributes, not doing that yet
     if ( !SetPixelFormat( hDC, PixFormat, &pfd ) )
     {
         MessageBox( NULL, "SetPixelFormat() failed:  "

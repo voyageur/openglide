@@ -478,14 +478,14 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
     }
     
     // Z-Buffering
-    if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
+/*    if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
          ( Glide.State.DepthFunction == GR_CMP_ALWAYS ) )
     {
         pV->az = 0.0f;
         pV->bz = 0.0f;
         pV->cz = 0.0f;
     }
-    else 
+    else */ 
     if ( OpenGL.DepthBufferType )
     {
         pV->az = a->ooz * D1OVER65536;

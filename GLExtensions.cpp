@@ -113,6 +113,7 @@ void ValidateUserConfig( void )
     InternalConfig.VertexArrayEXTEnable     = false;
     InternalConfig.FogCoordEXTEnable        = false;
     InternalConfig.BlendFuncSeparate        = false;
+    InternalConfig.TextureLodBias           = false;
 
     InternalConfig.TextureMemorySize        = 16;
     InternalConfig.FrameBufferMemorySize    = 8;
@@ -186,6 +187,11 @@ void ValidateUserConfig( void )
     if ( isExtensionSupported( "GL_EXT_blend_func_separate" ) )
     {
         InternalConfig.BlendFuncSeparate            = true;
+    }
+
+    if ( isExtensionSupported( "GL_EXT_texture_lod_bias" ) )
+    {
+        InternalConfig.TextureLodBias               = true;
     }
 
     if ( DetectMMX( ) )
