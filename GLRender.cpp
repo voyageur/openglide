@@ -978,7 +978,7 @@ void RenderDrawTriangles()
 	
     if(!OpenGL.Blend && Glide.State.ChromaKeyMode)
     {
-        glAlphaFunc(GL_GEQUAL, 1.0);
+        glAlphaFunc(GL_GEQUAL, 0.5);
         glEnable(GL_ALPHA_TEST);
         
         glBegin( GL_TRIANGLES );
