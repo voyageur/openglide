@@ -826,11 +826,13 @@ int DetectMMX( void )
 #endif
 
 #ifdef __GNUC__
-    asm ("mov $1, %%eax;"
+    asm ("push %%ebx;"
+         "mov  $1, %%eax;"
          "CPUID;"
+         "pop  %%ebx;"
          : "=d" (Result) /* Outputs */
          : /* No inputs */
-         : "%eax" /* Clobbers */
+         : "%eax", "%ecx", "cc" /* Clobbers */
         );
 #endif
 
