@@ -33,7 +33,8 @@ void    (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent,
 void    (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 
 // Snapping constant
-const float vertex_snap = float(3L << 18);
+const float vertex_snap_compare = 4096.0f;
+const float vertex_snap = float( 3L << 18 );
 
 // Standard structs for the render
 RenderStruct OGLRender;
@@ -607,7 +608,8 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
         }
     }
 
-    if ( unsnap )
+    if ( ( unsnap ) &&
+         ( a->x > vertex_snap_compare ) )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;
