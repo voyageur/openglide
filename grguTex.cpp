@@ -133,7 +133,7 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
         tmu, startAddress, thisLod, largeLod, aspectRatio, format, evenOdd, data );
 #endif
 
-    if ( tmu != GR_TMU0 )
+    if ( tmu != GR_TMU0 || thisLod != largeLod)
     {
         return;
     }
