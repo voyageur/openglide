@@ -79,7 +79,7 @@ DLLEXPORT FxU32 __stdcall
 grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
 {
 #ifdef OGL_DONE
-    GlideMsg("grTexTextureMemRequired( %u, --- )\n", dwEvenOdd );
+    GlideMsg( "grTexTextureMemRequired( %u, --- )\n", dwEvenOdd );
 #endif
 
     DWORD nTotalBytes = 0;
@@ -87,9 +87,15 @@ grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
     {
         nTotalBytes += GetTexSize( i, texInfo->aspectRatio, texInfo->format );
     }
-    nTotalBytes += ( ( nTotalBytes % 8 ) > 0 ) ? ( 8 - ( nTotalBytes % 8 ) ) : 0;
-
-    return nTotalBytes;
+    if ( nTotalBytes % 8 )
+    {
+        return ( nTotalBytes & 0xFFFFFFF8 ) + 8;
+    }
+    else
+    {
+        return nTotalBytes;
+    }
+//    nTotalBytes += ( ( nTotalBytes % 8 ) > 0 ) ? ( 8 - ( nTotalBytes % 8 ) ) : 0;
 }
 
 //*************************************************
@@ -133,8 +139,8 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
         tmu, startAddress, thisLod, largeLod, aspectRatio, format, evenOdd, data );
 #endif
 
-//    if ( ( tmu != GR_TMU0 ) || ( thisLod != largeLod ) )
-    if ( tmu != GR_TMU0 )
+    if ( ( tmu != GR_TMU0 ) || ( thisLod != largeLod ) )
+//    if ( tmu != GR_TMU0 )
     {
         return;
     }
@@ -200,7 +206,12 @@ grTexClampMode( GrChipID_t tmu,
     Glide.State.SClampMode = s_clampmode;
     Glide.State.TClampMode = t_clampmode;
 
-    switch ( s_clampmode )
+    // We can do this just because we know the constant values for both OpenGL and Glide
+    // To port it to anything else than OpenGL we NEED to change this code
+    OpenGL.SClampMode = GL_REPEAT - s_clampmode;
+    OpenGL.TClampMode = GL_REPEAT - t_clampmode;
+
+/*    switch ( s_clampmode )
     {
     case GR_TEXTURECLAMP_CLAMP:     OpenGL.SClampMode = GL_CLAMP;   break;
     case GR_TEXTURECLAMP_WRAP:      OpenGL.SClampMode = GL_REPEAT;  break;
@@ -210,7 +221,7 @@ grTexClampMode( GrChipID_t tmu,
     case GR_TEXTURECLAMP_CLAMP:     OpenGL.TClampMode = GL_CLAMP;   break;
     case GR_TEXTURECLAMP_WRAP:      OpenGL.TClampMode = GL_REPEAT;  break;
     }
-
+*/
 #ifdef OPENGL_DEBUG
     GLErro( "grTexClampMode" );
 #endif
@@ -336,9 +347,15 @@ grTexCalcMemRequired( GrLOD_t lodmin, GrLOD_t lodmax,
     {
         nTotalBytes += GetTexSize( i, aspect, fmt );
     }
-    nTotalBytes += ( ( nTotalBytes % 8 ) > 0 ) ? ( 8 - ( nTotalBytes % 8 ) ) : 0;
-
-    return nTotalBytes;
+    if ( nTotalBytes % 8 )
+    {
+        return ( nTotalBytes & 0xFFFFFFF8 ) + 8;
+    }
+    else
+    {
+        return nTotalBytes;
+    }
+//    nTotalBytes += ( ( nTotalBytes % 8 ) > 0 ) ? ( 8 - ( nTotalBytes % 8 ) ) : 0;
 }
 
 //*************************************************
@@ -428,6 +445,16 @@ grTexCombine( GrChipID_t tmu,
     Glide.State.TextureCombineRGBInvert = rgb_invert;
     Glide.State.TextureCombineAInvert   = alpha_invert;
 
+    if ( ( rgb_function != GR_COMBINE_FUNCTION_ZERO ) ||
+         ( alpha_function != GR_COMBINE_FUNCTION_ZERO ) )
+    {
+        OpenGL.Texture = true;
+    }
+    else
+    {
+        OpenGL.Texture = false;
+    }
+/*
     switch ( rgb_function )
     {
     case GR_COMBINE_FUNCTION_ZERO:
@@ -603,6 +630,7 @@ grTexCombine( GrChipID_t tmu,
 //      GlideMsg( "GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION\n" );
         break;
     }
+    */
 }
 
 //----------------------------------------------------------------
@@ -663,7 +691,7 @@ DLLEXPORT void __stdcall
 grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("grTexCombineFunction( %d, %d )\n", tmu, func );
+    GlideMsg( "grTexCombineFunction( %d, %d )\n", tmu, func );
 #endif
 
     if ( tmu != GR_TMU0 )
@@ -723,7 +751,7 @@ DLLEXPORT FxU32 __stdcall
 guTexMemQueryAvail( GrChipID_t tmu )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("guTexMemQueryAvail( %d )\n", tmu );
+    GlideMsg( "guTexMemQueryAvail( %d )\n", tmu );
 #endif
 
     if ( tmu != GR_TMU0 )
@@ -739,7 +767,7 @@ DLLEXPORT void __stdcall
 guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("guTexCombineFunction( %d, %d )\n", tmu, func );
+    GlideMsg( "guTexCombineFunction( %d, %d )\n", tmu, func );
 #endif
 
     if ( tmu != GR_TMU0 )
@@ -797,7 +825,7 @@ DLLEXPORT GrMipMapId_t __stdcall
 guTexGetCurrentMipMap( GrChipID_t tmu )
 {
 #ifdef OGL_DONE
-    GlideMsg("guTexGetCurrentMipMap( %d )\n", tmu );
+    GlideMsg( "guTexGetCurrentMipMap( %d )\n", tmu );
 #endif
 
     if ( tmu != GR_TMU0 )
@@ -837,7 +865,7 @@ DLLEXPORT GrMipMapInfo * __stdcall
 guTexGetMipMapInfo( GrMipMapId_t mmid )
 {
 #ifdef OGL_DONE
-    GlideMsg( "guTexGetMipMapInfo\n" );
+    GlideMsg( "guTexGetMipMapInfo( )\n" );
 #endif
 
     return UTextures.GetMipMapInfo( mmid );
@@ -848,7 +876,7 @@ DLLEXPORT void __stdcall
 guTexMemReset( void )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("guTexMemReset\n");
+    GlideMsg( "guTexMemReset( )\n" );
 #endif
 
     UTextures.MemReset( );
@@ -860,7 +888,7 @@ DLLEXPORT void __stdcall
 guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 {
 #ifdef OGL_DONE
-    GlideMsg("guTexDownloadMipMapLevel( %d, %d, --- )\n", mmid, lod );
+    GlideMsg( "guTexDownloadMipMapLevel( %d, %d, --- )\n", mmid, lod );
 #endif
 
     UTextures.DownloadMipMapLevel( mmid, lod, src );
@@ -871,7 +899,7 @@ DLLEXPORT void __stdcall
 guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table )
 {
 #ifdef OGL_DONE
-    GlideMsg("guTexDownloadMipMap\n");
+    GlideMsg( "guTexDownloadMipMap\n" );
 #endif
 
     UTextures.DownloadMipMap( mmid, src, table );
@@ -914,7 +942,7 @@ DLLEXPORT void __stdcall
 guTexSource( GrMipMapId_t id )
 {
 #ifdef OGL_DONE
-    GlideMsg("guTexSource( %d )\n", id );
+    GlideMsg( "guTexSource( %d )\n", id );
 #endif
 
     RenderDrawTriangles( );
@@ -927,7 +955,7 @@ DLLEXPORT FxU16 * __stdcall
 guTexCreateColorMipMap( void )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg("guTexCreateColorMipMap()\n"); 
+    GlideMsg( "guTexCreateColorMipMap( )\n" );
 #endif
 
     return 0;

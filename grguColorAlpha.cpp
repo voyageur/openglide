@@ -35,6 +35,15 @@ grDitherMode( GrDitherMode_t mode )
 
     Glide.State.DitherMode = mode;
 
+    if ( mode != GR_DITHER_DISABLE )
+    {
+        glEnable( GL_DITHER );
+    }
+    else
+    {
+        glDisable( GL_DITHER );
+    }
+/*
     switch ( Glide.State.DitherMode )
     {
     case GR_DITHER_DISABLE:
@@ -46,7 +55,7 @@ grDitherMode( GrDitherMode_t mode )
         glEnable( GL_DITHER );
         break;
     }
-
+*/
 #ifdef OPENGL_DEBUG
     GLErro( "grDitherMode" );
 #endif
@@ -82,10 +91,10 @@ grConstantColorValue4( float a, float r, float g, float b )
 #endif
 
     Glide.State.ConstantColorValue = ConvertConstantColor( r, g, b, a );
-    OpenGL.ConstantColor[0] = r * D1OVER255;
-    OpenGL.ConstantColor[1] = g * D1OVER255;
-    OpenGL.ConstantColor[2] = b * D1OVER255;
-    OpenGL.ConstantColor[3] = a * D1OVER255;
+    OpenGL.ConstantColor[ 0 ] = r * D1OVER255;
+    OpenGL.ConstantColor[ 1 ] = g * D1OVER255;
+    OpenGL.ConstantColor[ 2 ] = b * D1OVER255;
+    OpenGL.ConstantColor[ 3 ] = a * D1OVER255;
 }
 
 //*************************************************
@@ -339,14 +348,14 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND );
     }
     else
-    if (( Glide.State.ColorCombineFactor == GR_COMBINE_FACTOR_ONE ) &&
+/*    if (( Glide.State.ColorCombineFactor == GR_COMBINE_FACTOR_ONE ) &&
         ( Glide.State.ColorCombineOther == GR_COMBINE_OTHER_TEXTURE ) &&
         ( ( Glide.State.ColorCombineFunction == GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA ) || 
         ( Glide.State.ColorCombineFunction == GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL ) ) )
     {
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
     }
-    else
+    else*/
     {
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     }
@@ -481,6 +490,10 @@ grAlphaTestFunction( GrCmpFnc_t function )
 
     Glide.State.AlphaTestFunction = function;
 
+    // We can do this just because we know the constant values for both OpenGL and Glide
+    // To port it to anything else than OpenGL we NEED to change this code
+    OpenGL.AlphaTestFunction = GL_NEVER + function;
+/*
     switch ( function )
     {
     case GR_CMP_NEVER:      OpenGL.AlphaTestFunction = GL_NEVER;        break;
@@ -496,7 +509,7 @@ grAlphaTestFunction( GrCmpFnc_t function )
 //      glDisable( GL_ALPHA_TEST );
 //      return;
     }
-
+*/
     glEnable( GL_ALPHA_TEST );
     glAlphaFunc( OpenGL.AlphaTestFunction, OpenGL.AlphaReferenceValue );
 

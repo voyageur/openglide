@@ -101,24 +101,20 @@ void ValidateUserConfig( void )
     InternalConfig.FogEnable                = UserConfig.FogEnable;
     InternalConfig.InitFullScreen           = UserConfig.InitFullScreen;
     InternalConfig.PrecisionFixEnable       = UserConfig.PrecisionFixEnable;
-    InternalConfig.Wrap565Enable            = UserConfig.Wrap565Enable;
     InternalConfig.EnableMipMaps            = UserConfig.EnableMipMaps;
     InternalConfig.BuildMipMaps             = false;
     InternalConfig.IgnorePaletteChange      = UserConfig.IgnorePaletteChange;
 
     InternalConfig.MultiTextureEXTEnable    = false;
     InternalConfig.PaletteEXTEnable         = false;
-    InternalConfig.PackedPixelsEXTEnable    = false;
     InternalConfig.TextureEnvEXTEnable      = false;
     InternalConfig.VertexArrayEXTEnable     = false;
-    InternalConfig.SecondaryColorEXTEnable  = false;
     InternalConfig.FogCoordEXTEnable        = false;
 
     InternalConfig.TextureMemorySize        = 16;
     InternalConfig.FrameBufferMemorySize    = 8;
 
     InternalConfig.MMXEnable                = false;
-    InternalConfig.TDnowEnable              = false;
     
     int TexSize = UserConfig.TextureMemorySize;
     if ( ( TexSize > 1 ) && ( TexSize <= 16 ) )
@@ -159,14 +155,6 @@ void ValidateUserConfig( void )
         }
     }
 
-    if ( UserConfig.PackedPixelsEXTEnable )
-    {
-        if ( isExtensionSupported( "GL_EXT_packed_pixels" ) )
-        {
-            InternalConfig.PackedPixelsEXTEnable    = true;
-        }
-    }
-
     if ( UserConfig.TextureEnvEXTEnable )
     {
         if ( isExtensionSupported( "GL_EXT_texture_env_add" )  && 
@@ -184,18 +172,6 @@ void ValidateUserConfig( void )
         }
     }
 
-//    if ( UserConfig.SecondaryColorEXTEnable )
-    {
-        if ( isExtensionSupported( "GL_EXT_secondary_color" ) )
-        {
-            InternalConfig.SecondaryColorEXTEnable      = true;
-        }
-        else
-        {
-            MessageBox( NULL, "Current video does not support Secondary Color Extension, colors may be wrong", "Error", MB_OK );
-        }
-    }
-
     if ( UserConfig.FogCoordEXTEnable )
     {
         if ( isExtensionSupported( "GL_EXT_fog_coord" ) )
@@ -204,19 +180,11 @@ void ValidateUserConfig( void )
         }
     }
 
-    if ( UserConfig.MMXEnable )
+    if ( DetectMMX( ) )
     {
-        if ( DetectMMX() )
-        {
-            InternalConfig.MMXEnable        = true;
-        }
+        InternalConfig.MMXEnable = true;
     }
 
-    if ( UserConfig.TDnowEnable )
-    {
-        InternalConfig.TDnowEnable = true;
-    }
-    
     GLExtensions( );
 }
 
@@ -249,7 +217,11 @@ void GLExtensions( void )
         }
     }
 
-    if ( InternalConfig.SecondaryColorEXTEnable )
+    if ( ! isExtensionSupported( "GL_EXT_secondary_color" ) )
+    {
+        MessageBox( NULL, "Current video does not support Secondary Color Extension, colors may be wrong", "Error", MB_OK );
+    }
+    else
     {
         glSecondaryColor3ubvEXT     = (PFNGLSECONDARYCOLOR3UBVEXTPROC) wglGetProcAddress( "glSecondaryColor3ubvEXT" );
         glSecondaryColor3ubEXT      = (PFNGLSECONDARYCOLOR3UBEXTPROC) wglGetProcAddress( "glSecondaryColor3ubEXT" );
@@ -259,7 +231,6 @@ void GLExtensions( void )
              ( glSecondaryColorPointerEXT == NULL ) || (glSecondaryColor3fvEXT == NULL) )
         {
             Error( "Could not get address of function glSecondaryColorEXT.\n" );
-            InternalConfig.SecondaryColorEXTEnable      = false;
         }
         else
         {

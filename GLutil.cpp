@@ -440,27 +440,20 @@ void GetOptions( void )
     UserConfig.EnableMipMaps            = FALSE;
     UserConfig.BuildMipMaps             = FALSE;
     UserConfig.IgnorePaletteChange      = FALSE;
-
-    UserConfig.Wrap565Enable            = FALSE;
-
     UserConfig.MultiTextureEXTEnable    = TRUE;
     UserConfig.PaletteEXTEnable         = TRUE;
-    UserConfig.PackedPixelsEXTEnable    = FALSE;
     UserConfig.TextureEnvEXTEnable      = FALSE;
     UserConfig.VertexArrayEXTEnable     = FALSE;
-    UserConfig.SecondaryColorEXTEnable  = TRUE;
     UserConfig.FogCoordEXTEnable        = TRUE;
 
     UserConfig.TextureMemorySize        = 16;
     UserConfig.FrameBufferMemorySize    = 8;
 
     UserConfig.Priority                 = 2;
-    UserConfig.MMXEnable                = FALSE;
-    UserConfig.TDnowEnable              = FALSE;
 
     strcpy( Path, INIFILE );
 
-    GlideMsg("Configuration file is %s\n", Path );
+    GlideMsg( "Configuration file is %s\n", Path );
     
     if ( access( Path, 00 ) == -1 )
     {
@@ -468,21 +461,15 @@ void GetOptions( void )
         fprintf( IniFile, "Configuration File for OpenGLide\n\n" );
         fprintf( IniFile, "Version=%s\n\n", OpenGLideVersion );
         fprintf( IniFile, "[Options]\n" );
-        fprintf( IniFile, "EnableMMX=%d\n", UserConfig.MMXEnable );
-//      fprintf( IniFile, "Enable3DNow=%d\n", UserConfig.TDnowEnable );
         fprintf( IniFile, "CreateWindow=%d\n", UserConfig.CreateWindow );
         fprintf( IniFile, "InitFullScreen=%d\n", UserConfig.InitFullScreen );
         fprintf( IniFile, "EnableMipMaps=%d\n", UserConfig.EnableMipMaps );
         fprintf( IniFile, "IgnorePaletteChange=%d\n", UserConfig.IgnorePaletteChange );
         fprintf( IniFile, "EnableFog=%d\n", UserConfig.FogEnable );
         fprintf( IniFile, "EnablePrecisionFix=%d\n", UserConfig.PrecisionFixEnable );
-        fprintf( IniFile, "EnableWrap565=%d\n", UserConfig.Wrap565Enable );
         fprintf( IniFile, "EnableMultiTextureEXT=%d\n", UserConfig.MultiTextureEXTEnable );
         fprintf( IniFile, "EnablePaletteEXT=%d\n", UserConfig.PaletteEXTEnable );
-        fprintf( IniFile, "EnablePackedPixelsEXT=%d\n", UserConfig.PackedPixelsEXTEnable );
         fprintf( IniFile, "EnableVertexArrayEXT=%d\n", UserConfig.VertexArrayEXTEnable );
-//      fprintf( IniFile, "EnableTextureEnvEXT=%d\n", UserConfig.TextureEnvEXTEnable );
-        fprintf( IniFile, "EnableSecondaryColorEXT=%d\n", UserConfig.SecondaryColorEXTEnable );
         fprintf( IniFile, "EnableFogCoordEXT=%d\n", UserConfig.FogCoordEXTEnable );
         fprintf( IniFile, "TextureMemorySize=%d\n", UserConfig.TextureMemorySize );
         fprintf( IniFile, "WrapperPriority=%d\n", UserConfig.Priority );
@@ -494,10 +481,6 @@ void GetOptions( void )
         Pointer = FindConfig( Path, "Version" );
         if ( !strcmp( Pointer, OpenGLideVersion ) )
         {
-            Pointer = FindConfig( Path, "EnableMMX" );
-            UserConfig.MMXEnable = atoi( Pointer );
-//          Pointer = FindConfig( Path, "Enable3DNow" );
-//          UserConfig.TDnowEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "CreateWindow" );
             UserConfig.CreateWindow = atoi( Pointer );
             Pointer = FindConfig( Path, "InitFullScreen" );
@@ -510,20 +493,12 @@ void GetOptions( void )
             UserConfig.FogEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnablePrecisionFix" );
             UserConfig.PrecisionFixEnable = atoi( Pointer );
-            Pointer = FindConfig( Path, "EnableWrap565" );
-            UserConfig.Wrap565Enable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnableMultiTextureEXT" );
             UserConfig.MultiTextureEXTEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnablePaletteEXT" );
             UserConfig.PaletteEXTEnable = atoi( Pointer );
-            Pointer = FindConfig( Path, "EnablePackedPixelsEXT" );
-            UserConfig.PackedPixelsEXTEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnableVertexArrayEXT" );
             UserConfig.VertexArrayEXTEnable = atoi( Pointer );
-//          Pointer = FindConfig( Path, "EnableTextureEnvEXT" );
-//          UserConfig.TextureEnvEXTEnable = atoi( Pointer );
-            Pointer = FindConfig( Path, "EnableSecondaryColorEXT" );
-            UserConfig.SecondaryColorEXTEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnableFogCoordEXT" );
             UserConfig.FogCoordEXTEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "TextureMemorySize" );
@@ -617,7 +592,7 @@ void MMXCopyByteFlip( void *Dst, void *Src, DWORD NumberOfBytes )
       lea ESI, [ESI + ECX]
       lea EDI, [EDI + ECX - 8]
       neg ECX
-.align 16
+align 16
     mcbf_loopc:
       movq MM0, [ESI + ECX]
       movq MM1, MM0

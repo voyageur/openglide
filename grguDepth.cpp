@@ -88,16 +88,7 @@ grDepthMask( FxBool enable )
 
     RenderDrawTriangles( );
 
-    Glide.State.DepthBufferWritting = enable;
-
-    if ( Glide.State.DepthBufferWritting == FXFALSE )
-    {
-        OpenGL.DepthBufferWritting = GL_FALSE;
-    }
-    else
-    {
-        OpenGL.DepthBufferWritting = GL_TRUE;
-    }
+    Glide.State.DepthBufferWritting = OpenGL.DepthBufferWritting = enable;
 
     glDepthMask( OpenGL.DepthBufferWritting );
 
@@ -119,6 +110,11 @@ grDepthBufferFunction( GrCmpFnc_t func )
     RenderDrawTriangles( );
 
     Glide.State.DepthFunction = func;
+
+    // We can do this just because we know the constant values for both OpenGL and Glide
+    // To port it to anything else than OpenGL we NEED to change this code
+    OpenGL.DepthFunction = GL_NEVER + func;
+/*
     switch ( func )
     {
     case GR_CMP_NEVER:      OpenGL.DepthFunction = GL_NEVER;        break;
@@ -130,7 +126,7 @@ grDepthBufferFunction( GrCmpFnc_t func )
     case GR_CMP_GEQUAL:     OpenGL.DepthFunction = GL_GEQUAL;       break;
     case GR_CMP_ALWAYS:     OpenGL.DepthFunction = GL_ALWAYS;       break;
     }
-
+*/
     glDepthFunc( OpenGL.DepthFunction );
 
 #ifdef OPENGL_DEBUG

@@ -208,7 +208,6 @@ struct ConfigStruct
     int     FogEnable;
     int     InitFullScreen;
     int     PrecisionFixEnable;
-    int     Wrap565Enable;
     int     Priority;
     int     EnableMipMaps;
     int     BuildMipMaps;
@@ -216,14 +215,11 @@ struct ConfigStruct
 
     int     MultiTextureEXTEnable;
     int     PaletteEXTEnable;
-    int     PackedPixelsEXTEnable;
     int     TextureEnvEXTEnable;
     int     VertexArrayEXTEnable;
-    int     SecondaryColorEXTEnable;
     int     FogCoordEXTEnable;
 
     int     MMXEnable;
-    int     TDnowEnable;
     int     CreateWindow;
 
     DWORD   TextureMemorySize;

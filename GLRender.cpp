@@ -110,10 +110,7 @@ void RenderUpdateArrays( void )
     glVertexPointer( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TVertex[0] );
     glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor[0] );
     glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
-    if ( InternalConfig.SecondaryColorEXTEnable )
-    {
-        glSecondaryColorPointerEXT( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TColor2[0] );
-    }
+    glSecondaryColorPointerEXT( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TColor2[0] );
     if ( InternalConfig.FogCoordEXTEnable )
     {
         glFogCoordPointerEXT( 1, GL_FLOAT, &OGLRender.TFog[0] );

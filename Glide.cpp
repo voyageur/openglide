@@ -29,7 +29,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-char *OpenGLideVersion = "Version0.07b5";
+char *OpenGLideVersion = "Version0.08a1";
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -246,13 +246,10 @@ bool InitWindow( HWND hwnd )
     GlideMsg( "Init Full Screen = %s\n", InternalConfig.InitFullScreen ? "true" : "false" );
     GlideMsg( "Fog = %s\n", InternalConfig.FogEnable ? "true" : "false" );
     GlideMsg( "Precision Fix = %s\n", InternalConfig.PrecisionFixEnable ? "true" : "false" );
-    GlideMsg( "565 Wrap = %s\n", InternalConfig.Wrap565Enable ? "true" : "false" );
     GlideMsg( "MultiTexture = %s\n", InternalConfig.MultiTextureEXTEnable ? "true" : "false" );
     GlideMsg( "Palette Extension = %s\n", InternalConfig.PaletteEXTEnable ? "true" : "false" );
-    GlideMsg( "Packed Pixels Extension = %s\n", InternalConfig.PackedPixelsEXTEnable ? "true" : "false" );
 //  GlideMsg( "Texture Env Extension = %s\n", InternalConfig.TextureEnvEXTEnable ? "true" : "false" );
     GlideMsg( "Vertex Array Extension = %s\n", InternalConfig.VertexArrayEXTEnable ? "true" : "false" );
-    GlideMsg( "Secondary Color Extension = %s\n", InternalConfig.SecondaryColorEXTEnable ? "true" : "false" );
     GlideMsg( "Fog Coord Extension = %s\n", InternalConfig.FogCoordEXTEnable ? "true" : "false" );
     GlideMsg( "Texture Memory Size = %d Mb\n", InternalConfig.TextureMemorySize );
     GlideMsg( "Frame Buffer Memory Size = %d Mb\n", InternalConfig.FrameBufferMemorySize );
