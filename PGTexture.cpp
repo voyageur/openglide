@@ -174,26 +174,17 @@ inline void Convert8332to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 inline void ConvertP8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels, DWORD *palette)
 {
 	while(Pixels--)
-	{
-		*Buffer2 = (palette[*Buffer1] & 0xFF000000) |
-			((palette[*Buffer1] & 0x000000FF) << 16) | 
-			(palette[*Buffer1] & 0x0000FF00) | 
-			((palette[*Buffer1] & 0x00FF0000) >> 16);
-		Buffer1++;
-		Buffer2++;
-	}
+		*Buffer2++ = palette[*Buffer1++];
 }
 
 inline void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWORD *palette)
 {
-	DWORD R, G, B, A;
+	DWORD RGB, A;
 	for( DWORD i = Pixels; i > 0; i-- )
 	{
-		R = (palette[(*Buffer1)&0x00FF] & 0x00FF0000) >> 16;
-		G = (palette[(*Buffer1)&0x00FF] & 0x0000FF00) >> 8;
-		B = (palette[(*Buffer1)&0x00FF] & 0x000000FF);
-		A = ((*Buffer1) & 0xFF00) >> 8;
-		*Buffer2 = (A << 24)| (B << 16) | (G << 8) | R;
+		RGB = (palette[(*Buffer1)&0x00FF] & 0x00FFFFFF);
+		A = (*Buffer1) >> 8;
+		*Buffer2 = (A << 24) | RGB;
 		Buffer1++;
 		Buffer2++;
 	}
@@ -256,13 +247,19 @@ void PGTexture::DownloadTable(GrTexTable_t type, void *data)
     if(type == GR_TEXTABLE_PALETTE)
     {
         FxU32 hash;
+        FxU32 *idata;
         int i;
 
-        memcpy(m_palette, data, sizeof(m_palette));
+        idata = (FxU32 *)data;
 
         hash = 0;
         for(i = 0; i < 256; i++)
         {
+            m_palette[i] = (  (idata[i] & 0xff00ff00)
+                            | ((idata[i] & 0x00ff0000) >> 16)
+                            | ((idata[i] & 0x000000ff) << 16)
+                           );
+                             
             hash = ((hash << 5) | (hash >> 26));
             hash += m_palette[i];
         }
@@ -383,6 +380,12 @@ void PGTexture::MakeReady()
             break;
         }
     }
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
 }
 
 FxU32 PGTexture::TextureMemRequired(FxU32 evenOdd, GrTexInfo *info)
@@ -518,7 +521,11 @@ void PGTexture::GetAspect(float *hAspect, float *wAspect)
 
 void PGTexture::ChromakeyValue(GrColor_t value)
 {
-    m_chromakey_value = value;
+    m_chromakey_value = (
+                         (value & 0xff00ff00)
+                         | ((value & 0x00ff0000) >> 16)
+                         | ((value & 0x000000ff) << 16)
+                         );
 }
 
 void PGTexture::ChromakeyMode(GrChromakeyMode_t mode)
