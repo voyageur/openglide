@@ -97,6 +97,23 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
     Glide.State.ClipMaxX = maxx;
     Glide.State.ClipMinY = miny;
     Glide.State.ClipMaxY = maxy;
+
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+
+    if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
+    {
+        glOrtho( minx, maxx, miny, maxy, OpenGL.ZNear, OpenGL.ZFar );
+        glViewport( minx, miny, maxx - minx, maxy - miny ); 
+    }
+    else
+    {
+        glOrtho( minx, maxx, maxy, miny, OpenGL.ZNear, OpenGL.ZFar );
+        glViewport( minx, OpenGL.WindowHeight - maxy, maxx - minx, maxy - miny ); 
+    }
+
+
+    glMatrixMode( GL_MODELVIEW );
 }
 
 //----------------------------------------------------------------
