@@ -140,7 +140,7 @@ void ValidateUserConfig()
 	{
 		if ( isExtensionSupported( "GL_EXT_shared_texture_palette" ) )
 		{
-			InternalConfig.PaletteEXTEnable			= true;
+			InternalConfig.PaletteEXTEnable			= false;
 		}
 	}
 
