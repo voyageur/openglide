@@ -42,6 +42,7 @@ TexDB::~TexDB( void )
             delete tmp;
         }
     }
+    delete[] m_first;
 }
 
 bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
@@ -49,11 +50,6 @@ bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
 {
     Record  * r;
     FxU32   sect = startAddress / ( 32 * 1024 );
-
-    if ( sect >= numberOfTexSections )
-    {
-        sect = numberOfTexSections - 1;
-    }
 
     for ( r = m_first[ sect ]; r != NULL; r = r->next )
     {
@@ -105,11 +101,6 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
         stt_sect = 0;
     }
  
-    if ( stt_sect >= numberOfTexSections )
-    {
-        stt_sect = numberOfTexSections - 1;
-    }
-
     end_sect = endAddress / ( 32 * 1024 );
 
     if ( end_sect >= numberOfTexSections )
@@ -148,10 +139,6 @@ void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
     FxU32   sect;
 
     sect = startAddress / ( 32 * 1024 );
-    if ( sect >= numberOfTexSections )
-    {
-        sect = numberOfTexSections - 1;
-    }
 
     r->startAddress = startAddress;
     r->endAddress = endAddress;
