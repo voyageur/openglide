@@ -15,17 +15,20 @@
 #include "amd3dx.h"
 
 //**************************************************************
-// extern variables and functions prototypes
+// Defines
 //**************************************************************
 
-void    MMXCopyByteFlip( void *Dst, void *Src, DWORD NumberOfBytes );
+#define DEBUG_MIN_MAX( var, maxvar, minvar )    \
+    if ( var > maxvar ) maxvar = var;           \
+    if ( var < minvar ) minvar = var;
+
+//**************************************************************
+// extern variables and functions prototypes
+//**************************************************************
 
 //**************************************************************
 // Local variables
 //**************************************************************
-
-// Indicates the need of a second render pass
-bool    SecondPass;
 
 // The functions for the color combine
 float   (*AlphaFactorFunc)( float LocalAlpha, float OtherAlpha );
@@ -38,12 +41,30 @@ const float vertex_snap = float( 3L << 18 );
 
 // Standard structs for the render
 RenderStruct OGLRender;
-TColorStruct CFactor;
 
-float * ConstantForMultiply = NULL;
-float * ConstantForAnd = NULL;
-float * ConstantForSubtract = NULL;
-
+// Varibles for the Add functions
+static TColorStruct     Local, 
+                        Other, 
+                        CFactor;
+static float            AFactor[3];
+static TColorStruct     *pC,
+                        *pC2;
+static TVertexStruct    *pV;
+static TTextureStruct   *pTS;
+static TFogStruct       *pF;
+static void             *pt1, 
+                        *pt2, 
+                        *pt3;
+static float            atmuoow;
+static float            btmuoow;
+static float            ctmuoow;
+static float            w, 
+                        aoow, 
+                        boow, 
+                        coow;
+static float            hAspect, 
+                        wAspect,
+                        maxoow;
 
 //**************************************************************
 // Functions definitions
@@ -59,19 +80,6 @@ void RenderInitialize( void )
     OGLRender.TTexture  = new TTextureStruct[ MAXTRIANGLES + 1 ];
     OGLRender.TVertex   = new TVertexStruct[ MAXTRIANGLES + 1 ];
     OGLRender.TFog      = new TFogStruct[ MAXTRIANGLES + 1 ];
-
-    ConstantForAnd      = new float[ 2 ];
-    ConstantForMultiply = new float[ 2 ];
-    ConstantForSubtract = new float[ 2 ];
-
-    ConstantForAnd[ 0 ] = 0xFFFFF;
-    ConstantForAnd[ 1 ] = 0xFFFFF;
-
-    ConstantForMultiply[ 0 ] = D1OVER65536;
-    ConstantForMultiply[ 1 ] = D1OVER65536;
-
-    ConstantForSubtract[ 0 ] = 8.9375f;
-    ConstantForSubtract[ 1 ] = 8.9375f;
 
 #ifdef OGL_DEBUG
     OGLRender.FrameTriangles = 0;
@@ -95,9 +103,6 @@ void RenderFree( void )
     delete[] OGLRender.TTexture;
     delete[] OGLRender.TVertex;
     delete[] OGLRender.TFog;
-    delete[] ConstantForAnd;
-    delete[] ConstantForMultiply;
-    delete[] ConstantForSubtract;
 }
 
 void RenderUpdateArrays( void )
@@ -260,62 +265,6 @@ void RenderDrawTriangles( void )
         glActiveTextureARB( GL_TEXTURE0_ARB );
     }
 
-
-    if ( SecondPass && !InternalConfig.SecondaryColorEXTEnable )
-    {
-        glBlendFunc( GL_ONE, GL_ONE );
-        glEnable( GL_BLEND );
-        glDisable( GL_TEXTURE_2D );
-
-        if ( OpenGL.DepthBufferType )
-        {
-            glPolygonOffset( 1.0f, 0.5f );
-        }
-        else
-        {
-            glPolygonOffset( -1.0f, -0.5f );
-        }
-
-        glEnable( GL_POLYGON_OFFSET_FILL );
-
-        if ( 0 && InternalConfig.VertexArrayEXTEnable ) // ????
-        {
-            glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor2 );
-            glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
-            glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor );
-        }
-        else
-        {
-            glBegin( GL_TRIANGLES );
-            for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
-            {
-                glColor4fv( &OGLRender.TColor2[ i ].ar );
-                glVertex3fv( &OGLRender.TVertex[ i ].ax );
-
-                glColor4fv( &OGLRender.TColor2[ i ].br );
-                glVertex3fv( &OGLRender.TVertex[ i ].bx );
-
-                glColor4fv( &OGLRender.TColor2[ i ].cr );
-                glVertex3fv( &OGLRender.TVertex[ i ].cx );
-            }
-            glEnd( );
-        }
-
-        if ( Glide.State.DepthBiasLevel )
-        {
-            glPolygonOffset( 1.0f, OpenGL.DepthBiasLevel );
-        }
-        else
-        {
-            glDisable( GL_POLYGON_OFFSET_FILL );
-        }
-
-        if ( OpenGL.Blend )
-        {
-            glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
-        }
-    }
-
 #ifdef OGL_DEBUG
     if ( OGLRender.NumberOfTriangles > OGLRender.MaxSequencedTriangles )
     {
@@ -330,29 +279,12 @@ void RenderDrawTriangles( void )
 
 void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c, bool unsnap )
 {
-    static TColorStruct     Local, 
-                            Other, 
-                            CFactor;
-    static float            AFactor[3];
-    static TColorStruct     *pC,
-                            *pC2;
-    static TVertexStruct    *pV;
-    static TTextureStruct   *pTS;
-    static TFogStruct       *pF;
-    static void             *pt1, 
-                            *pt2, 
-                            *pt3;
-    float                   atmuoow;
-    float                   btmuoow;
-    float                   ctmuoow;
-
     pC = &OGLRender.TColor[ OGLRender.NumberOfTriangles ];
     pC2 = &OGLRender.TColor2[ OGLRender.NumberOfTriangles ];
     pV = &OGLRender.TVertex[ OGLRender.NumberOfTriangles ];
     pTS = &OGLRender.TTexture[ OGLRender.NumberOfTriangles ];
 
     ZeroMemory( pC2, sizeof( TColorStruct ) );
-    SecondPass  = false;
 
     if ( ( Glide.State.STWHint & GR_STWHINT_W_DIFF_TMU0 ) == 0 )
     {
@@ -378,7 +310,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_LOCAL_CONSTANT:
-            Local.aa = Local.ba = Local.ca = OpenGL.ConstantColor[3];
+            Local.aa = Local.ba = Local.ca = OpenGL.ConstantColor[ 3 ];
             break;
 
         case GR_COMBINE_LOCAL_DEPTH:
@@ -401,7 +333,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_OTHER_CONSTANT:
-            Other.aa = Other.ba = Other.ca = OpenGL.ConstantColor[3];
+            Other.aa = Other.ba = Other.ca = OpenGL.ConstantColor[ 3 ];
             break;
 
         case GR_COMBINE_OTHER_TEXTURE:
@@ -427,9 +359,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_LOCAL_CONSTANT:
-            Local.ar = Local.br = Local.cr = OpenGL.ConstantColor[0];
-            Local.ag = Local.bg = Local.cg = OpenGL.ConstantColor[1];
-            Local.ab = Local.bb = Local.cb = OpenGL.ConstantColor[2];
+            Local.ar = Local.br = Local.cr = OpenGL.ConstantColor[ 0 ];
+            Local.ag = Local.bg = Local.cg = OpenGL.ConstantColor[ 1 ];
+            Local.ab = Local.bb = Local.cb = OpenGL.ConstantColor[ 2 ];
             break;
         }
     }
@@ -451,9 +383,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_OTHER_CONSTANT:
-            Other.ar = Other.br = Other.cr = OpenGL.ConstantColor[0];
-            Other.ag = Other.bg = Other.cg = OpenGL.ConstantColor[1];
-            Other.ab = Other.bb = Other.cb = OpenGL.ConstantColor[2];
+            Other.ar = Other.br = Other.cr = OpenGL.ConstantColor[ 0 ];
+            Other.ag = Other.bg = Other.cg = OpenGL.ConstantColor[ 1 ];
+            Other.ab = Other.bb = Other.cb = OpenGL.ConstantColor[ 2 ];
             break;
 
         case GR_COMBINE_OTHER_TEXTURE:
@@ -466,9 +398,10 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 
     ColorFunctionFunc( pC, pC2, &Local, &Other );
 
-    pC2->aa = 0.0f;
-    pC2->ba = 0.0f;
-    pC2->ca = 0.0f;
+// ???? Why is this here as we are zeroing the pC2 struct in the beggining ???????
+//    pC2->aa = 0.0f;
+//    pC2->ba = 0.0f;
+//    pC2->ca = 0.0f;
 
     switch ( Glide.State.AlphaFunction )
     {
@@ -485,38 +418,38 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 
     case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL:
     case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA:
-        pC->aa = ((1.0f - AlphaFactorFunc( Local.aa, Other.aa )) * Local.aa);
-        pC->ba = ((1.0f - AlphaFactorFunc( Local.ba, Other.ba )) * Local.ba);
-        pC->ca = ((1.0f - AlphaFactorFunc( Local.ca, Other.ca )) * Local.ca);
+        pC->aa = ( 1.0f - AlphaFactorFunc( Local.aa, Other.aa ) ) * Local.aa;
+        pC->ba = ( 1.0f - AlphaFactorFunc( Local.ba, Other.ba ) ) * Local.ba;
+        pC->ca = ( 1.0f - AlphaFactorFunc( Local.ca, Other.ca ) ) * Local.ca;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER:
-        pC->aa = (AlphaFactorFunc( Local.aa, Other.aa ) * Other.aa);
-        pC->ba = (AlphaFactorFunc( Local.ba, Other.ba ) * Other.ba);
-        pC->ca = (AlphaFactorFunc( Local.ca, Other.ca ) * Other.ca);
+        pC->aa = AlphaFactorFunc( Local.aa, Other.aa ) * Other.aa;
+        pC->ba = AlphaFactorFunc( Local.ba, Other.ba ) * Other.ba;
+        pC->ca = AlphaFactorFunc( Local.ca, Other.ca ) * Other.ca;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL:
     case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA:
-        pC->aa = (AlphaFactorFunc( Local.aa, Other.aa ) * Other.aa + Local.aa);
-        pC->ba = (AlphaFactorFunc( Local.ba, Other.ba ) * Other.ba + Local.ba);
-        pC->ca = (AlphaFactorFunc( Local.ca, Other.ca ) * Other.ca + Local.ca);
+        pC->aa = AlphaFactorFunc( Local.aa, Other.aa ) * Other.aa + Local.aa;
+        pC->ba = AlphaFactorFunc( Local.ba, Other.ba ) * Other.ba + Local.ba;
+        pC->ca = AlphaFactorFunc( Local.ca, Other.ca ) * Other.ca + Local.ca;
 //      pC2->aa =  Local.aa;
 //      pC2->ba =  Local.ba;
 //      pC2->ca =  Local.ca;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL:
-        pC->aa = (AlphaFactorFunc( Local.aa, Other.aa ) * ( Other.aa - Local.aa ));
-        pC->ba = (AlphaFactorFunc( Local.ba, Other.ba ) * ( Other.ba - Local.ba ));
-        pC->ca = (AlphaFactorFunc( Local.ca, Other.ca ) * ( Other.ca - Local.ca ));
+        pC->aa = AlphaFactorFunc( Local.aa, Other.aa ) * ( Other.aa - Local.aa );
+        pC->ba = AlphaFactorFunc( Local.ba, Other.ba ) * ( Other.ba - Local.ba );
+        pC->ca = AlphaFactorFunc( Local.ca, Other.ca ) * ( Other.ca - Local.ca );
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL:
     case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA:
-        pC->aa = (AlphaFactorFunc( Local.aa, Other.aa ) * ( Other.aa - Local.aa ) + Local.aa);
-        pC->ba = (AlphaFactorFunc( Local.ba, Other.ba ) * ( Other.ba - Local.ba ) + Local.ba);
-        pC->ca = (AlphaFactorFunc( Local.ca, Other.ca ) * ( Other.ca - Local.ca ) + Local.ca);
+        pC->aa = AlphaFactorFunc( Local.aa, Other.aa ) * ( Other.aa - Local.aa ) + Local.aa;
+        pC->ba = AlphaFactorFunc( Local.ba, Other.ba ) * ( Other.ba - Local.ba ) + Local.ba;
+        pC->ca = AlphaFactorFunc( Local.ca, Other.ca ) * ( Other.ca - Local.ca ) + Local.ca;
 //      pC2->aa =  Local.ba;
 //      pC2->ba =  Local.ba;
 //      pC2->ca =  Local.ca;
@@ -525,44 +458,28 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 
     if ( Glide.State.ColorCombineInvert )
     {
-        pC->ar = 1.0f - pC->ar;
-        pC->ag = 1.0f - pC->ag;
-        pC->ab = 1.0f - pC->ab;
-        pC->br = 1.0f - pC->br;
-        pC->bg = 1.0f - pC->bg;
-        pC->bb = 1.0f - pC->bb;
-        pC->cr = 1.0f - pC->cr;
-        pC->cg = 1.0f - pC->cg;
-        pC->cb = 1.0f - pC->cb;
-        if ( SecondPass )
-        {
-            pC2->ar = 1.0f - pC2->ar;
-            pC2->ag = 1.0f - pC2->ag;
-            pC2->ab = 1.0f - pC2->ab;
-            pC2->br = 1.0f - pC2->br;
-            pC2->bg = 1.0f - pC2->bg;
-            pC2->bb = 1.0f - pC2->bb;
-            pC2->cr = 1.0f - pC2->cr;
-            pC2->cg = 1.0f - pC2->cg;
-            pC2->cb = 1.0f - pC2->cb;
-        }
+        pC->ar = 1.0f - pC->ar - pC2->ar;
+        pC->ag = 1.0f - pC->ag - pC2->ag;
+        pC->ab = 1.0f - pC->ab - pC2->ab;
+        pC->br = 1.0f - pC->br - pC2->br;
+        pC->bg = 1.0f - pC->bg - pC2->bg;
+        pC->bb = 1.0f - pC->bb - pC2->bb;
+        pC->cr = 1.0f - pC->cr - pC2->cr;
+        pC->cg = 1.0f - pC->cg - pC2->cg;
+        pC->cb = 1.0f - pC->cb - pC2->cb;
+        pC2->ar = pC2->ag = pC2->ab = 0.0f;
+        pC2->br = pC2->bg = pC2->bb = 0.0f;
+        pC2->cr = pC2->cg = pC2->cb = 0.0f;
     }
 
     if ( Glide.State.AlphaInvert )
     {
-        pC->aa = 1.0f - pC->aa;
-        pC->ba = 1.0f - pC->ba;
-        pC->ca = 1.0f - pC->ca;
-        if ( SecondPass )
-        {
-            pC2->aa = 1.0f - pC2->aa;
-            pC2->ba = 1.0f - pC2->ba;
-            pC2->ca = 1.0f - pC2->ca;
-        }
+        pC->aa = 1.0f - pC->aa - pC2->aa;
+        pC->ba = 1.0f - pC->ba - pC2->ba;
+        pC->ca = 1.0f - pC->ca - pC2->ca;
+        pC2->aa = pC2->ba = pC2->ca = 0.0f;
     }
     
-    static float w, aoow, boow, coow;
-
     // Z-Buffering
     if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
          ( Glide.State.DepthFunction == GR_CMP_ALWAYS ) )
@@ -630,9 +547,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 
     if ( OpenGL.Texture )
     {
-        float maxoow = max( atmuoow, max( btmuoow, ctmuoow ) );
-        float hAspect, 
-              wAspect;
+        maxoow = max( atmuoow, max( btmuoow, ctmuoow ) );
 
         Textures->GetAspect( &hAspect, &wAspect );
 
@@ -665,82 +580,51 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             pF->cf = c->a * D1OVER255;
         }
     #ifdef OGL_DEBUG
-            if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
-            if ( pF->bf > OGLRender.MaxF ) OGLRender.MaxF = pF->bf;
-            if ( pF->cf > OGLRender.MaxF ) OGLRender.MaxF = pF->cf;
-            if ( pF->af < OGLRender.MinF ) OGLRender.MinF = pF->af;
-            if ( pF->bf < OGLRender.MinF ) OGLRender.MinF = pF->bf;
-            if ( pF->cf < OGLRender.MinF ) OGLRender.MinF = pF->cf;
+       DEBUG_MIN_MAX( pC->af, OGLRender.MaxF, OGLRender.MinF );
+       DEBUG_MIN_MAX( pC->bf, OGLRender.MaxF, OGLRender.MinF );
+       DEBUG_MIN_MAX( pC->bf, OGLRender.MaxF, OGLRender.MinF );
     #endif
     }
 
 #ifdef OGL_DEBUG
-    if ( pC->ar > OGLRender.MaxR ) OGLRender.MaxR = pC->ar;
-    if ( pC->br > OGLRender.MaxR ) OGLRender.MaxR = pC->br;
-    if ( pC->cr > OGLRender.MaxR ) OGLRender.MaxR = pC->cr;
-    if ( pC->ar < OGLRender.MinR ) OGLRender.MinR = pC->ar;
-    if ( pC->br < OGLRender.MinR ) OGLRender.MinR = pC->br;
-    if ( pC->cr < OGLRender.MinR ) OGLRender.MinR = pC->cr;
+    DEBUG_MIN_MAX( pC->ar, OGLRender.MaxR, OGLRender.MinR );
+    DEBUG_MIN_MAX( pC->br, OGLRender.MaxR, OGLRender.MinR );
+    DEBUG_MIN_MAX( pC->cr, OGLRender.MaxR, OGLRender.MinR );
     
-    if ( pC->ag > OGLRender.MaxG ) OGLRender.MaxG = pC->ag;
-    if ( pC->bg > OGLRender.MaxG ) OGLRender.MaxG = pC->bg;
-    if ( pC->cg > OGLRender.MaxG ) OGLRender.MaxG = pC->cg;
-    if ( pC->ag < OGLRender.MinG ) OGLRender.MinG = pC->ag;
-    if ( pC->bg < OGLRender.MinG ) OGLRender.MinG = pC->bg;
-    if ( pC->cg < OGLRender.MinG ) OGLRender.MinG = pC->cg;
+    DEBUG_MIN_MAX( pC->ag, OGLRender.MaxG, OGLRender.MinG );
+    DEBUG_MIN_MAX( pC->bg, OGLRender.MaxG, OGLRender.MinG );
+    DEBUG_MIN_MAX( pC->cg, OGLRender.MaxG, OGLRender.MinG );
 
-    if ( pC->ab > OGLRender.MaxB ) OGLRender.MaxB = pC->ab;
-    if ( pC->bb > OGLRender.MaxB ) OGLRender.MaxB = pC->bb;
-    if ( pC->cb > OGLRender.MaxB ) OGLRender.MaxB = pC->cb;
-    if ( pC->ab < OGLRender.MinB ) OGLRender.MinB = pC->ab;
-    if ( pC->bb < OGLRender.MinB ) OGLRender.MinB = pC->bb;
-    if ( pC->cb < OGLRender.MinB ) OGLRender.MinB = pC->cb;
+    DEBUG_MIN_MAX( pC->ab, OGLRender.MaxB, OGLRender.MinB );
+    DEBUG_MIN_MAX( pC->bb, OGLRender.MaxB, OGLRender.MinB );
+    DEBUG_MIN_MAX( pC->cb, OGLRender.MaxB, OGLRender.MinB );
 
-    if ( pC->aa > OGLRender.MaxA ) OGLRender.MaxA = pC->aa;
-    if ( pC->ba > OGLRender.MaxA ) OGLRender.MaxA = pC->ba;
-    if ( pC->ca > OGLRender.MaxA ) OGLRender.MaxA = pC->ca;
-    if ( pC->aa < OGLRender.MinA ) OGLRender.MinA = pC->aa;
-    if ( pC->ba < OGLRender.MinA ) OGLRender.MinA = pC->ba;
-    if ( pC->ca < OGLRender.MinA ) OGLRender.MinA = pC->ca;
+    DEBUG_MIN_MAX( pC->aa, OGLRender.MaxA, OGLRender.MinA );
+    DEBUG_MIN_MAX( pC->ba, OGLRender.MaxA, OGLRender.MinA );
+    DEBUG_MIN_MAX( pC->ca, OGLRender.MaxA, OGLRender.MinA );
 
-    if ( pV->az > OGLRender.MaxZ ) OGLRender.MaxZ = pV->az;
-    if ( pV->bz > OGLRender.MaxZ ) OGLRender.MaxZ = pV->bz;
-    if ( pV->cz > OGLRender.MaxZ ) OGLRender.MaxZ = pV->cz;
-    if ( pV->az < OGLRender.MinZ ) OGLRender.MinZ = pV->az;
-    if ( pV->bz < OGLRender.MinZ ) OGLRender.MinZ = pV->bz;
-    if ( pV->cz < OGLRender.MinZ ) OGLRender.MinZ = pV->cz;
+    DEBUG_MIN_MAX( pC->az, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pC->bz, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pC->cz, OGLRender.MaxZ, OGLRender.MinZ );
 
-    if ( pV->ax > OGLRender.MaxX ) OGLRender.MaxX = pV->ax;
-    if ( pV->bx > OGLRender.MaxX ) OGLRender.MaxX = pV->bx;
-    if ( pV->cx > OGLRender.MaxX ) OGLRender.MaxX = pV->cx;
-    if ( pV->ax < OGLRender.MinX ) OGLRender.MinX = pV->ax;
-    if ( pV->bx < OGLRender.MinX ) OGLRender.MinX = pV->bx;
-    if ( pV->cx < OGLRender.MinX ) OGLRender.MinX = pV->cx;
+    DEBUG_MIN_MAX( pC->ax, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pC->bx, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pC->cx, OGLRender.MaxX, OGLRender.MinX );
 
-    if ( pV->ay > OGLRender.MaxY ) OGLRender.MaxY = pV->ay;
-    if ( pV->by > OGLRender.MaxY ) OGLRender.MaxY = pV->by;
-    if ( pV->cy > OGLRender.MaxY ) OGLRender.MaxY = pV->cy;
-    if ( pV->ay < OGLRender.MinY ) OGLRender.MinY = pV->ay;
-    if ( pV->by < OGLRender.MinY ) OGLRender.MinY = pV->by;
-    if ( pV->cy < OGLRender.MinY ) OGLRender.MinY = pV->cy;
+    DEBUG_MIN_MAX( pC->ay, OGLRender.Maxy, OGLRender.MinY );
+    DEBUG_MIN_MAX( pC->by, OGLRender.MaxY, OGLRender.MinY );
+    DEBUG_MIN_MAX( pC->cy, OGLRender.MaxY, OGLRender.MinY );
 
-    if ( pTS->as > OGLRender.MaxS ) OGLRender.MaxS = pTS->as;
-    if ( pTS->bs > OGLRender.MaxS ) OGLRender.MaxS = pTS->bs;
-    if ( pTS->cs > OGLRender.MaxS ) OGLRender.MaxS = pTS->cs;
-    if ( pTS->as < OGLRender.MinS ) OGLRender.MinS = pTS->as;
-    if ( pTS->bs < OGLRender.MinS ) OGLRender.MinS = pTS->bs;
-    if ( pTS->cs < OGLRender.MinS ) OGLRender.MinS = pTS->cs;
+    DEBUG_MIN_MAX( pC->as, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pC->bs, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pC->cs, OGLRender.MaxS, OGLRender.MinS );
 
-    if ( pTS->at > OGLRender.MaxT ) OGLRender.MaxT = pTS->at;
-    if ( pTS->bt > OGLRender.MaxT ) OGLRender.MaxT = pTS->bt;
-    if ( pTS->ct > OGLRender.MaxT ) OGLRender.MaxT = pTS->ct;
-    if ( pTS->at < OGLRender.MinT ) OGLRender.MinT = pTS->at;
-    if ( pTS->bt < OGLRender.MinT ) OGLRender.MinT = pTS->bt;
-    if ( pTS->ct < OGLRender.MinT ) OGLRender.MinT = pTS->ct;
+    DEBUG_MIN_MAX( pC->at, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pC->bt, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pC->ct, OGLRender.MaxT, OGLRender.MinT );
 
     OGLRender.FrameTriangles++;
 #endif
-
     
     OGLRender.NumberOfTriangles++;
 
@@ -754,23 +638,8 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 #endif
 }
 
-void RenderAddLine( const GrVertex *a, const GrVertex *b )
+void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
 {
-    static TColorStruct     Local, 
-                            Other, 
-                            CFactor;
-    static float            AFactor[ 2 ];
-    static TColorStruct     *pC, 
-                            *pC2;
-    static TVertexStruct    *pV;
-    static TTextureStruct   *pTS;
-    static TFogStruct       *pF;
-    static void             *pt1, 
-                            *pt2, 
-                            *pt3;
-    float                   atmuoow;
-    float                   btmuoow;
-
     pC  = &OGLRender.TColor[ MAXTRIANGLES ];
     pC2 = &OGLRender.TColor2[ MAXTRIANGLES ];
     pV  = &OGLRender.TVertex[ MAXTRIANGLES ];
@@ -779,7 +648,6 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 
     // Color Stuff, need to optimize it
     ZeroMemory( pC2, sizeof( TColorStruct ) );
-    SecondPass  = false;
 
     if ( ( Glide.State.STWHint & GR_STWHINT_W_DIFF_TMU0 ) == 0 )
     {
@@ -911,32 +779,30 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL:
         ColorFactor3Func( &CFactor, &Local, &Other );
-        pC->ar = CFactor.ar * Other.ar + Local.ar;
-        pC->ag = CFactor.ag * Other.ag + Local.ag;
-        pC->ab = CFactor.ab * Other.ab + Local.ab;
-        pC->br = CFactor.br * Other.br + Local.br;
-        pC->bg = CFactor.bg * Other.bg + Local.bg;
-        pC->bb = CFactor.bb * Other.bb + Local.bb;
+        pC->ar = CFactor.ar * Other.ar;
+        pC->ag = CFactor.ag * Other.ag;
+        pC->ab = CFactor.ab * Other.ab;
+        pC->br = CFactor.br * Other.br;
+        pC->bg = CFactor.bg * Other.bg;
+        pC->bb = CFactor.bb * Other.bb;
         pC2->ar = Local.ar;
         pC2->ag = Local.ag;
         pC2->ab = Local.ab;
         pC2->br = Local.br;
         pC2->bg = Local.bg;
         pC2->bb = Local.bb;
-        SecondPass = true;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA:
         ColorFactor3Func( &CFactor, &Local, &Other );
-        pC->ar = CFactor.ar * Other.ar + Local.aa;
-        pC->ag = CFactor.ag * Other.ag + Local.aa;
-        pC->ab = CFactor.ab * Other.ab + Local.aa;
-        pC->br = CFactor.br * Other.br + Local.ba;
-        pC->bg = CFactor.bg * Other.bg + Local.ba;
-        pC->bb = CFactor.bb * Other.bb + Local.ba;
+        pC->ar = CFactor.ar * Other.ar;
+        pC->ag = CFactor.ag * Other.ag;
+        pC->ab = CFactor.ab * Other.ab;
+        pC->br = CFactor.br * Other.br;
+        pC->bg = CFactor.bg * Other.bg;
+        pC->bb = CFactor.bb * Other.bb;
         pC2->ar = pC2->ag = pC2->ab = Local.aa;
         pC2->br = pC2->bg = pC2->bb = Local.ba;
-        SecondPass = true;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL:
@@ -964,19 +830,18 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         else
         {
             ColorFactor3Func( &CFactor, &Local, &Other );
-            pC->ar = CFactor.ar * (Other.ar - Local.ar) + Local.ar;
-            pC->ag = CFactor.ag * (Other.ag - Local.ag) + Local.ag;
-            pC->ab = CFactor.ab * (Other.ab - Local.ab) + Local.ab;
-            pC->br = CFactor.br * (Other.br - Local.br) + Local.br;
-            pC->bg = CFactor.bg * (Other.bg - Local.bg) + Local.bg;
-            pC->bb = CFactor.bb * (Other.bb - Local.bb) + Local.bb;
+            pC->ar = CFactor.ar * (Other.ar - Local.ar);
+            pC->ag = CFactor.ag * (Other.ag - Local.ag);
+            pC->ab = CFactor.ab * (Other.ab - Local.ab);
+            pC->br = CFactor.br * (Other.br - Local.br);
+            pC->bg = CFactor.bg * (Other.bg - Local.bg);
+            pC->bb = CFactor.bb * (Other.bb - Local.bb);
             pC2->ar = Local.ar;
             pC2->ag = Local.ag;
             pC2->ab = Local.ab;
             pC2->br = Local.br;
             pC2->bg = Local.bg;
             pC2->bb = Local.bb;
-            SecondPass = true;
         }
         break;
 
@@ -991,15 +856,14 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         else
         {
             ColorFactor3Func( &CFactor, &Local, &Other );
-            pC->ar = CFactor.ar * (Other.ar - Local.ar) + Local.aa;
-            pC->ag = CFactor.ag * (Other.ag - Local.ag) + Local.aa;
-            pC->ab = CFactor.ab * (Other.ab - Local.ab) + Local.aa;
-            pC->br = CFactor.br * (Other.br - Local.br) + Local.ba;
-            pC->bg = CFactor.bg * (Other.bg - Local.bg) + Local.ba;
-            pC->bb = CFactor.bb * (Other.bb - Local.bb) + Local.ba;
+            pC->ar = CFactor.ar * (Other.ar - Local.ar);
+            pC->ag = CFactor.ag * (Other.ag - Local.ag);
+            pC->ab = CFactor.ab * (Other.ab - Local.ab);
+            pC->br = CFactor.br * (Other.br - Local.br);
+            pC->bg = CFactor.bg * (Other.bg - Local.bg);
+            pC->bb = CFactor.bb * (Other.bb - Local.bb);
             pC2->ar = pC2->ag = pC2->ab = Local.aa;
             pC2->br = pC2->bg = pC2->bb = Local.ba;
-            SecondPass = true;
         }
         break;
 
@@ -1017,20 +881,18 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         pC2->br = Local.br;
         pC2->bg = Local.bg;
         pC2->bb = Local.bb;
-        SecondPass = true;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA:
         ColorFactor3Func( &CFactor, &Local, &Other );
-        pC->ar = CFactor.ar * -Local.ar + Local.aa;
-        pC->ag = CFactor.ag * -Local.ag + Local.aa;
-        pC->ab = CFactor.ab * -Local.ab + Local.aa;
-        pC->br = CFactor.br * -Local.br + Local.ba;
-        pC->bg = CFactor.bg * -Local.bg + Local.ba;
-        pC->bb = CFactor.bb * -Local.bb + Local.ba;
+        pC->ar = CFactor.ar * -Local.ar;
+        pC->ag = CFactor.ag * -Local.ag;
+        pC->ab = CFactor.ab * -Local.ab;
+        pC->br = CFactor.br * -Local.br;
+        pC->bg = CFactor.bg * -Local.bg;
+        pC->bb = CFactor.bb * -Local.bb;
         pC2->ar = pC2->ag = pC2->ab = Local.aa;
         pC2->br = pC2->bg = pC2->bb = Local.ba;
-        SecondPass = true;
         break;
     }
 
@@ -1081,36 +943,23 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 
     if ( Glide.State.ColorCombineInvert )
     {
-        pC->ar = 1.0f - pC->ar;
-        pC->ag = 1.0f - pC->ag;
-        pC->ab = 1.0f - pC->ab;
-        pC->br = 1.0f - pC->br;
-        pC->bg = 1.0f - pC->bg;
-        pC->bb = 1.0f - pC->bb;
-        if ( SecondPass )
-        {
-            pC2->ar = 1.0f - pC2->ar;
-            pC2->ag = 1.0f - pC2->ag;
-            pC2->ab = 1.0f - pC2->ab;
-            pC2->br = 1.0f - pC2->br;
-            pC2->bg = 1.0f - pC2->bg;
-            pC2->bb = 1.0f - pC2->bb;
-        }
+        pC->ar = 1.0f - pC->ar - pC2->ar;
+        pC->ag = 1.0f - pC->ag - pC2->ag;
+        pC->ab = 1.0f - pC->ab - pC2->ab;
+        pC->br = 1.0f - pC->br - pC2->br;
+        pC->bg = 1.0f - pC->bg - pC2->bg;
+        pC->bb = 1.0f - pC->bb - pC2->bb;
+        pC2->ar = pC2->ag = pC2->ab = 0.0f;
+        pC2->br = pC2->bg = pC2->bb = 0.0f;
     }
 
     if ( Glide.State.AlphaInvert )
     {
-        pC->aa = 1.0f - pC->aa;
-        pC->ba = 1.0f - pC->ba;
-        if ( SecondPass )
-        {
-            pC2->aa = 1.0f - pC2->aa;
-            pC2->ba = 1.0f - pC2->ba;
-        }
+        pC->aa = 1.0f - pC->aa - pC2->aa;
+        pC->ba = 1.0f - pC->ba - pC2->ba;
+        pC2->aa = pC2->ba = 0.0f;
     }
     
-    static float w;
-
     // Z-Buffering
     if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
          ( Glide.State.DepthBufferMode == GR_CMP_ALWAYS ) )
@@ -1151,7 +1000,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         }
     }
 
-    if ( 0 && a->x > 2048 )
+    if ( ( unsnap ) &&
+         ( a->x > vertex_snap_compare ) )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;
@@ -1168,9 +1018,6 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 
     if ( OpenGL.Texture )
     {
-        float   hAspect, 
-                wAspect;
-
         Textures->GetAspect( &hAspect, &wAspect );
 
         pTS->as = a->tmuvtx[0].sow * wAspect; // / a->oow;
@@ -1189,53 +1036,39 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
 
     #ifdef OGL_DEBUG
-        if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
-        if ( pF->bf > OGLRender.MaxF ) OGLRender.MaxF = pF->bf;
-        if ( pF->af < OGLRender.MinF ) OGLRender.MinF = pF->af;
-        if ( pF->bf < OGLRender.MinF ) OGLRender.MinF = pF->bf;
+        DEBUG_MIN_MAX( pC->af, OGLRender.MaxF, OGLRender.MinF );
+        DEBUG_MIN_MAX( pC->bf, OGLRender.MaxF, OGLRender.MinF );
     #endif
     }
 
 #ifdef OGL_DEBUG
-    if ( pC->ar > OGLRender.MaxR ) OGLRender.MaxR = pC->ar;
-    if ( pC->br > OGLRender.MaxR ) OGLRender.MaxR = pC->br;
-    if ( pC->ar < OGLRender.MinR ) OGLRender.MinR = pC->ar;
-    if ( pC->br < OGLRender.MinR ) OGLRender.MinR = pC->br;
+    DEBUG_MIN_MAX( pC->ar, OGLRender.MaxR, OGLRender.MinR );
+    DEBUG_MIN_MAX( pC->br, OGLRender.MaxR, OGLRender.MinR );
     
-    if ( pC->ag > OGLRender.MaxG ) OGLRender.MaxG = pC->ag;
-    if ( pC->bg > OGLRender.MaxG ) OGLRender.MaxG = pC->bg;
-    if ( pC->ag < OGLRender.MinG ) OGLRender.MinG = pC->ag;
-    if ( pC->bg < OGLRender.MinG ) OGLRender.MinG = pC->bg;
+    DEBUG_MIN_MAX( pC->ag, OGLRender.MaxG, OGLRender.MinG );
+    DEBUG_MIN_MAX( pC->bg, OGLRender.MaxG, OGLRender.MinG );
 
-    if ( pC->ab > OGLRender.MaxB ) OGLRender.MaxB = pC->ab;
-    if ( pC->bb > OGLRender.MaxB ) OGLRender.MaxB = pC->bb;
-    if ( pC->ab < OGLRender.MinB ) OGLRender.MinB = pC->ab;
-    if ( pC->bb < OGLRender.MinB ) OGLRender.MinB = pC->bb;
+    DEBUG_MIN_MAX( pC->ab, OGLRender.MaxB, OGLRender.MinB );
+    DEBUG_MIN_MAX( pC->bb, OGLRender.MaxB, OGLRender.MinB );
 
-    if ( pC->aa > OGLRender.MaxA ) OGLRender.MaxA = pC->aa;
-    if ( pC->ba > OGLRender.MaxA ) OGLRender.MaxA = pC->ba;
-    if ( pC->aa < OGLRender.MinA ) OGLRender.MinA = pC->aa;
-    if ( pC->ba < OGLRender.MinA ) OGLRender.MinA = pC->ba;
+    DEBUG_MIN_MAX( pC->aa, OGLRender.MaxA, OGLRender.MinA );
+    DEBUG_MIN_MAX( pC->ba, OGLRender.MaxA, OGLRender.MinA );
 
-    if ( pV->az > OGLRender.MaxZ ) OGLRender.MaxZ = pV->az;
-    if ( pV->bz > OGLRender.MaxZ ) OGLRender.MaxZ = pV->bz;
-    if ( pV->az < OGLRender.MinZ ) OGLRender.MinZ = pV->az;
-    if ( pV->bz < OGLRender.MinZ ) OGLRender.MinZ = pV->bz;
+    DEBUG_MIN_MAX( pC->az, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pC->bz, OGLRender.MaxZ, OGLRender.MinZ );
 
-    if ( pV->ax > OGLRender.MaxX ) OGLRender.MaxX = pV->ax;
-    if ( pV->bx > OGLRender.MaxX ) OGLRender.MaxX = pV->bx;
-    if ( pV->ax < OGLRender.MinX ) OGLRender.MinX = pV->ax;
-    if ( pV->bx < OGLRender.MinX ) OGLRender.MinX = pV->bx;
+    DEBUG_MIN_MAX( pC->ax, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pC->bx, OGLRender.MaxX, OGLRender.MinX );
 
-    if ( pV->ay > OGLRender.MaxY ) OGLRender.MaxY = pV->ay;
-    if ( pV->by > OGLRender.MaxY ) OGLRender.MaxY = pV->by;
-    if ( pV->ay < OGLRender.MinY ) OGLRender.MinY = pV->ay;
-    if ( pV->by < OGLRender.MinY ) OGLRender.MinY = pV->by;
+    DEBUG_MIN_MAX( pC->ay, OGLRender.Maxy, OGLRender.MinY );
+    DEBUG_MIN_MAX( pC->by, OGLRender.MaxY, OGLRender.MinY );
+
+    DEBUG_MIN_MAX( pC->as, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pC->bs, OGLRender.MaxS, OGLRender.MinS );
+
+    DEBUG_MIN_MAX( pC->at, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pC->bt, OGLRender.MaxT, OGLRender.MinT );
 #endif
-
-    static DWORD    Pixels;
-    static BYTE     * Buffer1;
-    static BYTE     * Buffer2;
 
     if ( OpenGL.Texture )
     {
@@ -1247,7 +1080,6 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
     {
         glDisable( GL_TEXTURE_2D );
     }
-
 
     if ( OpenGL.Blend )
     {
@@ -1272,80 +1104,26 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
     }
     
     glBegin( GL_LINES );
-    glColor4fv( &pC->ar );
-    glSecondaryColor3fvEXT( &pC2->ar );
-    glTexCoord4fv( &pTS->as );
-    glFogCoordfEXT( pF->af );
-    glVertex3fv( &pV->ax );
-
-    glColor4fv( &pC->br );
-    glSecondaryColor3fvEXT( &pC2->br );
-    glTexCoord4fv( &pTS->bs );
-    glFogCoordfEXT( pF->bf );
-    glVertex3fv( &pV->bx );
-    glEnd();
-
-    if ( SecondPass && !InternalConfig.SecondaryColorEXTEnable )
-    {
-        glDisable( GL_TEXTURE_2D );
-
-        glBlendFunc( GL_ONE, GL_ONE );
-        glEnable( GL_BLEND );
-
-        if ( OpenGL.DepthBufferType )
-        {
-            glPolygonOffset( 0.4f, 0.4f );
-        }
-        else
-        {
-            glPolygonOffset( -0.4f, -0.4f );
-        }
-
-        glEnable( GL_POLYGON_OFFSET_FILL );
-
-        glBegin( GL_LINES );
-        glColor4fv( &pC2->ar );
+        glColor4fv( &pC->ar );
+        glSecondaryColor3fvEXT( &pC2->ar );
+        glTexCoord4fv( &pTS->as );
+        glFogCoordfEXT( pF->af );
         glVertex3fv( &pV->ax );
 
-        glColor4fv( &pC2->br );
+        glColor4fv( &pC->br );
+        glSecondaryColor3fvEXT( &pC2->br );
+        glTexCoord4fv( &pTS->bs );
+        glFogCoordfEXT( pF->bf );
         glVertex3fv( &pV->bx );
-        glEnd();
-
-        if ( Glide.State.DepthBiasLevel )
-        {
-            glPolygonOffset( 1.0f, OpenGL.DepthBiasLevel );
-        }
-        else
-        {
-            glDisable( GL_POLYGON_OFFSET_FILL );
-        }
-
-        if ( OpenGL.Blend )
-        {
-            glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
-        }
-    }
+    glEnd();
 
 #ifdef OPENGL_DEBUG
     GLErro( "Render::AddLine" );
 #endif
 }
 
-void RenderAddPoint( const GrVertex *a )
+void RenderAddPoint( const GrVertex *a, bool unsnap )
 {
-    static TColorStruct     Local, 
-                            Other, 
-                            CFactor;
-    static float            AFactor[ 1 ];
-    static TColorStruct     * pC, 
-                            * pC2;
-    static TVertexStruct    * pV;
-    static TTextureStruct   * pTS;
-    static TFogStruct       * pF;
-    static void             * pt1, 
-                            * pt2, 
-                            * pt3;
-
     pC  = &OGLRender.TColor[ MAXTRIANGLES ];
     pC2 = &OGLRender.TColor2[ MAXTRIANGLES ];
     pV  = &OGLRender.TVertex[ MAXTRIANGLES ];
@@ -1354,7 +1132,6 @@ void RenderAddPoint( const GrVertex *a )
 
     // Color Stuff, need to optimize it
     ZeroMemory( pC2, sizeof( TColorStruct ) );
-    SecondPass  = false;
 
     if ( Glide.ALocal )
     {
@@ -1457,22 +1234,20 @@ void RenderAddPoint( const GrVertex *a )
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL:
         ColorFactor3Func( &CFactor, &Local, &Other );
-        pC->ar = CFactor.ar * Other.ar + Local.ar;
-        pC->ag = CFactor.ag * Other.ag + Local.ag;
-        pC->ab = CFactor.ab * Other.ab + Local.ab;
+        pC->ar = CFactor.ar * Other.ar;
+        pC->ag = CFactor.ag * Other.ag;
+        pC->ab = CFactor.ab * Other.ab;
         pC2->ar = Local.ar;
         pC2->ag = Local.ag;
         pC2->ab = Local.ab;
-        SecondPass = true;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA:
         ColorFactor3Func( &CFactor, &Local, &Other );
-        pC->ar = CFactor.ar * Other.ar + Local.aa;
-        pC->ag = CFactor.ag * Other.ag + Local.aa;
-        pC->ab = CFactor.ab * Other.ab + Local.aa;
+        pC->ar = CFactor.ar * Other.ar;
+        pC->ag = CFactor.ag * Other.ag;
+        pC->ab = CFactor.ab * Other.ab;
         pC2->ar = pC2->ag = pC2->ab = Local.aa;
-        SecondPass = true;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL:
@@ -1494,13 +1269,12 @@ void RenderAddPoint( const GrVertex *a )
         else
         {
             ColorFactor3Func( &CFactor, &Local, &Other );
-            pC->ar = CFactor.ar * (Other.ar - Local.ar) + Local.ar;
-            pC->ag = CFactor.ag * (Other.ag - Local.ag) + Local.ag;
-            pC->ab = CFactor.ab * (Other.ab - Local.ab) + Local.ab;
+            pC->ar = CFactor.ar * (Other.ar - Local.ar);
+            pC->ag = CFactor.ag * (Other.ag - Local.ag);
+            pC->ab = CFactor.ab * (Other.ab - Local.ab);
             pC2->ar = Local.ar;
             pC2->ag = Local.ag;
             pC2->ab = Local.ab;
-            SecondPass = true;
         }
         break;
 
@@ -1514,11 +1288,10 @@ void RenderAddPoint( const GrVertex *a )
         else
         {
             ColorFactor3Func( &CFactor, &Local, &Other );
-            pC->ar = CFactor.ar * (Other.ar - Local.ar) + Local.aa;
-            pC->ag = CFactor.ag * (Other.ag - Local.ag) + Local.aa;
-            pC->ab = CFactor.ab * (Other.ab - Local.ab) + Local.aa;
+            pC->ar = CFactor.ar * (Other.ar - Local.ar);
+            pC->ag = CFactor.ag * (Other.ag - Local.ag);
+            pC->ab = CFactor.ab * (Other.ab - Local.ab);
             pC2->ar = pC2->ag = pC2->ab = Local.aa;
-            SecondPass = true;
         }
         break;
 
@@ -1530,19 +1303,16 @@ void RenderAddPoint( const GrVertex *a )
         pC2->ar = Local.ar;
         pC2->ag = Local.ag;
         pC2->ab = Local.ab;
-        SecondPass = true;
         break;
 
     case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA:
         ColorFactor3Func( &CFactor, &Local, &Other );
-        pC->ar = CFactor.ar * -Local.ar + Local.aa;
-        pC->ag = CFactor.ag * -Local.ag + Local.aa;
-        pC->ab = CFactor.ab * -Local.ab + Local.aa;
+        pC->ar = CFactor.ar * -Local.ar;
+        pC->ag = CFactor.ag * -Local.ag;
+        pC->ab = CFactor.ab * -Local.ab;
         pC2->ar = pC2->ag = pC2->ab = Local.aa;
-        SecondPass = true;
         break;
     }
-
 
     switch ( Glide.State.AlphaFunction )
     {
@@ -1583,27 +1353,18 @@ void RenderAddPoint( const GrVertex *a )
 
     if ( Glide.State.ColorCombineInvert )
     {
-        pC->ar = 1.0f - pC->ar;
-        pC->ag = 1.0f - pC->ag;
-        pC->ab = 1.0f - pC->ab;
-        if ( SecondPass )
-        {
-            pC2->ar = 1.0f - pC2->ar;
-            pC2->ag = 1.0f - pC2->ag;
-            pC2->ab = 1.0f - pC2->ab;
-        }
+        pC->ar = 1.0f - pC->ar - pC2->ar;
+        pC->ag = 1.0f - pC->ag - pC2->ag;
+        pC->ab = 1.0f - pC->ab - pC2->ab;
+        pC2->ar = pC2->ag = pC2->ab = 0.0f;
     }
 
     if ( Glide.State.AlphaInvert )
     {
-        pC->aa = 1.0f - pC->aa;
-        if ( SecondPass )
-        {
-            pC2->aa = 1.0f - pC2->aa;
-        }
+        pC->aa = 1.0f - pC->aa - pC2->aa;
+        pC2->aa = 0.0f;
     }
     
-    static float w;
     // Z-Buffering
     if ( ( Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE ) || 
          ( Glide.State.DepthBufferMode == GR_CMP_ALWAYS ) )
@@ -1628,7 +1389,8 @@ void RenderAddPoint( const GrVertex *a )
         }
     }
 
-    if ( 0 && a->x > 2048 )
+    if ( ( unsnap ) &&
+         ( a->x > vertex_snap_compare ) )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;
@@ -1641,9 +1403,6 @@ void RenderAddPoint( const GrVertex *a )
 
     if ( OpenGL.Texture )
     {
-        float   hAspect, 
-                wAspect;
-
         Textures->GetAspect( &hAspect, &wAspect );
 
         pTS->as = a->tmuvtx[0].sow * wAspect;
@@ -1658,37 +1417,29 @@ void RenderAddPoint( const GrVertex *a )
         pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
 
     #ifdef OGL_DEBUG
-        if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
-        if ( pF->af < OGLRender.MinF ) OGLRender.MinF = pF->af;
+        DEBUG_MIN_MAX( pC->af, OGLRender.MaxF, OGLRender.MinF );
     #endif
     }
 
 #ifdef OGL_DEBUG
-    if ( pC->ar > OGLRender.MaxR ) OGLRender.MaxR = pC->ar;
-    if ( pC->ar < OGLRender.MinR ) OGLRender.MinR = pC->ar;
+    DEBUG_MIN_MAX( pC->ar, OGLRender.MaxR, OGLRender.MinR );
     
-    if ( pC->ag > OGLRender.MaxG ) OGLRender.MaxG = pC->ag;
-    if ( pC->ag < OGLRender.MinG ) OGLRender.MinG = pC->ag;
+    DEBUG_MIN_MAX( pC->ag, OGLRender.MaxG, OGLRender.MinG );
 
-    if ( pC->ab > OGLRender.MaxB ) OGLRender.MaxB = pC->ab;
-    if ( pC->ab < OGLRender.MinB ) OGLRender.MinB = pC->ab;
+    DEBUG_MIN_MAX( pC->ab, OGLRender.MaxB, OGLRender.MinB );
 
-    if ( pC->aa > OGLRender.MaxA ) OGLRender.MaxA = pC->aa;
-    if ( pC->aa < OGLRender.MinA ) OGLRender.MinA = pC->aa;
+    DEBUG_MIN_MAX( pC->aa, OGLRender.MaxA, OGLRender.MinA );
 
-    if ( pV->az > OGLRender.MaxZ ) OGLRender.MaxZ = pV->az;
-    if ( pV->az < OGLRender.MinZ ) OGLRender.MinZ = pV->az;
+    DEBUG_MIN_MAX( pC->az, OGLRender.MaxZ, OGLRender.MinZ );
 
-    if ( pV->ax > OGLRender.MaxX ) OGLRender.MaxX = pV->ax;
-    if ( pV->ax < OGLRender.MinX ) OGLRender.MinX = pV->ax;
+    DEBUG_MIN_MAX( pC->ax, OGLRender.MaxX, OGLRender.MinX );
 
-    if ( pV->ay > OGLRender.MaxY ) OGLRender.MaxY = pV->ay;
-    if ( pV->ay < OGLRender.MinY ) OGLRender.MinY = pV->ay;
+    DEBUG_MIN_MAX( pC->ay, OGLRender.Maxy, OGLRender.MinY );
+
+    DEBUG_MIN_MAX( pC->as, OGLRender.MaxS, OGLRender.MinS );
+
+    DEBUG_MIN_MAX( pC->at, OGLRender.MaxT, OGLRender.MinT );
 #endif
-
-    static DWORD    Pixels;
-    static BYTE     * Buffer1;
-    static BYTE     * Buffer2;
 
     if ( OpenGL.Texture )
     {
@@ -1700,7 +1451,6 @@ void RenderAddPoint( const GrVertex *a )
     {
         glDisable( GL_TEXTURE_2D );
     }
-
 
     if ( OpenGL.Blend )
     {
@@ -1725,50 +1475,12 @@ void RenderAddPoint( const GrVertex *a )
     }
     
     glBegin( GL_POINTS );
-    glColor4fv( &pC->ar );
-    glSecondaryColor3fvEXT( &pC2->ar );
-    glTexCoord4fv( &pTS->as );
-    glFogCoordfEXT( pF->af );
-    glVertex3fv( &pV->ax );
-    glEnd();
-
-    if ( SecondPass && !InternalConfig.SecondaryColorEXTEnable )
-    {
-        glDisable( GL_TEXTURE_2D );
-
-        glBlendFunc( GL_ONE, GL_ONE );
-        glEnable( GL_BLEND );
-
-        if ( OpenGL.DepthBufferType )
-        {
-            glPolygonOffset( 0.4f, 0.4f );
-        }
-        else
-        {
-            glPolygonOffset( -0.4f, -0.4f );
-        }
-
-        glEnable( GL_POLYGON_OFFSET_FILL );
-
-        glBegin( GL_LINES );
-        glColor4fv( &pC2->ar );
+        glColor4fv( &pC->ar );
+        glSecondaryColor3fvEXT( &pC2->ar );
+        glTexCoord4fv( &pTS->as );
+        glFogCoordfEXT( pF->af );
         glVertex3fv( &pV->ax );
-        glEnd();
-
-        if ( Glide.State.DepthBiasLevel )
-        {
-            glPolygonOffset( 1.0f, OpenGL.DepthBiasLevel );
-        }
-        else
-        {
-            glDisable( GL_POLYGON_OFFSET_FILL );
-        }
-
-        if ( OpenGL.Blend )
-        {
-            glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
-        }
-    }
+    glEnd();
 
 #ifdef OPENGL_DEBUG
     GLErro( "Render::AddPoint" );
@@ -1923,15 +1635,15 @@ void ColorFunctionScaleOther( TColorStruct * pC, TColorStruct * pC2, TColorStruc
 void ColorFunctionScaleOtherAddLocal( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other )
 {
     ColorFactor3Func( &CFactor, Local, Other );
-    pC->ar = CFactor.ar * Other->ar + Local->ar;
-    pC->ag = CFactor.ag * Other->ag + Local->ag;
-    pC->ab = CFactor.ab * Other->ab + Local->ab;
-    pC->br = CFactor.br * Other->br + Local->br;
-    pC->bg = CFactor.bg * Other->bg + Local->bg;
-    pC->bb = CFactor.bb * Other->bb + Local->bb;
-    pC->cr = CFactor.cr * Other->cr + Local->cr;
-    pC->cg = CFactor.cg * Other->cg + Local->cg;
-    pC->cb = CFactor.cb * Other->cb + Local->cb;
+    pC->ar = CFactor.ar * Other->ar;
+    pC->ag = CFactor.ag * Other->ag;
+    pC->ab = CFactor.ab * Other->ab;
+    pC->br = CFactor.br * Other->br;
+    pC->bg = CFactor.bg * Other->bg;
+    pC->bb = CFactor.bb * Other->bb;
+    pC->cr = CFactor.cr * Other->cr;
+    pC->cg = CFactor.cg * Other->cg;
+    pC->cb = CFactor.cb * Other->cb;
     pC2->ar = Local->ar;
     pC2->ag = Local->ag;
     pC2->ab = Local->ab;
@@ -1941,25 +1653,23 @@ void ColorFunctionScaleOtherAddLocal( TColorStruct * pC, TColorStruct * pC2, TCo
     pC2->cr = Local->cr;
     pC2->cg = Local->cg;
     pC2->cb = Local->cb;
-    SecondPass = true;
 }
 
 void ColorFunctionScaleOtherAddLocalAlpha( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other )
 {
     ColorFactor3Func( &CFactor, Local, Other );
-    pC->ar = CFactor.ar * Other->ar + Local->aa;
-    pC->ag = CFactor.ag * Other->ag + Local->aa;
-    pC->ab = CFactor.ab * Other->ab + Local->aa;
-    pC->br = CFactor.br * Other->br + Local->ba;
-    pC->bg = CFactor.bg * Other->bg + Local->ba;
-    pC->bb = CFactor.bb * Other->bb + Local->ba;
-    pC->cr = CFactor.cr * Other->cr + Local->ca;
-    pC->cg = CFactor.cg * Other->cg + Local->ca;
-    pC->cb = CFactor.cb * Other->cb + Local->ca;
+    pC->ar = CFactor.ar * Other->ar;
+    pC->ag = CFactor.ag * Other->ag;
+    pC->ab = CFactor.ab * Other->ab;
+    pC->br = CFactor.br * Other->br;
+    pC->bg = CFactor.bg * Other->bg;
+    pC->bb = CFactor.bb * Other->bb;
+    pC->cr = CFactor.cr * Other->cr;
+    pC->cg = CFactor.cg * Other->cg;
+    pC->cb = CFactor.cb * Other->cb;
     pC2->ar = pC2->ag = pC2->ab = Local->aa;
     pC2->br = pC2->bg = pC2->bb = Local->ba;
     pC2->cr = pC2->cg = pC2->cb = Local->ca;
-    SecondPass = true;
 }
 
 void ColorFunctionScaleOtherMinusLocal( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other )
@@ -1995,15 +1705,15 @@ void ColorFunctionScaleOtherMinusLocalAddLocal( TColorStruct * pC, TColorStruct 
     else
     {
         ColorFactor3Func( &CFactor, Local, Other );
-        pC->ar = CFactor.ar * (Other->ar - Local->ar) + Local->ar;
-        pC->ag = CFactor.ag * (Other->ag - Local->ag) + Local->ag;
-        pC->ab = CFactor.ab * (Other->ab - Local->ab) + Local->ab;
-        pC->br = CFactor.br * (Other->br - Local->br) + Local->br;
-        pC->bg = CFactor.bg * (Other->bg - Local->bg) + Local->bg;
-        pC->bb = CFactor.bb * (Other->bb - Local->bb) + Local->bb;
-        pC->cr = CFactor.cr * (Other->cr - Local->cr) + Local->cr;
-        pC->cg = CFactor.cg * (Other->cg - Local->cg) + Local->cg;
-        pC->cb = CFactor.cb * (Other->cb - Local->cb) + Local->cb;
+        pC->ar = CFactor.ar * (Other->ar - Local->ar);
+        pC->ag = CFactor.ag * (Other->ag - Local->ag);
+        pC->ab = CFactor.ab * (Other->ab - Local->ab);
+        pC->br = CFactor.br * (Other->br - Local->br);
+        pC->bg = CFactor.bg * (Other->bg - Local->bg);
+        pC->bb = CFactor.bb * (Other->bb - Local->bb);
+        pC->cr = CFactor.cr * (Other->cr - Local->cr);
+        pC->cg = CFactor.cg * (Other->cg - Local->cg);
+        pC->cb = CFactor.cb * (Other->cb - Local->cb);
         pC2->ar = Local->ar;
         pC2->ag = Local->ag;
         pC2->ab = Local->ab;
@@ -2013,7 +1723,6 @@ void ColorFunctionScaleOtherMinusLocalAddLocal( TColorStruct * pC, TColorStruct 
         pC2->cr = Local->cr;
         pC2->cg = Local->cg;
         pC2->cb = Local->cb;
-        SecondPass = true;
     }
 }
 
@@ -2030,19 +1739,18 @@ void ColorFunctionScaleOtherMinusLocalAddLocalAlpha( TColorStruct * pC, TColorSt
     else
     {
         ColorFactor3Func( &CFactor, Local, Other );
-        pC->ar = CFactor.ar * (Other->ar - Local->ar) + Local->aa;
-        pC->ag = CFactor.ag * (Other->ag - Local->ag) + Local->aa;
-        pC->ab = CFactor.ab * (Other->ab - Local->ab) + Local->aa;
-        pC->br = CFactor.br * (Other->br - Local->br) + Local->ba;
-        pC->bg = CFactor.bg * (Other->bg - Local->bg) + Local->ba;
-        pC->bb = CFactor.bb * (Other->bb - Local->bb) + Local->ba;
-        pC->cr = CFactor.cr * (Other->cr - Local->cr) + Local->ca;
-        pC->cg = CFactor.cg * (Other->cg - Local->cg) + Local->ca;
-        pC->cb = CFactor.cb * (Other->cb - Local->cb) + Local->ca;
+        pC->ar = CFactor.ar * (Other->ar - Local->ar);
+        pC->ag = CFactor.ag * (Other->ag - Local->ag);
+        pC->ab = CFactor.ab * (Other->ab - Local->ab);
+        pC->br = CFactor.br * (Other->br - Local->br);
+        pC->bg = CFactor.bg * (Other->bg - Local->bg);
+        pC->bb = CFactor.bb * (Other->bb - Local->bb);
+        pC->cr = CFactor.cr * (Other->cr - Local->cr);
+        pC->cg = CFactor.cg * (Other->cg - Local->cg);
+        pC->cb = CFactor.cb * (Other->cb - Local->cb);
         pC2->ar = pC2->ag = pC2->ab = Local->aa;
         pC2->br = pC2->bg = pC2->bb = Local->ba;
         pC2->cr = pC2->cg = pC2->cb = Local->ca;
-        SecondPass = true;
     }
 }
 
@@ -2067,161 +1775,21 @@ void ColorFunctionMinusLocalAddLocal( TColorStruct * pC, TColorStruct * pC2, TCo
     pC2->cr = Local->cr;
     pC2->cg = Local->cg;
     pC2->cb = Local->cb;
-    SecondPass = true;
 }
 
 void ColorFunctionMinusLocalAddLocalAlpha( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other )
 {
     ColorFactor3Func( &CFactor, Local, Other );
-    pC->ar = CFactor.ar * -Local->ar + Local->aa;
-    pC->ag = CFactor.ag * -Local->ag + Local->aa;
-    pC->ab = CFactor.ab * -Local->ab + Local->aa;
-    pC->br = CFactor.br * -Local->br + Local->ba;
-    pC->bg = CFactor.bg * -Local->bg + Local->ba;
-    pC->bb = CFactor.bb * -Local->bb + Local->ba;
-    pC->cr = CFactor.cr * -Local->cr + Local->ca;
-    pC->cg = CFactor.cg * -Local->cg + Local->ca;
-    pC->cb = CFactor.cb * -Local->cb + Local->ca;
+    pC->ar = CFactor.ar * -Local->ar;
+    pC->ag = CFactor.ag * -Local->ag;
+    pC->ab = CFactor.ab * -Local->ab;
+    pC->br = CFactor.br * -Local->br;
+    pC->bg = CFactor.bg * -Local->bg;
+    pC->bb = CFactor.bb * -Local->bb;
+    pC->cr = CFactor.cr * -Local->cr;
+    pC->cg = CFactor.cg * -Local->cg;
+    pC->cb = CFactor.cb * -Local->cb;
     pC2->ar = pC2->ag = pC2->ab = Local->aa;
     pC2->br = pC2->bg = pC2->bb = Local->ba;
     pC2->cr = pC2->cg = pC2->cb = Local->ca;
-    SecondPass = true;
 }
-
-void TColorFunctionScaleOtherAddLocalTDNow( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other )
-{
-    ColorFactor3Func( &CFactor, Local, Other );
-    __asm
-    {
-        mov eax, pC
-        femms
-        mov ebx, offset CFactor
-        mov edx, Other
-        mov ecx, Local
-        movq mm0, [ebx]
-        pfmul (mm0, edx)
-        pfadd (mm0, ecx)
-        movq mm1, [ebx+8]
-        pfmulm (mm1, edx, 8)
-        pfaddm (mm1, ecx, 8)
-        movq mm2, [ebx+16]
-        movq [eax], mm0
-        pfmulm (mm2, edx, 16)
-        pfaddm (mm2, ecx, 16)
-        movq mm3, [ebx+24]
-        movq [eax+8], mm1
-        pfmulm (mm3, edx, 24)
-        pfaddm (mm3, ecx, 24)
-        movq mm4, [ebx+32]
-        movq [eax+16], mm2
-        pfmulm (mm4, edx, 32)
-        pfaddm (mm4, ecx, 32)
-        movq mm5, [ebx+40]
-        movq [eax+24], mm3
-        pfmulm (mm5, edx, 40)
-        pfaddm (mm5, ecx, 40)
-        movq [eax+32], mm4
-        mov edx, pC2
-        movq [eax+40], mm5
-        movq mm0, [ecx]
-        movq mm1, [ecx+8]
-        movq [edx], mm0
-        movq [edx+8], mm1
-        movq mm2, [ecx+16]
-        movq mm3, [ecx+24]
-        movq [edx+16], mm2
-        movq [edx+24], mm3
-        movq mm4, [ecx+32]
-        movq mm5, [ecx+40]
-        movq [edx+32], mm4
-        movq [edx+40], mm5
-        femms
-        mov SecondPass, 1
-    }
-//  SecondPass = true;
-}
-
-void TColorFunctionScaleOtherMinusLocalAddLocalTDNow( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other )
-{
-    ColorFactor3Func( &CFactor, Local, Other );
-    __asm
-    {
-        mov ecx, Local
-        mov eax, DWORD PTR Glide.State.ColorCombineFactor
-        cmp eax, GR_COMBINE_FACTOR_TEXTURE_ALPHA
-        je  SHORT cont
-        cmp eax, GR_COMBINE_FACTOR_TEXTURE_RGB
-        jne SHORT SecondLoop
-cont:
-        cmp Glide.State.ColorCombineOther, GR_COMBINE_OTHER_TEXTURE
-        jne SHORT SecondLoop
-
-        mov edx, pC
-        movq mm0, [ecx]
-        movq [edx], mm0
-        movq mm0, [ecx+8]
-        movq [edx+8], mm0
-        movq mm0, [ecx+16]
-        movq [edx+16], mm0
-        movq mm0, [ecx+24]
-        movq [edx+24], mm0
-        movq mm0, [ecx+32]
-        movq [edx+32], mm0
-        movq mm0, [ecx+40]
-        movq [edx+40], mm0
-        jmp EndFunction
-
-SecondLoop:
-        femms
-        mov eax, pC
-        mov edx, Other
-        mov ebx, offset CFactor
-        movq mm0, [edx]
-        pfsub (mm0, ecx)
-        pfmul (mm0, ebx)
-        pfadd (mm0, ecx)
-        movq mm1, [edx+8]
-        pfsubm (mm1, ecx, 8)
-        pfmulm (mm1, ebx, 8)
-        pfaddm (mm1, ecx, 8)
-        movq mm2, [edx+16]
-        pfsubm (mm2, ecx, 16)
-        pfmulm (mm2, ebx, 16)
-        pfaddm (mm2, ecx, 16)
-        movq mm3, [edx+24]
-        pfsubm (mm3, ecx, 24)
-        pfmulm (mm3, edx, 24)
-        pfaddm (mm3, ecx, 24)
-        movq mm4, [edx+32]
-        pfsubm (mm4, ecx, 32)
-        pfmulm (mm4, ebx, 32)
-        pfaddm (mm4, ecx, 32)
-        movq mm5, [edx+40]
-        pfsubm (mm5, ecx, 40)
-        pfmulm (mm5, ebx, 40)
-        pfaddm (mm5, ecx, 40)
-        movq [eax], mm0
-        movq [eax+8], mm1
-        movq [eax+16], mm2
-        movq [eax+24], mm3
-        movq [eax+32], mm4
-        movq [eax+40], mm5
-        mov edx, pC2
-        movq mm0, [ecx]
-        movq mm1, [ecx+8]
-        movq [edx], mm0
-        movq [edx+8], mm1
-        movq mm2, [ecx+16]
-        movq mm3, [ecx+24]
-        movq [edx+16], mm2
-        movq [edx+24], mm3
-        movq mm4, [ecx+32]
-        movq mm5, [ecx+40]
-        movq [edx+32], mm4
-        movq [edx+40], mm5
-        mov SecondPass, 1
-EndFunction:
-        femms
-    }
-}
-

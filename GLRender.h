@@ -99,8 +99,8 @@ void RenderInitialize( void );
 void RenderFree( void );
 void RenderUpdateArrays( void );
 void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c, bool unsnap );
-void RenderAddLine( const GrVertex *a, const GrVertex *b );
-void RenderAddPoint( const GrVertex *a );
+void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap );
+void RenderAddPoint( const GrVertex *a, bool unsnap );
 void RenderDrawTriangles( void );
 
 // Main Render variables
