@@ -709,7 +709,7 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ALPHA_8:
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( false && InternalConfig.OGLVersion > 1 )
             {
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data );
             }
