@@ -518,7 +518,7 @@ void GetOptions( void )
 
     UserConfig.Wrap565Enable            = FALSE;
 
-    UserConfig.MultiTextureEXTEnable    = FALSE;
+    UserConfig.MultiTextureEXTEnable    = TRUE;
     UserConfig.PaletteEXTEnable         = TRUE;
     UserConfig.PackedPixelsEXTEnable    = FALSE;
     UserConfig.TextureEnvEXTEnable      = FALSE;
