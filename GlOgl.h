@@ -206,6 +206,7 @@ struct ConfigStruct
 	int		PrecisionFixEnable;
 	int		Wrap565Enable;
 	int		Priority;
+    int     EnableMipMaps;
 	int		BuildMipMaps;
     int     IgnorePaletteChange;
 

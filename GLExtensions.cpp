@@ -86,7 +86,8 @@ void ValidateUserConfig()
 	InternalConfig.InitFullScreen			= UserConfig.InitFullScreen;
 	InternalConfig.PrecisionFixEnable		= UserConfig.PrecisionFixEnable;
 	InternalConfig.Wrap565Enable			= UserConfig.Wrap565Enable;
-	InternalConfig.BuildMipMaps				= UserConfig.BuildMipMaps;
+	InternalConfig.EnableMipMaps			= UserConfig.EnableMipMaps;
+	InternalConfig.BuildMipMaps				= false;
     InternalConfig.IgnorePaletteChange      = UserConfig.IgnorePaletteChange;
 
 	InternalConfig.MultiTextureEXTEnable	= false;
@@ -125,6 +126,14 @@ void ValidateUserConfig()
 			InternalConfig.MultiTextureEXTEnable	= true;
 		}
 	}
+
+    if ( UserConfig.EnableMipMaps )
+    {
+        if( !isExtensionSupported( "GL_SGIS_generate_mipmap" ) )
+        {
+            InternalConfig.BuildMipMaps = true;
+        }
+    }
 
 	if ( UserConfig.PaletteEXTEnable )
 	{

@@ -471,6 +471,7 @@ void GetOptions()
 	UserConfig.InitFullScreen			= false;
 	UserConfig.PrecisionFixEnable		= true;
 	UserConfig.CreateWindow				= false;
+	UserConfig.EnableMipMaps			= false;
 	UserConfig.BuildMipMaps				= false;
     UserConfig.IgnorePaletteChange      = false;
 
@@ -517,7 +518,7 @@ void GetOptions()
 //		fprintf( IniFile, "Enable3DNow=%d\n", UserConfig.TDnowEnable );
 		fprintf( IniFile, "CreateWindow=%d\n", UserConfig.CreateWindow );
 		fprintf( IniFile, "InitFullScreen=%d\n", UserConfig.InitFullScreen );
-		fprintf( IniFile, "EnableMipMaps=%d\n", UserConfig.BuildMipMaps );
+		fprintf( IniFile, "EnableMipMaps=%d\n", UserConfig.EnableMipMaps );
         fprintf( IniFile, "IgnorePaletteChange=%d\n", UserConfig.IgnorePaletteChange );
 		fprintf( IniFile, "EnableFog=%d\n", UserConfig.FogEnable );
 		fprintf( IniFile, "EnablePrecisionFix=%d\n", UserConfig.PrecisionFixEnable );
@@ -548,7 +549,7 @@ void GetOptions()
 			Pointer = FindConfig( Path, "InitFullScreen" );
 			UserConfig.InitFullScreen = atoi( Pointer );
 			Pointer = FindConfig( Path, "EnableMipMaps" );
-			UserConfig.BuildMipMaps = atoi( Pointer );
+			UserConfig.EnableMipMaps = atoi( Pointer );
             Pointer = FindConfig( Path, "IgnorePaletteChange" );
             UserConfig.IgnorePaletteChange = atoi( Pointer );
 			Pointer = FindConfig( Path, "EnableFog" );

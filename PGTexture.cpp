@@ -315,14 +315,16 @@ void PGTexture::MakeReady()
     FxU32 wipe_hash;
     bool palette_changed;
     bool *pal_change_ptr;
+    bool use_mipmap_ext;
 
     if(!m_valid)
         return;
 
-    test_hash = 0;
-    wipe_hash = 0;
+    test_hash       = 0;
+    wipe_hash       = 0;
     palette_changed = false;
-    pal_change_ptr = NULL;
+    use_mipmap_ext  = (InternalConfig.EnableMipMaps && !InternalConfig.BuildMipMaps);
+    pal_change_ptr  = NULL;
     
     data = m_memory + m_startAddress;
 
@@ -338,6 +340,11 @@ void PGTexture::MakeReady()
         ApplyKeyToPalette();
         test_hash = m_palette_hash;
         wipe_hash = m_palette_hash;
+       /*
+        * OpenGL's mipmap generation doesn't seem
+        * to handle paletted textures.
+        */
+        use_mipmap_ext = false;
         break;
     case GR_TEXFMT_AP_88:
         ApplyKeyToPalette();
@@ -369,6 +376,10 @@ void PGTexture::MakeReady()
         ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        if(use_mipmap_ext)
+            glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true);
+
+
 
         switch(m_info.format)
         {
@@ -399,7 +410,7 @@ void PGTexture::MakeReady()
                 glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette);
                 
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, texVals.width, texVals.height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, data );
-                if(InternalConfig.BuildMipMaps)
+                if(InternalConfig.EnableMipMaps)
                     genPaletteMipmaps(texVals.width, texVals.height, data);
             }
             else
