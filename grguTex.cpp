@@ -191,22 +191,17 @@ grTexClampMode( GrChipID_t tmu,
     Glide.State.SClampMode = s_clampmode;
     Glide.State.TClampMode = t_clampmode;
 
-    // We can do this just because we know the constant values for both OpenGL and Glide
-    // To port it to anything else than OpenGL we NEED to change this code
-    OpenGL.SClampMode = GL_REPEAT - s_clampmode;
-    OpenGL.TClampMode = GL_REPEAT - t_clampmode;
-
-/*    switch ( s_clampmode )
+    switch ( s_clampmode )
     {
-    case GR_TEXTURECLAMP_CLAMP:     OpenGL.SClampMode = GL_CLAMP;   break;
+    case GR_TEXTURECLAMP_CLAMP:     OpenGL.SClampMode = GL_CLAMP_TO_EDGE;   break;
     case GR_TEXTURECLAMP_WRAP:      OpenGL.SClampMode = GL_REPEAT;  break;
     }
     switch ( t_clampmode )
     {
-    case GR_TEXTURECLAMP_CLAMP:     OpenGL.TClampMode = GL_CLAMP;   break;
+    case GR_TEXTURECLAMP_CLAMP:     OpenGL.TClampMode = GL_CLAMP_TO_EDGE;   break;
     case GR_TEXTURECLAMP_WRAP:      OpenGL.TClampMode = GL_REPEAT;  break;
     }
-*/
+
 #ifdef OPENGL_DEBUG
     GLErro( "grTexClampMode" );
 #endif

@@ -296,9 +296,12 @@ bool PGTexture::MakeReady( void )
                    &texNum, use_two_textures ? &tex2Num : NULL );
 
         glBindTexture( GL_TEXTURE_2D, texNum );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
+    
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
+    
         if( use_mipmap_ext )
         {
             glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true );
@@ -309,8 +312,11 @@ bool PGTexture::MakeReady( void )
             glActiveTextureARB( GL_TEXTURE1_ARB );
 
             glBindTexture( GL_TEXTURE_2D, tex2Num );
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
+        
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
 
             if( use_mipmap_ext2 )
             {
