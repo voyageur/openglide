@@ -98,7 +98,7 @@ struct RenderStruct
 void RenderInitialize( void );
 void RenderFree( void );
 void RenderUpdateArrays( void );
-void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c );
+void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c, bool unsnap );
 void RenderAddLine( const GrVertex *a, const GrVertex *b );
 void RenderAddPoint( const GrVertex *a );
 void RenderDrawTriangles( void );

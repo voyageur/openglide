@@ -327,7 +327,7 @@ void RenderDrawTriangles( void )
     OGLRender.NumberOfTriangles = 0;
 }
 
-void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
+void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c, bool unsnap )
 {
     static TColorStruct     Local, 
                             Other, 
@@ -607,7 +607,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
         }
     }
 
-    if ( 0 && a->x > 2048 )
+    if ( unsnap )
     {
         pV->ax = a->x - vertex_snap;
         pV->ay = a->y - vertex_snap;

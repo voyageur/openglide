@@ -22,7 +22,7 @@ grDrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
     GlideMsg( "grDrawTriangle( ---, ---, --- )\n" );
 #endif
 
-    RenderAddTriangle( a, b, c );
+    RenderAddTriangle( a, b, c, ( a->x > 2048 ) );
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
     {
@@ -40,10 +40,11 @@ grDrawPlanarPolygonVertexList( int nVertices, const GrVertex vlist[] )
 #ifdef CRITICAL
     GlideMsg("grDrawPlanarPolygonVertexList( %d, --- )\n", nVertices );
 #endif
+    bool unsnap = ( nVertices > 0 && vlist[ 0 ].x > 2048 );
 
     for ( int i = 2; i < nVertices; i++ )
     {
-        RenderAddTriangle( &vlist[ 0 ], &vlist[ i - 1 ], &vlist[ i ] );
+        RenderAddTriangle( &vlist[ 0 ], &vlist[ i - 1 ], &vlist[ i ], unsnap );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -94,12 +95,14 @@ grDrawPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 #ifdef CRITICAL
     GlideMsg( "grDrawPolygon( %d, ---, --- )\n" );
 #endif
+    bool unsnap = ( nverts > 0 && vlist[ ilist[ 0 ] ].x > 2048 );
 
     for ( int i = 2; i < nverts; i++ )
     {
         RenderAddTriangle( &vlist[ ilist[ 0 ] ], 
                            &vlist[ ilist[ i - 1 ] ], 
-                           &vlist[ ilist[ i ] ] );
+                           &vlist[ ilist[ i ] ],
+                           unsnap );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -118,12 +121,14 @@ grDrawPlanarPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 #ifdef CRITICAL
     GlideMsg( "grDrawPlanarPolygon( %d, ---, --- )\n", nverts );
 #endif
+    bool unsnap = ( nverts > 0 && vlist[ ilist[ 0 ] ].x > 2048 );
 
     for ( int i = 2; i < nverts; i++ )
     {
         RenderAddTriangle( &vlist[ ilist[ 0 ] ], 
                            &vlist[ ilist[ i - 1 ] ],
-                           &vlist[ ilist[ i ] ] );
+                           &vlist[ ilist[ i ] ],
+                           unsnap );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -142,12 +147,14 @@ grDrawPolygonVertexList( int nVertices, const GrVertex vlist[] )
 #ifdef CRITICAL
     GlideMsg( "grDrawPolygonVertexList( %d, --- )\n", nVertices );
 #endif
+    bool unsnap = ( nVertices > 0 && vlist[ 0 ].x > 2048 );
 
     for ( int i = 2; i < nVertices; i++ )
     {
         RenderAddTriangle( &vlist[ 0 ],
                            &vlist[ i - 1 ],
-                           &vlist[ i ] );
+                           &vlist[ i ],
+                           unsnap );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -165,7 +172,7 @@ guAADrawTriangleWithClip( const GrVertex *a, const GrVertex *b,
     GlideMsg("guAADrawTriangleWithClip( ---, ---, --- )\n");
 #endif
 
-    RenderAddTriangle( a, b, c );
+    RenderAddTriangle( a, b, c, false );
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
     {
@@ -183,7 +190,7 @@ guDrawTriangleWithClip( const GrVertex *a,
     GlideMsg("guDrawTriangleWithClip( ---, ---, --- )\n");
 #endif
 
-    RenderAddTriangle( a, b, c );
+    RenderAddTriangle( a, b, c, false );
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
     {
@@ -203,7 +210,8 @@ guDrawPolygonVertexListWithClip( int nverts, const GrVertex vlist[] )
     {
         RenderAddTriangle( &vlist[ 0 ], 
                            &vlist[ i - 1 ],
-                           &vlist[ i ] );
+                           &vlist[ i ],
+                           false );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -239,12 +247,14 @@ grAADrawPolygon( const int nverts, const int ilist[], const GrVertex vlist[] )
 #ifdef CRITICAL
     GlideMsg( "grAADrawPolygon( %d, ---, --- )\n", nverts );
 #endif
+    bool unsnap = ( nverts > 0 && vlist[ ilist[ 0 ] ].x > 2048 );
 
     for ( int i = 2; i < nverts; i++ )
     {
         RenderAddTriangle( &vlist[ ilist[ 0 ] ],
                            &vlist[ ilist[ i - 1 ] ],
-                           &vlist[ ilist[ i ] ]);
+                           &vlist[ ilist[ i ] ],
+                           unsnap );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -260,12 +270,14 @@ grAADrawPolygonVertexList( const int nverts, const GrVertex vlist[] )
 #ifdef CRITICAL
     GlideMsg( "grAADrawPolygonVertexList( %d, --- )\n", nverts );
 #endif
+    bool unsnap = (nverts > 0 && vlist[ 0 ].x > 2048 );
 
     for ( int i = 2; i < nverts; i++ )
     {
         RenderAddTriangle( &vlist[ 0 ],
                            &vlist[ i - 1 ],
-                           &vlist[ i ] );
+                           &vlist[ i ],
+                           unsnap );
     }
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
@@ -284,7 +296,7 @@ grAADrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
         ab_antialias, bc_antialias, ca_antialias );
 #endif
 
-    RenderAddTriangle( a, b, c );
+    RenderAddTriangle( a, b, c, a->x > 2048 );
 
     if ( Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER )
     {
