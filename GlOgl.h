@@ -35,16 +35,14 @@
 #endif
 
 #include <windows.h>
-#include "Glide.h"
-#include "GL\gl.h"
-#include "GL\glu.h"
-#include "GLRender.h"
-#include "PGTexture.h"
-#include "PGUTexture.h"
+#include <GL\gl.h>
+#include <GL\glu.h>
 
-#define RDTSC(v)    __asm _emit 0x0f \
-                    __asm _emit 0x31 \
-                    __asm mov dword ptr v, eax \
+#include "Glide.h"
+
+#define RDTSC(v)    __asm _emit 0x0f                \
+                    __asm _emit 0x31                \
+                    __asm mov dword ptr v, eax      \
                     __asm mov dword ptr v+4, edx
 
 #define ERRORFILE               "OpenGLid.ERR"
@@ -53,7 +51,7 @@
 
 #define OPENGLBUFFERMEMORY      OpenGL.WindowWidth * OpenGL.WindowHeight
 
-#define OPENGLFOGTABLESIZE      64*1024
+#define OPENGLFOGTABLESIZE      64 * 1024
 
 #define D1OVER255               0.003921568627451f      // 1 / 255
 #define D1OVER65536             0.0000152587890625f     // 1 / 65536
@@ -63,8 +61,8 @@
 #define D8OVER256               0.03125f                // 8 / 256
 
 #define WBUFFERNEAR             -1.0f
-#define WBUFFERFAR              0.0f
-#define ZBUFFERNEAR             0.0f
+#define WBUFFERFAR               0.0f
+#define ZBUFFERNEAR              0.0f
 #define ZBUFFERFAR              -1.0f
 
 // Class declarations
@@ -218,8 +216,9 @@ struct ConfigStruct
     int     TextureEnvEXTEnable;
     int     VertexArrayEXTEnable;
     int     FogCoordEXTEnable;
-    int     BlendFuncSeparate;
-    int     TextureLodBias;
+    int     BlendFuncSeparateEXTEnable;
+    int     TextureLodBiasEXTEnable;
+    int     SecondaryColorEXTEnable;
 
     int     MMXEnable;
     int     CreateWindow;
@@ -233,9 +232,6 @@ extern GlideStruct      Glide;                  // Glide Internal
 extern OpenGLStruct     OpenGL;                 // OpenGL equivalents
 extern ConfigStruct     UserConfig,
                         InternalConfig;
-
-extern PGTexture *Textures;
-extern PGUTexture UTextures;
 
 // Genral Prototypes
 void __cdecl GlideMsg(char *szString, ...);

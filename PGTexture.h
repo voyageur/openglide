@@ -83,4 +83,6 @@ private:
     GuNccTable m_ncc[2];
 };
 
+extern PGTexture *Textures;
+
 #endif

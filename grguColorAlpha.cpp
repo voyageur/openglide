@@ -14,6 +14,7 @@
 #include "GlOgl.h"
 #include "GLRender.h"
 #include "Glextensions.h"
+#include "PGTexture.h"
 
 
 // extern functions
@@ -575,7 +576,7 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_PREFOG_COLOR:         OpenGL.DstAlphaBlend = GL_ONE;                  break;
     }
 
-    if ( ! InternalConfig.BlendFuncSeparate )
+    if ( ! InternalConfig.BlendFuncSeparateEXTEnable )
     {
         glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
     }

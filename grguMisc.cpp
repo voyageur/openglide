@@ -10,6 +10,7 @@
 //**************************************************************
 
 #include "GlOgl.h"
+#include "GLRender.h"
 
 
 // Error Function variable

@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "GlOgl.h"
+#include "GLRender.h"
 #include "Glextensions.h"
 
 //Functions
@@ -102,25 +103,26 @@ int isExtensionSupported( const char *extension )
 
 void ValidateUserConfig( void )
 {
-    InternalConfig.FogEnable                = UserConfig.FogEnable;
-    InternalConfig.InitFullScreen           = UserConfig.InitFullScreen;
-    InternalConfig.PrecisionFixEnable       = UserConfig.PrecisionFixEnable;
-    InternalConfig.EnableMipMaps            = UserConfig.EnableMipMaps;
-    InternalConfig.BuildMipMaps             = false;
-    InternalConfig.IgnorePaletteChange      = UserConfig.IgnorePaletteChange;
+    InternalConfig.FogEnable                    = UserConfig.FogEnable;
+    InternalConfig.InitFullScreen               = UserConfig.InitFullScreen;
+    InternalConfig.PrecisionFixEnable           = UserConfig.PrecisionFixEnable;
+    InternalConfig.EnableMipMaps                = UserConfig.EnableMipMaps;
+    InternalConfig.BuildMipMaps                 = false;
+    InternalConfig.IgnorePaletteChange          = UserConfig.IgnorePaletteChange;
 
-    InternalConfig.MultiTextureEXTEnable    = false;
-    InternalConfig.PaletteEXTEnable         = false;
-    InternalConfig.TextureEnvEXTEnable      = false;
-    InternalConfig.VertexArrayEXTEnable     = false;
-    InternalConfig.FogCoordEXTEnable        = false;
-    InternalConfig.BlendFuncSeparate        = false;
-    InternalConfig.TextureLodBias           = false;
+    InternalConfig.MultiTextureEXTEnable        = false;
+    InternalConfig.PaletteEXTEnable             = false;
+    InternalConfig.TextureEnvEXTEnable          = false;
+    InternalConfig.VertexArrayEXTEnable         = false;
+    InternalConfig.FogCoordEXTEnable            = false;
+    InternalConfig.BlendFuncSeparateEXTEnable   = false;
+    InternalConfig.TextureLodBiasEXTEnable      = false;
+    InternalConfig.SecondaryColorEXTEnable      = false;
 
-    InternalConfig.TextureMemorySize        = 16;
-    InternalConfig.FrameBufferMemorySize    = 8;
+    InternalConfig.TextureMemorySize            = 16;
+    InternalConfig.FrameBufferMemorySize        = 8;
 
-    InternalConfig.MMXEnable                = false;
+    InternalConfig.MMXEnable                    = false;
     
     int TexSize = UserConfig.TextureMemorySize;
     if ( ( TexSize > 1 ) && ( TexSize <= 16 ) )
@@ -188,12 +190,17 @@ void ValidateUserConfig( void )
 
     if ( isExtensionSupported( "GL_EXT_blend_func_separate" ) )
     {
-        InternalConfig.BlendFuncSeparate            = true;
+        InternalConfig.BlendFuncSeparateEXTEnable   = true;
     }
 
     if ( isExtensionSupported( "GL_EXT_texture_lod_bias" ) )
     {
-        InternalConfig.TextureLodBias               = true;
+        InternalConfig.TextureLodBiasEXTEnable      = true;
+    }
+
+    if ( isExtensionSupported( "GL_EXT_secondary_color" ) )
+    {
+        InternalConfig.SecondaryColorEXTEnable      = true;
     }
 
     if ( DetectMMX( ) )
@@ -234,11 +241,7 @@ void GLExtensions( void )
         }
     }
 
-    if ( ! isExtensionSupported( "GL_EXT_secondary_color" ) )
-    {
-        MessageBox( NULL, "Current video does not support Secondary Color Extension, colors may be wrong", "Error", MB_OK );
-    }
-    else
+    if ( InternalConfig.SecondaryColorEXTEnable )
     {
         glSecondaryColor3ubvEXT     = (PFNGLSECONDARYCOLOR3UBVEXTPROC) wglGetProcAddress( "glSecondaryColor3ubvEXT" );
         glSecondaryColor3ubEXT      = (PFNGLSECONDARYCOLOR3UBEXTPROC) wglGetProcAddress( "glSecondaryColor3ubEXT" );

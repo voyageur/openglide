@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "glogl.h"
+#include "GLRender.h"
 
 // extern variables
 extern __int64          InitialTick,

@@ -50,4 +50,6 @@ public:
     virtual ~PGUTexture( void );
 };
 
+extern PGUTexture UTextures;
+
 #endif

@@ -12,7 +12,7 @@
 #include "GlOGl.h"
 #include "GLRender.h"
 #include "GLextensions.h"
-#include "amd3dx.h"
+#include "PGTexture.h"
 
 
 //**************************************************************
@@ -263,6 +263,33 @@ void RenderDrawTriangles( void )
         }
     }
 
+/*  
+    I will do that correctly later, it is not right yet
+
+    if ( ! InternalConfig.SecondaryColorEXTEnable )
+    {
+        glDisable( GL_TEXTURE_2D );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_ONE, GL_ONE );
+
+        glBegin( GL_TRIANGLES );
+        for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+        {
+            glColor3fv( &OGLRender.TColor2[ i ].ar );
+            glVertex3fv( &OGLRender.TVertex[ i ].ax );
+            
+            glColor3fv( &OGLRender.TColor2[ i ].br );
+            glVertex3fv( &OGLRender.TVertex[ i ].bx );
+            
+            glColor3fv( &OGLRender.TColor2[ i ].cr );
+            glVertex3fv( &OGLRender.TVertex[ i ].cx );
+        }
+        glEnd( );
+
+        glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
+    }
+*/
+
     if ( use_two_tex )
     {
         glActiveTextureARB( GL_TEXTURE1_ARB );
@@ -325,7 +352,6 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             Local.ba = b->z;
             Local.ca = c->z;
             break;
-
         }
     }
 
@@ -518,11 +544,11 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
         if ( InternalConfig.PrecisionFixEnable )
         {
             w = 1.0f / a->oow;
-            pV->az = 8.9375f - ((float)( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
+            pV->az = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
             w = 1.0f / b->oow;
-            pV->bz = 8.9375f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) * D1OVER65536) );
+            pV->bz = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
             w = 1.0f / c->oow;
-            pV->cz = 8.9375f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) * D1OVER65536) );
+            pV->cz = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
         }
         else
         {
@@ -554,21 +580,21 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 
     if ( OpenGL.Texture )
     {
-        maxoow = max( atmuoow, max( btmuoow, ctmuoow ) );
+        maxoow = 1.0f / max( atmuoow, max( btmuoow, ctmuoow ) );
 
         Textures->GetAspect( &hAspect, &wAspect );
 
-        pTS->as = a->tmuvtx[ 0 ].sow * wAspect / maxoow;
-        pTS->at = a->tmuvtx[ 0 ].tow * hAspect / maxoow;
-        pTS->bs = b->tmuvtx[ 0 ].sow * wAspect / maxoow;
-        pTS->bt = b->tmuvtx[ 0 ].tow * hAspect / maxoow;
-        pTS->cs = c->tmuvtx[ 0 ].sow * wAspect / maxoow;
-        pTS->ct = c->tmuvtx[ 0 ].tow * hAspect / maxoow;
+        pTS->as = a->tmuvtx[ 0 ].sow * wAspect * maxoow;
+        pTS->at = a->tmuvtx[ 0 ].tow * hAspect * maxoow;
+        pTS->bs = b->tmuvtx[ 0 ].sow * wAspect * maxoow;
+        pTS->bt = b->tmuvtx[ 0 ].tow * hAspect * maxoow;
+        pTS->cs = c->tmuvtx[ 0 ].sow * wAspect * maxoow;
+        pTS->ct = c->tmuvtx[ 0 ].tow * hAspect * maxoow;
 
         pTS->aq = pTS->bq = pTS->cq = 0.0f;
-        pTS->aoow = atmuoow / maxoow;
-        pTS->boow = btmuoow / maxoow;
-        pTS->coow = ctmuoow / maxoow;
+        pTS->aoow = atmuoow * maxoow;
+        pTS->boow = btmuoow * maxoow;
+        pTS->coow = ctmuoow * maxoow;
     }
 
     if( InternalConfig.FogEnable )

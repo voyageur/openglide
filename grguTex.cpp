@@ -12,6 +12,8 @@
 #include "GlOgl.h"
 #include "GLRender.h"
 #include "GLextensions.h"
+#include "PGTexture.h"
+#include "PGUTexture.h"
 
 
 // Functions
@@ -390,7 +392,7 @@ grTexLodBiasValue( GrChipID_t tmu, float bias )
         tmu, bias );
 #endif
 
-    if ( InternalConfig.TextureLodBias )
+    if ( InternalConfig.TextureLodBiasEXTEnable )
     {
         glTexEnvf( GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, bias );
     }

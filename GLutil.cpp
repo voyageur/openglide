@@ -435,24 +435,24 @@ void GetOptions( void )
     extern char * OpenGLideVersion;
     char        Path[255];
 
-    UserConfig.FogEnable                = TRUE;
-    UserConfig.InitFullScreen           = FALSE;
-    UserConfig.PrecisionFixEnable       = TRUE;
-    UserConfig.CreateWindow             = FALSE;
-    UserConfig.EnableMipMaps            = FALSE;
-    UserConfig.BuildMipMaps             = FALSE;
-    UserConfig.IgnorePaletteChange      = FALSE;
-    UserConfig.MultiTextureEXTEnable    = TRUE;
-    UserConfig.PaletteEXTEnable         = TRUE;
-    UserConfig.TextureEnvEXTEnable      = FALSE;
-    UserConfig.VertexArrayEXTEnable     = FALSE;
-    UserConfig.FogCoordEXTEnable        = TRUE;
-    UserConfig.BlendFuncSeparate        = FALSE;
+    UserConfig.FogEnable                    = TRUE;
+    UserConfig.InitFullScreen               = FALSE;
+    UserConfig.PrecisionFixEnable           = TRUE;
+    UserConfig.CreateWindow                 = FALSE;
+    UserConfig.EnableMipMaps                = FALSE;
+    UserConfig.BuildMipMaps                 = FALSE;
+    UserConfig.IgnorePaletteChange          = FALSE;
+    UserConfig.MultiTextureEXTEnable        = TRUE;
+    UserConfig.PaletteEXTEnable             = TRUE;
+    UserConfig.TextureEnvEXTEnable          = FALSE;
+    UserConfig.VertexArrayEXTEnable         = FALSE;
+    UserConfig.FogCoordEXTEnable            = TRUE;
+    UserConfig.BlendFuncSeparateEXTEnable   = FALSE;
 
-    UserConfig.TextureMemorySize        = 16;
-    UserConfig.FrameBufferMemorySize    = 8;
+    UserConfig.TextureMemorySize            = 16;
+    UserConfig.FrameBufferMemorySize        = 8;
 
-    UserConfig.Priority                 = 2;
+    UserConfig.Priority                     = 2;
 
     strcpy( Path, INIFILE );
 
