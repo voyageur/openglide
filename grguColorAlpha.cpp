@@ -4,6 +4,7 @@
 //*					   Made by Glorfindel
 //**************************************************************
 
+#include "math.h"
 #include "GlOgl.h"
 #include "GLRender.h"
 
@@ -748,10 +749,27 @@ grGammaCorrectionValue( float value )
 	RenderDrawTriangles();
 
 	OpenGL.Gamma = value;
-	// Wrong way, but useful for now
-	glPixelTransferf( GL_RED_SCALE, value );
-	glPixelTransferf( GL_GREEN_SCALE, value );
-	glPixelTransferf( GL_BLUE_SCALE, value );
+    {
+        struct
+        {
+            WORD red[256];
+            WORD green[256];
+            WORD blue[256];
+        } ramp;
+        int i;
+        HDC pDC = GetDC(NULL);
+
+        for(i = 0; i < 256; i++)
+        {
+            WORD v = (WORD) (0xffff * pow(i / 255.0, 1.0/value));
+
+            ramp.red[i] = ramp.green[i] = ramp.blue[i] = (v & 0xff00);
+        }
+
+        BOOL res = SetDeviceGammaRamp(pDC, &ramp);
+
+        ReleaseDC(NULL, pDC);
+    }
 
 #ifdef OPENGL_DEBUG
 	GLErro( "grGammaCorrectionValue" );

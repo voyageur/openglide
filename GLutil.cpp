@@ -64,9 +64,92 @@ void GLErro( char *Funcao )
 	}
 }
 
+#if 0
+static LPDIRECTDRAW              pDD = NULL;
+static LPDIRECTDRAWSURFACE      pSurf = NULL;
+static LPDIRECTDRAWGAMMACONTROL pControl = NULL;
+
+static HRESULT open_direct_draw(HWND hwnd)
+{
+    HRESULT res;
+    DDSURFACEDESC desc;
+
+    res = DirectDrawCreate(NULL, &pDD, NULL);
+    if(res != DD_OK)
+        return res;
+
+    res = pDD->SetCooperativeLevel(NULL, DDSCL_NORMAL);
+    //res = pDD->SetCooperativeLevel(hwnd, DDSCL_EXCLUSIVE|DDSCL_FULLSCREEN);
+    if(res != DD_OK)
+        return res;
+
+    memset(&desc, 0, sizeof(desc));
+    desc.dwSize = sizeof(desc);
+    desc.dwFlags = DDSD_CAPS;
+    desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+
+    res = pDD->CreateSurface(&desc, &pSurf, NULL);
+    if(res != DD_OK)
+        return res;
+
+    res = pSurf->QueryInterface(IID_IDirectDrawGammaControl, (void **) &pControl);
+
+    return res;
+}
+
+static void close_direct_draw()
+{
+    if(pControl != NULL)
+    {
+        pControl->Release();
+        pControl = NULL;
+    }
+
+    if(pSurf != NULL)
+    {
+        pSurf->Release();
+        pSurf = NULL;
+    }
+
+    if(pDD != NULL)
+    {
+        pDD->Release();
+        pDD = NULL;
+    }
+}
+
+static HRESULT set_gamma_ramp()
+{
+    HRESULT res;
+    DDGAMMARAMP ramp;
+    int i;
+    
+    if(pControl == NULL)
+        return DDERR_NOTINITIALIZED;
+    
+    for(i = 0; i < 256; i++)
+    {
+        WORD v = (WORD) (0xffff * pow(i / 255.0, 0.66));
+        
+        ramp.red[i] = ramp.green[i] = ramp.blue[i] = (v & 0xff00);
+    }
+    
+    res = pControl->SetGammaRamp(0, &ramp);
+
+    return res;
+}
+#endif
+
 HDC hDC;
 static HGLRC hRC;
 static HWND hWND;
+static struct
+        {
+            WORD red[256];
+            WORD green[256];
+            WORD blue[256];
+        } old_ramp;
+static BOOL ramp_stored = FALSE;
 
 void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 {
@@ -77,7 +160,7 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
     hWND = hwnd;
 
 	hDC = GetDC( hwnd );
-	BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
+    	BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
 
 	ZeroMemory( &pfd, sizeof(pfd) );
 	pfd.nSize        = sizeof(pfd);
@@ -111,10 +194,27 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 
 	hRC = wglCreateContext(hDC);
 	wglMakeCurrent(hDC, hRC);
+
+    {
+        HDC pDC = GetDC(NULL);
+
+        ramp_stored = GetDeviceGammaRamp(pDC, &old_ramp);
+
+        ReleaseDC(NULL, pDC);
+    }
 }    
 
 void FinaliseOpenGLWindow(void)
 {
+    if(ramp_stored)
+    {
+        HDC pDC = GetDC(NULL);
+
+        BOOL res = SetDeviceGammaRamp(pDC, &old_ramp);
+
+        ReleaseDC(NULL, pDC);
+    }
+
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(hRC);
 	ReleaseDC(hWND, hDC);
