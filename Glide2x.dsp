@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /Zp8 /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x416 /d "_DEBUG"
@@ -123,6 +123,10 @@ SOURCE=.\glidesys.h
 # Begin Source File
 
 SOURCE=.\glideutl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PGTexture.h
 # End Source File
 # Begin Source File
 
@@ -216,6 +220,10 @@ SOURCE=.\grguTex.cpp
 # Begin Source File
 
 SOURCE=.\Otimizaceos.txt
+# End Source File
+# Begin Source File
+
+SOURCE=.\PGTexture.cpp
 # End Source File
 # Begin Source File
 

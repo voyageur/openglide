@@ -7,6 +7,7 @@
 #include "GlOGl.h"
 #include "GLRender.h"
 #include "GLTexture.h"
+#include "PGTexture.h"
 #include "GLextensions.h"
 #include "amd3dx.h"
 #include "profile.h"
@@ -863,87 +864,7 @@ void RenderDrawTriangles()
 	{
 		glEnable( GL_TEXTURE_2D );
 
-		if ( OpenGL.CurrentTexture->Palette )
-		{
-			if ( OpenGL.CurrentTexture->PaletteOpt.GetPalette() != OpenGL.PaletteCalc )
-			{
-				if ( ( TNumber = OpenGL.CurrentTexture->PaletteOpt.SearchPalette( OpenGL.PaletteCalc ) ) == 0 )
-				{
-					TNumber = OpenGL.CurrentTexture->PaletteOpt.SetPalette( OpenGL.PaletteCalc );
-					glBindTexture( GL_TEXTURE_2D, TNumber );
-
-					if ( OpenGL.CurrentTexture->Format == GR_TEXFMT_P_8 )
-					{
-						if ( 0 && InternalConfig.MMXEnable )
-						{
-							MMXConvertPalette( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );
-						}
-						else
-						{
-							ConvertPalette( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );
-						}
-
-						glTexImage2D( GL_TEXTURE_2D, OpenGL.CurrentTexture->Lod, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-						if ( InternalConfig.BuildMipMaps )
-						{
-							gluBuild2DMipmaps( GL_TEXTURE_2D, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-						}
-					}
-					else
-					{
-						if ( InternalConfig.MMXEnable )
-						{
-	//						MMXConvertPaletteAlpha( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );//, OpenGL.PTable );
-							Pixels = OpenGL.CurrentTexture->NPixels;
-							Buffer1 = OpenGL.CurrentTexture->Data;
-							Buffer2 = TexTemp;
-							while(Pixels)
-							{
-								*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][0];
-								*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][1];
-								*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][2];
-								*(Buffer2++) = *(Buffer1);
-								Buffer1 += 2;
-								Pixels--;
-							}
-						}
-						else
-						{
-							Pixels = OpenGL.CurrentTexture->NPixels;
-							Buffer1 = OpenGL.CurrentTexture->Data;
-							Buffer2 = TexTemp;
-							while(Pixels)
-							{
-								*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][2];
-								*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][1];
-								*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][0];
-								*(Buffer2++) = *(Buffer1);
-								Buffer1 += 2;
-								Pixels--;
-							}
-						}
-						glTexImage2D( GL_TEXTURE_2D, OpenGL.CurrentTexture->Lod, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-						if ( InternalConfig.BuildMipMaps )
-						{
-							gluBuild2DMipmaps( GL_TEXTURE_2D, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-						}
-					}
-				}
-				else
-				{
-					glBindTexture( GL_TEXTURE_2D, TNumber );
-#ifdef DEBUG
-					Textures->NotUpdatedPalette++;
-#endif
-				}
-//				OpenGL.CurrentTexture->Palette = OpenGL.PaletteCalc;
-				OpenGL.CurrentTexture->NeedUpdate = false;
-			}
-#ifdef DEBUG
-			else
-				Textures->NotUpdatedPalette++;
-#endif
-		}
+        Textures->MakeReady();
 	}
 	else
 	{
@@ -1438,12 +1359,16 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 	if (OpenGL.Texture)
 	{
         float maxoow = max(a->oow, max(b->oow, c->oow));
-		pTS->as = a->tmuvtx[0].sow * CurrentTextureWidth / maxoow;
-		pTS->at = a->tmuvtx[0].tow * CurrentTextureHeight / maxoow;
-		pTS->bs = b->tmuvtx[0].sow * CurrentTextureWidth / maxoow;
-		pTS->bt = b->tmuvtx[0].tow * CurrentTextureHeight / maxoow;
-		pTS->cs = c->tmuvtx[0].sow * CurrentTextureWidth / maxoow;
-		pTS->ct = c->tmuvtx[0].tow * CurrentTextureHeight / maxoow;
+        float hAspect, wAspect;
+
+        Textures->GetAspect(&hAspect, &wAspect);
+
+		pTS->as = a->tmuvtx[0].sow * wAspect / maxoow;
+		pTS->at = a->tmuvtx[0].tow * hAspect / maxoow;
+		pTS->bs = b->tmuvtx[0].sow * wAspect / maxoow;
+		pTS->bt = b->tmuvtx[0].tow * hAspect / maxoow;
+		pTS->cs = c->tmuvtx[0].sow * wAspect / maxoow;
+		pTS->ct = c->tmuvtx[0].tow * hAspect / maxoow;
 
 		pTS->aq = pTS->bq = pTS->cq = 0.0f;
 		pTS->aoow = a->oow / maxoow;
@@ -1936,10 +1861,14 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 
 	if (OpenGL.Texture)
 	{
-		pTS->as = a->tmuvtx[0].sow * CurrentTextureWidth;// / a->oow;
-		pTS->at = a->tmuvtx[0].tow * CurrentTextureHeight;// / a->oow;
-		pTS->bs = b->tmuvtx[0].sow * CurrentTextureWidth;// / b->oow;
-		pTS->bt = b->tmuvtx[0].tow * CurrentTextureHeight;// / b->oow;
+        float hAspect, wAspect;
+
+        Textures->GetAspect(&hAspect, &wAspect);
+
+		pTS->as = a->tmuvtx[0].sow * wAspect;// / a->oow;
+		pTS->at = a->tmuvtx[0].tow * hAspect;// / a->oow;
+		pTS->bs = b->tmuvtx[0].sow * wAspect;// / b->oow;
+		pTS->bt = b->tmuvtx[0].tow * hAspect;// / b->oow;
 
 		pTS->aq = pTS->bq = 0.0f;
 		pTS->aoow = a->oow;
@@ -2012,71 +1941,7 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 	{
 		glEnable( GL_TEXTURE_2D );
 
-		if (OpenGL.CurrentTexture->Palette)
-		{
-			if (OpenGL.CurrentTexture->Palette != OpenGL.PaletteCalc)
-			{
-				if (OpenGL.CurrentTexture->Format == GR_TEXFMT_P_8)
-				{
-					if ( InternalConfig.MMXEnable )
-					{
-						MMXConvertPalette( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );//, OpenGL.PTable );
-					}
-					else
-					{
-						Pixels = OpenGL.CurrentTexture->NPixels;
-						Buffer1 = OpenGL.CurrentTexture->Data;
-						Buffer2 = TexTemp;
-						while(Pixels)
-						{
-							*(Buffer2++) = OpenGL.PTable[*Buffer1][2];
-							*(Buffer2++) = OpenGL.PTable[*Buffer1][1];
-							*(Buffer2++) = OpenGL.PTable[*Buffer1++][0];
-							*(Buffer2++) = 0xFF;
-							Pixels--;
-						}
-					}
-					glTexImage2D( GL_TEXTURE_2D, OpenGL.CurrentTexture->Lod, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					if ( InternalConfig.BuildMipMaps )
-					{
-						gluBuild2DMipmaps( GL_TEXTURE_2D, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					}
-				}
-				else
-				{
-					if ( InternalConfig.MMXEnable )
-					{
-						MMXConvertPaletteAlpha( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );//, OpenGL.PTable );
-					}
-					else
-					{
-						Pixels = OpenGL.CurrentTexture->NPixels;
-						Buffer1 = OpenGL.CurrentTexture->Data;
-						Buffer2 = TexTemp;
-						while(Pixels)
-						{
-							*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][2];
-							*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][1];
-							*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][0];
-							*(Buffer2++) = *Buffer1;
-							Buffer1 += 2;
-							Pixels--;
-						}
-					}
-					glTexImage2D( GL_TEXTURE_2D, OpenGL.CurrentTexture->Lod, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					if ( InternalConfig.BuildMipMaps )
-					{
-						gluBuild2DMipmaps( GL_TEXTURE_2D, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					}
-				}
-				OpenGL.CurrentTexture->Palette = OpenGL.PaletteCalc;
-				OpenGL.CurrentTexture->NeedUpdate = false;
-			}
-#ifdef DEBUG
-			else
-				Textures->NotUpdatedPalette++;
-#endif
-		}
+        Textures->MakeReady();
 	}
 	else
 	{
@@ -2429,8 +2294,12 @@ void RenderAddPoint( const GrVertex *a )
 
 	if (OpenGL.Texture)
 	{
-		pTS->as = a->tmuvtx[0].sow * CurrentTextureWidth;// / a->oow;
-		pTS->at = a->tmuvtx[0].tow * CurrentTextureHeight;// / a->oow;
+        float hAspect, wAspect;
+
+        Textures->GetAspect(&hAspect, &wAspect);
+
+		pTS->as = a->tmuvtx[0].sow * wAspect;// / a->oow;
+		pTS->at = a->tmuvtx[0].tow * hAspect;// / a->oow;
 
 		pTS->aq = 0.0f;
 		pTS->aoow = a->oow;
@@ -2484,71 +2353,7 @@ void RenderAddPoint( const GrVertex *a )
 	{
 		glEnable( GL_TEXTURE_2D );
 
-		if (OpenGL.CurrentTexture->Palette)
-		{
-			if (OpenGL.CurrentTexture->Palette != OpenGL.PaletteCalc)
-			{
-				if (OpenGL.CurrentTexture->Format == GR_TEXFMT_P_8)
-				{
-					if ( InternalConfig.MMXEnable )
-					{
-						MMXConvertPalette( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );//, OpenGL.PTable );
-					}
-					else
-					{
-						Pixels = OpenGL.CurrentTexture->NPixels;
-						Buffer1 = OpenGL.CurrentTexture->Data;
-						Buffer2 = TexTemp;
-						while(Pixels)
-						{
-							*(Buffer2++) = OpenGL.PTable[*Buffer1][2];
-							*(Buffer2++) = OpenGL.PTable[*Buffer1][1];
-							*(Buffer2++) = OpenGL.PTable[*Buffer1++][0];
-							*(Buffer2++) = 0xFF;
-							Pixels--;
-						}
-					}
-					glTexImage2D( GL_TEXTURE_2D, OpenGL.CurrentTexture->Lod, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					if ( InternalConfig.BuildMipMaps )
-					{
-						gluBuild2DMipmaps( GL_TEXTURE_2D, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					}
-				}
-				else
-				{
-					if ( InternalConfig.MMXEnable )
-					{
-						MMXConvertPaletteAlpha( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );//, OpenGL.PTable );
-					}
-					else
-					{
-						Pixels = OpenGL.CurrentTexture->NPixels;
-						Buffer1 = OpenGL.CurrentTexture->Data;
-						Buffer2 = TexTemp;
-						while(Pixels)
-						{
-							*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][2];
-							*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][1];
-							*(Buffer2++) = OpenGL.PTable[*(Buffer1+1)][0];
-							*(Buffer2++) = *Buffer1;
-							Buffer1 += 2;
-							Pixels--;
-						}
-					}
-					glTexImage2D( GL_TEXTURE_2D, OpenGL.CurrentTexture->Lod, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					if ( InternalConfig.BuildMipMaps )
-					{
-						gluBuild2DMipmaps( GL_TEXTURE_2D, 4, OpenGL.CurrentTexture->Width, OpenGL.CurrentTexture->Height, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp );
-					}
-				}
-				OpenGL.CurrentTexture->Palette = OpenGL.PaletteCalc;
-				OpenGL.CurrentTexture->NeedUpdate = false;
-			}
-#ifdef DEBUG
-			else
-				Textures->NotUpdatedPalette++;
-#endif
-		}
+        Textures->MakeReady();
 	}
 	else
 	{

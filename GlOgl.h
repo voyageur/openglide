@@ -35,6 +35,7 @@
 #include "GL\glu.h"
 #include "GLRender.h"
 #include "GLTexture.h"
+#include "PGTexture.h"
 
 #define RDTSC(v)	__asm _emit 0x0f \
 					__asm _emit 0x31 \

@@ -692,6 +692,9 @@ grChromakeyValue( GrColor_t value )
 #ifdef PARTDONE
 	GlideMsg( "grChromakeyValue( %d )\n", value );
 #endif
+	RenderDrawTriangles();
+
+    Textures->ChromakeyValue(value);
 
 	Glide.State.ChromakeyValue = value;
 	ConvertColorB( value, OpenGL.ChromaColor[0], OpenGL.ChromaColor[1], OpenGL.ChromaColor[2], OpenGL.ChromaColor[3] );
@@ -706,6 +709,9 @@ grChromakeyMode( GrChromakeyMode_t mode )
 #ifdef PARTDONE
 	GlideMsg( "grChromakeyMode( %d )\n", mode );
 #endif
+	RenderDrawTriangles();
+
+    Textures->ChromakeyMode(mode);
 
 	Glide.State.ChromaKeyMode = mode;
 

@@ -42,7 +42,8 @@ GlideStruct		Glide;
 OpenGLStruct	OpenGL;
 
 // Classes
-WTexture		*Textures;
+//WTexture		*Textures;
+PGTexture		*Textures;
 WUTexture		UTextures;
 //Render			OGLRender;
 
@@ -351,13 +352,10 @@ grGlideInit( void )
 
 	Glide.TextureMemory = UserConfig.TextureMemorySize * 1024 * 1024;
 
-	Textures = new WTexture( Glide.TextureMemory );
+	//Textures = new WTexture( Glide.TextureMemory );
+	Textures = new PGTexture();
 	if ( Textures == NULL )
-	{
 		Error( "Cannot allocate enough memory for Texture Buffer in User setting, using default" );
-		Glide.TextureMemory = TEXTUREMEMORY;
-		Textures = new WTexture( Glide.TextureMemory );
-	}
 
 	Glide.TexMemoryMaxPosition	= (FxU32)Glide.TextureMemory;
 	UserConfig.TextureMemorySize = Glide.TextureMemory / (1024*1024);
@@ -705,16 +703,6 @@ grSstWinClose( void )
 	GlideMsg( "MaxB = %f\nMinB = %f\n", OGLRender.MaxB, OGLRender.MinR );
 	GlideMsg( "MaxA = %f\nMinA = %f\n", OGLRender.MaxA, OGLRender.MinA );
 	GlideMsg( "-----------------------------------------------------\n" );
-	GlideMsg( "565 Textures = %lu\n1555 Textures = %lu\n4444 Textures = %lu\nPalette Textures = %lu\nAlpha Pallete Textures = %lu\n",
-			Textures->t565, Textures->t1555, Textures->t4444, Textures->tp8, Textures->tap88 );
-	GlideMsg( "Alpha Textures = %lu\nAlpha Intensity (88) Textures = %lu\nIntensity Textures = %lu\n",
-		Textures->ta8, Textures->tai88, Textures->ti8 );
-	GlideMsg( "Alpha/Intensity (44) Textures = %lu\n8Bit Textures = %lu\n16 Bits textures = %lu\n",
-		Textures->tai44, Textures->t332, Textures->t8332 );
-	GlideMsg( "AYIQ (8422) Textures = %lu\nYIQ (422) Textures = %lu\nRSVD0 Textures = %lu\nRSVD1 Textures = %lu\nRSVD2 Textures = %lu\n",
-		Textures->tayiq8422, Textures->tyiq422, Textures->trsvd0, Textures->trsvd1, Textures->trsvd2 );
-	GlideMsg( "Texture Pallete Tables not updated = %lu\n", Textures->NotUpdatedPalette );
-	GlideMsg( "Total Textures Stored = %d\n", Textures->ActualTexture );
 	GlideMsg( "-----------------------------------------------------\n" );
 #endif
 

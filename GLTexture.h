@@ -12,6 +12,7 @@
 #define MAXTEXTURES				5000
 #define DEFPALETTE				64
 
+#include "PGTexture.h"
 
 struct TexSourceStruct
 {
@@ -166,7 +167,8 @@ public:
 };
 
 
-extern WTexture			*Textures;
+//extern WTexture			*Textures;
+extern PGTexture			*Textures;
 extern WUTexture		UTextures;
 
 // Conversions Routines Prototypes

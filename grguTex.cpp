@@ -65,7 +65,9 @@ grTexSource( GrChipID_t tmu,
 	Glide.State.TexSource.StartAddress = startAddress;
 	Glide.State.TexSource.EvenOdd = evenOdd;
 
-	OpenGL.CurrentTexture = Textures->SetSource( startAddress );	
+	OpenGL.CurrentTexture = 0;
+    
+    Textures->Source( startAddress, evenOdd, info );	
 }
 
 //*************************************************
@@ -107,7 +109,7 @@ grTexDownloadMipMap( GrChipID_t tmu,
 		return;
 
 	info->smallLod = info->largeLod;
-	Textures->AddTexture( startAddress, info );
+	Textures->DownloadMipMap( startAddress, evenOdd, info );
 //	register int i;
 //	BYTE *Data = (BYTE*)info->data;
 //	for( i = info->largeLod; i <= info->smallLod; i++ )
@@ -144,7 +146,7 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
 	info.format			= format;
 	info.data			= data;
 
-	Textures->AddTexture( startAddress, &info );
+	Textures->DownloadMipMap( startAddress, evenOdd, &info );
 }
 
 //----------------------------------------------------------------
@@ -532,6 +534,8 @@ grTexDownloadTable( GrChipID_t   tmu,
 		return;
 
 	RenderDrawTriangles();
+
+    Textures->DownloadTable(type, data);
 
 	if ( type == GR_TEXTABLE_PALETTE )
 	{
@@ -1015,7 +1019,9 @@ guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 	grTexDownloadMipMapLevel( MipMap->tmu, MipMap->tmu_base_address, lod, MipMap->lod_max,
 		MipMap->aspect_ratio, MipMap->format, MipMap->odd_even_mask, (void*) *src );
 
-	UTextures.SetOpenGLTexture( mmid, Textures->TextureNumber( MipMap->tmu_base_address ) );
+
+    //FIXME: by commenting out the line below, I have critically broken OpenGLide
+	//UTextures.SetOpenGLTexture( mmid, Textures->TextureNumber( MipMap->tmu_base_address ) );
 }
 
 //----------------------------------------------------------------
