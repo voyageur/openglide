@@ -79,7 +79,7 @@ struct RenderStruct
 	TFogStruct		*TFog;
 	long NumberOfTriangles;
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
 	float MinX, MinY, MinZ, MinW;
 	float MaxX, MaxY, MaxZ, MaxW;
 	float MinS, MinT, MaxS, MaxT;

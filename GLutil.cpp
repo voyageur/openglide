@@ -22,6 +22,18 @@ ConfigStruct    UserConfig,
 extern unsigned long    NumberOfErrors;
 extern BOOL             GenerateErrorFile();
 
+HDC hDC;
+static HGLRC hRC;
+static HWND hWND;
+static struct
+{
+    WORD red[ 256 ];
+    WORD green[ 256 ];
+    WORD blue[ 256 ];
+} old_ramp;
+
+static BOOL ramp_stored = FALSE;
+static BOOL mode_changed = FALSE;
 
 // Functions
 
@@ -67,112 +79,13 @@ void __cdecl Error( char *szString, ... )
 
 void GLErro( char *Funcao )
 {
-    GLenum Erro = glGetError();
+    GLenum Erro = glGetError( );
 
     if ( Erro != GL_NO_ERROR )
     {
         Error( "%s: OpenGLError = %s\n", Funcao, gluErrorString( Erro ) );
     }
 }
-
-// Not included
-#if 0
-
-static LPDIRECTDRAW             pDD = NULL;
-static LPDIRECTDRAWSURFACE      pSurf = NULL;
-static LPDIRECTDRAWGAMMACONTROL pControl = NULL;
-
-static HRESULT open_direct_draw( HWND hwnd )
-{
-    HRESULT         res;
-    DDSURFACEDESC   desc;
-
-    res = DirectDrawCreate( NULL, &pDD, NULL );
-    if ( res != DD_OK )
-    {
-        return res;
-    }
-
-    res = pDD->SetCooperativeLevel( NULL, DDSCL_NORMAL );
-    if ( res != DD_OK )
-    {
-        return res;
-    }
-
-    memset( &desc, 0, sizeof( desc ) );
-    desc.dwSize = sizeof( desc );
-    desc.dwFlags = DDSD_CAPS;
-    desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-
-    res = pDD->CreateSurface( &desc, &pSurf, NULL );
-    if( res != DD_OK )
-    {
-        return res;
-    }
-
-    res = pSurf->QueryInterface( IID_IDirectDrawGammaControl, (void **) &pControl );
-
-    return res;
-}
-
-static void close_direct_draw( void )
-{
-    if ( pControl != NULL )
-    {
-        pControl->Release( );
-        pControl = NULL;
-    }
-
-    if ( pSurf != NULL )
-    {
-        pSurf->Release( );
-        pSurf = NULL;
-    }
-
-    if ( pDD != NULL )
-    {
-        pDD->Release( );
-        pDD = NULL;
-    }
-}
-
-static HRESULT set_gamma_ramp( void )
-{
-    HRESULT     res;
-    DDGAMMARAMP ramp;
-    int         i;
-    
-    if ( pControl == NULL )
-    {
-        return DDERR_NOTINITIALIZED;
-    }
-    
-    for ( i = 0; i < 256; i++ )
-    {
-        WORD v = (WORD)( 0xffff * pow( i / 255.0, 0.66 ) );
-        
-        ramp.red[ i ] = ramp.green[ i ] = ramp.blue[ i ] = ( v & 0xff00 );
-    }
-    
-    res = pControl->SetGammaRamp( 0, &ramp );
-
-    return res;
-}
-
-#endif
-
-HDC hDC;
-static HGLRC hRC;
-static HWND hWND;
-static struct
-{
-    WORD red[ 256 ];
-    WORD green[ 256 ];
-    WORD blue[ 256 ];
-} old_ramp;
-
-static BOOL ramp_stored = FALSE;
-static BOOL mode_changed = FALSE;
 
 static BOOL SetScreenMode( HWND hWnd, int xsize, int ysize )
 {
@@ -181,9 +94,9 @@ static BOOL SetScreenMode( HWND hWnd, int xsize, int ysize )
     BOOL    found;
     DEVMODE DevMode;
 
-    hdc = ::GetDC( hWnd );
+    hdc = GetDC( hWnd );
     bits_per_pixel = GetDeviceCaps( hdc, BITSPIXEL );
-    ::ReleaseDC( hWnd, hdc );
+    ReleaseDC( hWnd, hdc );
     
     found = FALSE;
     DevMode.dmSize = sizeof( DEVMODE );
@@ -478,7 +391,7 @@ float ClockFrequency( void )
     i64_perf_end = 0;
 
     RDTSC( i64_clock_start );
-    while( i64_perf_end < ( i64_perf_start + 250000 ) )
+    while( i64_perf_end < ( i64_perf_start + 350000 ) )
     {
         QueryPerformanceCounter( (LARGE_INTEGER*)&i64_perf_end );
     }
@@ -486,7 +399,7 @@ float ClockFrequency( void )
 
     i64_clock_end -= i64_clock_start;
 
-    d_loop_period = ((double)i64_perf_freq) / 250000.0;
+    d_loop_period = ((double)i64_perf_freq) / 350000.0;
     d_clock_freq = ((double)( i64_clock_end & 0xffffffff )) * d_loop_period;
 
     return (float)d_clock_freq;
@@ -555,17 +468,6 @@ void GetOptions( void )
     UserConfig.Priority                 = 2;
     UserConfig.MMXEnable                = FALSE;
     UserConfig.TDnowEnable              = FALSE;
-
-    /*
-    if ( GetWindowsDirectory( Path, MAX_PATH ) == 0 )
-    {
-        Error( "Could not get the Windows Directory\nExiting...\n" );
-        exit( -1 );
-    }
-
-    strcat( Path, "\\" );
-    strcat( Path, INIFILE );
-    */
 
     strcpy( Path, INIFILE );
 

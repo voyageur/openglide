@@ -38,7 +38,7 @@ public:
 
     void Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num );
     void WipeRange( FxU32 startAddress, FxU32 endAddress, FxU32 hash );
-    bool Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
+    GrTexInfo * Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
                GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change );
     TexDB( unsigned int MemorySize );
     virtual ~TexDB( void );

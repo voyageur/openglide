@@ -18,7 +18,7 @@
 DLLEXPORT void __stdcall
 grDrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grDrawTriangle( ---, ---, --- )\n" );
 #endif
 
@@ -37,7 +37,7 @@ grDrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
 DLLEXPORT void __stdcall
 grDrawPlanarPolygonVertexList( int nVertices, const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grDrawPlanarPolygonVertexList( %d, --- )\n", nVertices );
 #endif
 
@@ -59,7 +59,7 @@ grDrawPlanarPolygonVertexList( int nVertices, const GrVertex vlist[] )
 DLLEXPORT void __stdcall
 grDrawLine( const GrVertex *a, const GrVertex *b )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grDrawLine( ---, --- )\n");
 #endif
     
@@ -78,7 +78,7 @@ grDrawLine( const GrVertex *a, const GrVertex *b )
 DLLEXPORT void __stdcall
 grDrawPoint( const GrVertex *a )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grDrawPoint( --- )\n" );
 #endif
 
@@ -91,7 +91,7 @@ grDrawPoint( const GrVertex *a )
 DLLEXPORT void __stdcall
 grDrawPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grDrawPolygon( %d, ---, --- )\n" );
 #endif
 
@@ -116,7 +116,7 @@ grDrawPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 DLLEXPORT void __stdcall
 grDrawPlanarPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grDrawPlanarPolygon( %d, ---, --- )\n", nverts );
 #endif
 
@@ -141,7 +141,7 @@ grDrawPlanarPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 DLLEXPORT void __stdcall
 grDrawPolygonVertexList( int nVertices, const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grDrawPolygonVertexList( %d, --- )\n", nVertices );
 #endif
 
@@ -164,7 +164,7 @@ DLLEXPORT void __stdcall
 guAADrawTriangleWithClip( const GrVertex *a, const GrVertex *b, 
                           const GrVertex *c )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("guAADrawTriangleWithClip( ---, ---, --- )\n");
 #endif
 
@@ -182,7 +182,7 @@ guDrawTriangleWithClip( const GrVertex *a,
                         const GrVertex *b,
                         const GrVertex *c )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("guDrawTriangleWithClip( ---, ---, --- )\n");
 #endif
 
@@ -198,7 +198,7 @@ guDrawTriangleWithClip( const GrVertex *a,
 DLLEXPORT void __stdcall
 guDrawPolygonVertexListWithClip( int nverts, const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "guDrawPolygonVertexListWithClip( %d, --- )\n", nverts );
 #endif
 
@@ -220,7 +220,7 @@ guDrawPolygonVertexListWithClip( int nverts, const GrVertex vlist[] )
 DLLEXPORT void __stdcall
 grAADrawLine( const GrVertex *a, const GrVertex *b )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grAADrawLine( ---, --- )\n" );
 #endif
 
@@ -230,7 +230,7 @@ grAADrawLine( const GrVertex *a, const GrVertex *b )
 DLLEXPORT void __stdcall
 grAADrawPoint(const GrVertex *a )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grAADrawPoint( --- )\n");
 #endif
 
@@ -240,7 +240,7 @@ grAADrawPoint(const GrVertex *a )
 DLLEXPORT void __stdcall
 grAADrawPolygon( const int nverts, const int ilist[], const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grAADrawPolygon( %d, ---, --- )\n", nverts );
 #endif
 
@@ -262,7 +262,7 @@ grAADrawPolygon( const int nverts, const int ilist[], const GrVertex vlist[] )
 DLLEXPORT void __stdcall
 grAADrawPolygonVertexList( const int nverts, const GrVertex vlist[] )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grAADrawPolygonVertexList( %d, --- )\n", nverts );
 #endif
 
@@ -285,7 +285,7 @@ DLLEXPORT void __stdcall
 grAADrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
                   FxBool ab_antialias, FxBool bc_antialias, FxBool ca_antialias )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grAADrawTriangle( ---, ---, ---, %d, %d, %d )\n",
         ab_antialias, bc_antialias, ca_antialias );
 #endif

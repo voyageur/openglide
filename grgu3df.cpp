@@ -24,13 +24,13 @@ int Read3dfHeader( const char *filename, Gu3dfInfo *data );
 DLLEXPORT FxBool __stdcall
 gu3dfGetInfo( const char *filename, Gu3dfInfo *info )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "gu3dfGetInfo( %s, --- )\n", filename );
 #endif
 
     if ( Read3dfHeader( filename, info ) )
     {
-#ifdef DEBUG
+#ifdef OGL_DEBUG
         GlideMsg( "==========================================\n" );
         GlideMsg( "3df file Header: %s\n", filename );
         GlideMsg( "Texture Format = %d\n", info->header.format );
@@ -79,14 +79,14 @@ static FxU32 ReadDataShort( FILE *fp )
 DLLEXPORT FxBool __stdcall
 gu3dfLoad( const char *filename, Gu3dfInfo *data )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "gu3dfLoad( %s, --- )\n", filename );
 #endif
 
     FILE    * file3df;
     int     jump = Read3dfHeader( filename, data );
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     GlideMsg( "Start of Data (Offset) = %d\n", jump );
     GlideMsg( "Total Bytes to be Read = %d\n", data->mem_required );
 #endif
@@ -102,7 +102,7 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
         {
             data->table.palette.data[i] = ReadDataLong( file3df );
         }
-#ifdef DEBUG
+#ifdef OGL_DEBUG
         GlideMsg( "Reading Palette\n" );
 #endif
     }

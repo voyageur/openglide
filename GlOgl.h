@@ -14,24 +14,24 @@
 
 #define __WIN32__
 
-//#define ALL
-//#define PARTDONE
-//#define NOTDONE
-//#define DEBUG
-//#define CRITICAL
-#define OPENGL_DEBUG
-//#define PROFILING
-//#define UTEX
+//#define OGL_ALL
+//#define OGL_PARTDONE
+//#define OGL_NOTDONE
+//#define OGL_DEBUG
+//#define OGL_CRITICAL
+//#define OPENGL_DEBUG
+//#define OGL_PROFILING
+//#define OGL_UTEX
 
-#ifdef ALL
- #define DONE
- #define PARTDONE
- #define NOTDONE
- #define DEBUG
- #define CRITICAL
+#ifdef OGL_ALL
+ #define OGL_DONE
+ #define OGL_PARTDONE
+ #define OGL_NOTDONE
+ #define OGL_DEBUG
+ #define OGL_CRITICAL
  #define OPENGL_DEBUG
- #define PROFILING
- #define UTEX
+ #define OGL_PROFILING
+ #define OGL_UTEX
 #endif
 
 #include <windows.h>

@@ -27,7 +27,7 @@ void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes );
 DLLEXPORT void __stdcall
 grFogTable( const GrFog_t *ft )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grFogTable( --- )\n" );
 #endif
 
@@ -69,7 +69,7 @@ grFogTable( const GrFog_t *ft )
 DLLEXPORT void __stdcall
 grFogColorValue( GrColor_t fogcolor )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grFogColorValue( %x )\n", fogcolor );
 #endif
 
@@ -88,7 +88,7 @@ grFogColorValue( GrColor_t fogcolor )
 DLLEXPORT void __stdcall
 grFogMode( GrFogMode_t mode )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grFogMode( %d )\n", mode );
 #endif
 
@@ -134,7 +134,7 @@ grFogMode( GrFogMode_t mode )
 DLLEXPORT void __stdcall
 guFogGenerateExp( GrFog_t *fogtable, float density )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "guFogGenerateExp( ---, %-4.2f )\n", density );
 #endif
     
@@ -167,7 +167,7 @@ guFogGenerateExp( GrFog_t *fogtable, float density )
 DLLEXPORT void __stdcall
 guFogGenerateExp2( GrFog_t *fogtable, float density )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "guFogGenerateExp2( ---, %-4.2f )\n", density );
 #endif
 
@@ -186,7 +186,7 @@ DLLEXPORT void __stdcall
 guFogGenerateLinear( GrFog_t *fogtable,
                      float nearZ, float farZ )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "guFogGenerateLinear( ---, %-4.2f, %-4.2f )\n", nearZ, farZ );
 #endif
 
@@ -229,7 +229,7 @@ guFogGenerateLinear( GrFog_t *fogtable,
 DLLEXPORT float __stdcall
 guFogTableIndexToW( int i )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "guFogTableIndexToW( %d )\n", i );
 #endif
 

@@ -53,14 +53,14 @@ GrMipMapId_t PGUTexture::AllocateMemory( GrChipID_t tmu, FxU8 odd_even_mask,
         size += PGTexture::MipMapMemRequired( lod, aspect, fmt );
     }
 
-#ifdef UTEX
+#ifdef OGL_UTEX
     GlideMsg( "Allocate id = %d size = %d\n", m_free_id, size );
 #endif
 
     if ( ( m_free_id >= MAX_MM ) || 
          ( ( m_free_mem + size ) >= Textures->m_tex_memory_size ) )
     {
-#ifdef UTEX
+#ifdef OGL_UTEX
         GlideMsg("Allocation failed\n");
 #endif
         return GR_NULL_MIPMAP_HANDLE;
@@ -91,7 +91,7 @@ GrMipMapId_t PGUTexture::AllocateMemory( GrChipID_t tmu, FxU8 odd_even_mask,
 
 void PGUTexture::DownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table )
 {
-#ifdef UTEX
+#ifdef OGL_UTEX
     GlideMsg("Download id = %d ", mmid);
 #endif
 
@@ -104,7 +104,7 @@ void PGUTexture::DownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNcc
         info.largeLod    = mm_info[ mmid ].lod_max;
         info.smallLod    = mm_info[ mmid ].lod_min;
         info.data        = (void *)src;
-#ifdef UTEX
+#ifdef OGL_UTEX
         {
             FxU32 size = 0;
 
@@ -119,7 +119,7 @@ void PGUTexture::DownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNcc
 
         grTexDownloadMipMap( 0, mm_start[ mmid ], mm_info[ mmid ].odd_even_mask, &info );
     }
-#ifdef UTEX
+#ifdef OGL_UTEX
     else
     {
         GlideMsg( "failed\n" );
@@ -133,7 +133,7 @@ void PGUTexture::DownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void
 
 void PGUTexture::MemReset( void )
 {
-#ifdef UTEX
+#ifdef OGL_UTEX
     GlideMsg("Reset\n");
 #endif
 
@@ -166,7 +166,7 @@ void PGUTexture::Source( GrMipMapId_t id )
 
         m_current_id = id;
     }
-#ifdef UTEX
+#ifdef OGL_UTEX
     else
     {
         GlideMsg( "TexSourcefailed\n" );

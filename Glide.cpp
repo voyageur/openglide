@@ -266,7 +266,7 @@ bool InitWindow( HWND hwnd )
     GlideMsg( "Version:     %s\n", glGetString( GL_VERSION ) );
     GlideMsg( "Extensions:  %s\n", glGetString( GL_EXTENSIONS ) );
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     GlideMsg( "-------------------------------------------\n" );
     GlideMsg( "GlideState size = %d\n", sizeof( GlideState ) );
     GlideMsg( "GrState size = %d\n", sizeof( GrState ) );
@@ -323,7 +323,7 @@ void InitOpenGL( void )
 DLLEXPORT void __stdcall
 grGlideGetVersion( char version[80] )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grGlideGetVersion( --- )\n" );
 #endif
     strcpy( version, "Glide 2.43" );
@@ -335,7 +335,7 @@ grGlideGetVersion( char version[80] )
 DLLEXPORT void __stdcall
 grGlideInit( void )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grGlideInit()\n" );
 #endif
     if ( OpenGL.GlideInit )
@@ -384,7 +384,7 @@ grGlideShutdown( void )
 
     RDTSC( FinalTick );
 
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grGlideShutdown()\n" );
 #endif
 
@@ -400,7 +400,7 @@ grGlideShutdown( void )
 DLLEXPORT void __stdcall
 grGlideSetState( const GrState *state )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grGlideSetState( --- )\n" );
 #endif
     GlideState StateTemp;
@@ -445,7 +445,7 @@ grGlideSetState( const GrState *state )
 DLLEXPORT void __stdcall
 grGlideGetState( GrState *state )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grGlideGetState( --- )\n" );
 #endif
 
@@ -456,7 +456,7 @@ grGlideGetState( GrState *state )
 DLLEXPORT void __stdcall
 grGlideShamelessPlug( const FxBool on )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grGlideShamelessPlug( %d )\n", on );
 #endif
 }
@@ -467,7 +467,7 @@ grGlideShamelessPlug( const FxBool on )
 DLLEXPORT FxBool __stdcall
 grSstQueryBoards( GrHwConfiguration *hwConfig )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstQueryBoards( --- )\n" );
 #endif
 
@@ -615,7 +615,7 @@ grSstWinOpen(   FxU32 hwnd,
     Glide.NumBuffers        = num_buffers;
     Glide.AuxBuffers        = num_aux_buffers;
 
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstWinOpen( %d, %d, %d, %d, %d, %d, %d )\n",
         hwnd, res, ref, cformat, org_loc, num_buffers, num_aux_buffers );
 #endif
@@ -623,8 +623,8 @@ grSstWinOpen(   FxU32 hwnd,
     // Initializing Glide and OpenGL
     InitOpenGL( );
 
-    Glide.SrcBuffer.Address = new WORD[ OPENGLBUFFERMEMORY ];
-    Glide.DstBuffer.Address = new WORD[ OPENGLBUFFERMEMORY ];
+    Glide.SrcBuffer.Address = new WORD[ OPENGLBUFFERMEMORY * 2 ];
+    Glide.DstBuffer.Address = new WORD[ OPENGLBUFFERMEMORY * 2 ];
     
     // Just checking
     if ( ( !Glide.SrcBuffer.Address ) || ( !Glide.DstBuffer.Address ) )
@@ -636,7 +636,7 @@ grSstWinOpen(   FxU32 hwnd,
     ZeroMemory( Glide.SrcBuffer.Address, OPENGLBUFFERMEMORY * 2 );
     ZeroMemory( Glide.DstBuffer.Address, OPENGLBUFFERMEMORY * 2 );
 
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "----Start of grSstWinOpen()\n" );
 #endif
     // All should be disabled
@@ -682,7 +682,7 @@ grSstWinOpen(   FxU32 hwnd,
 //  grGammaCorrectionValue( 1.6f );
     grHints(GR_HINT_STWHINT, 0);
 
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "----End of grSstWinOpen()\n" );
 #endif
 
@@ -703,7 +703,7 @@ grSstWinOpen(   FxU32 hwnd,
 DLLEXPORT void __stdcall
 grSstWinClose( void )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstWinClose()\n" );
 #endif
     if ( !OpenGL.WinOpen )
@@ -713,7 +713,7 @@ grSstWinClose( void )
 
     OpenGL.WinOpen = false;
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     GlideMsg( "-----------------------------------------------------\n" );
     GlideMsg( "** Debug Information **\n" );
     GlideMsg( "-----------------------------------------------------\n" );
@@ -729,6 +729,22 @@ grSstWinClose( void )
     GlideMsg( "MaxG = %f\nMinG = %f\n", OGLRender.MaxG, OGLRender.MinG );
     GlideMsg( "MaxB = %f\nMinB = %f\n", OGLRender.MaxB, OGLRender.MinR );
     GlideMsg( "MaxA = %f\nMinA = %f\n", OGLRender.MaxA, OGLRender.MinA );
+    GlideMsg( "-----------------------------------------------------\n" );
+    GlideMsg( "Texture Information:\n" );
+    GlideMsg( "  565 = %d\n", Textures->Num_565_Tex );
+    GlideMsg( " 1555 = %d\n", Textures->Num_1555_Tex );
+    GlideMsg( " 4444 = %d\n", Textures->Num_4444_Tex );
+    GlideMsg( "  332 = %d\n", Textures->Num_332_Tex );
+    GlideMsg( " 8332 = %d\n", Textures->Num_8332_Tex );
+    GlideMsg( "Alpha = %d\n", Textures->Num_Alpha_Tex );
+    GlideMsg( " AI88 = %d\n", Textures->Num_AlphaIntensity88_Tex );
+    GlideMsg( " AI44 = %d\n", Textures->Num_AlphaIntensity44_Tex );
+    GlideMsg( " AP88 = %d\n", Textures->Num_AlphaPalette_Tex );
+    GlideMsg( "   P8 = %d\n", Textures->Num_Palette_Tex );
+    GlideMsg( "Inten = %d\n", Textures->Num_Intensity_Tex );
+    GlideMsg( "  YIQ = %d\n", Textures->Num_YIQ_Tex );
+    GlideMsg( " AYIQ = %d\n", Textures->Num_AYIQ_Tex );
+    GlideMsg( "Other = %d\n", Textures->Num_Other_Tex );
     GlideMsg( "-----------------------------------------------------\n" );
     GlideMsg( "-----------------------------------------------------\n" );
 #endif
@@ -747,7 +763,7 @@ grSstWinClose( void )
 DLLEXPORT FxBool __stdcall
 grSstQueryHardware( GrHwConfiguration *hwconfig )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstQueryHardware( --- )\n" );
 #endif
 
@@ -771,7 +787,7 @@ grSstQueryHardware( GrHwConfiguration *hwconfig )
 DLLEXPORT void __stdcall
 grSstSelect( int which_sst )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstSelect( %d )\n", which_sst );
 #endif
     // Nothing Needed Here but...
@@ -784,7 +800,7 @@ grSstSelect( int which_sst )
 DLLEXPORT FxU32 __stdcall
 grSstScreenHeight( void )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstScreenHeight()\n" );
 #endif
 
@@ -797,7 +813,7 @@ grSstScreenHeight( void )
 DLLEXPORT FxU32 __stdcall
 grSstScreenWidth( void )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstScreenWidth()\n" );
 #endif
 
@@ -810,7 +826,7 @@ grSstScreenWidth( void )
 DLLEXPORT void __stdcall
 grSstOrigin( GrOriginLocation_t  origin )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSstSetOrigin( %d )\n", origin );
 #endif
 
@@ -847,7 +863,7 @@ grSstOrigin( GrOriginLocation_t  origin )
 DLLEXPORT void __stdcall
 grSstPerfStats(GrSstPerfStats_t *pStats)
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstPerfStats\n" );
 #endif
 }
@@ -856,7 +872,7 @@ grSstPerfStats(GrSstPerfStats_t *pStats)
 DLLEXPORT void __stdcall
 grSstResetPerfStats(void)
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstResetPerfStats\n" );
 #endif
 }
@@ -865,7 +881,7 @@ grSstResetPerfStats(void)
 DLLEXPORT FxU32 __stdcall 
 grSstVideoLine( void )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstVideoLine()\n" );
 #endif
 
@@ -876,7 +892,7 @@ grSstVideoLine( void )
 DLLEXPORT FxBool __stdcall 
 grSstVRetraceOn( void )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstVRetraceOn()\n" );
 #endif
 
@@ -887,7 +903,7 @@ grSstVRetraceOn( void )
 DLLEXPORT FxBool __stdcall 
 grSstIsBusy( void )
 { 
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstIsBusy()\n" ); 
 #endif
 
@@ -898,7 +914,7 @@ grSstIsBusy( void )
 DLLEXPORT FxBool __stdcall
 grSstControl( FxU32 code )
 { 
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstControl( %lu )\n", code ); 
 #endif
 
@@ -909,7 +925,7 @@ grSstControl( FxU32 code )
 DLLEXPORT FxBool __stdcall
 grSstControlMode( GrControl_t mode )
 { 
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grSstControlMode( %d )\n", mode );
 #endif
 
@@ -933,7 +949,7 @@ grSstControlMode( GrControl_t mode )
 DLLEXPORT FxU32 __stdcall 
 grSstStatus( void )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("grSstStatus()\n");
 #endif
 
@@ -956,7 +972,7 @@ grSstStatus( void )
 DLLEXPORT void __stdcall
 grSstIdle( void )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grSetIdle()\n" );
 #endif
 

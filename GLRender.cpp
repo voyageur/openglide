@@ -73,7 +73,7 @@ void RenderInitialize( void )
     ConstantForSubtract[ 0 ] = 8.9375f;
     ConstantForSubtract[ 1 ] = 8.9375f;
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     OGLRender.FrameTriangles = 0;
     OGLRender.MaxTriangles = 0;
     OGLRender.MaxSequencedTriangles = 0;
@@ -316,7 +316,7 @@ void RenderDrawTriangles( void )
         }
     }
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     if ( OGLRender.NumberOfTriangles > OGLRender.MaxSequencedTriangles )
     {
         OGLRender.MaxSequencedTriangles = OGLRender.NumberOfTriangles;
@@ -664,7 +664,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             pF->bf = b->a * D1OVER255;
             pF->cf = c->a * D1OVER255;
         }
-    #ifdef DEBUG
+    #ifdef OGL_DEBUG
             if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
             if ( pF->bf > OGLRender.MaxF ) OGLRender.MaxF = pF->bf;
             if ( pF->cf > OGLRender.MaxF ) OGLRender.MaxF = pF->cf;
@@ -674,7 +674,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
     #endif
     }
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     if ( pC->ar > OGLRender.MaxR ) OGLRender.MaxR = pC->ar;
     if ( pC->br > OGLRender.MaxR ) OGLRender.MaxR = pC->br;
     if ( pC->cr > OGLRender.MaxR ) OGLRender.MaxR = pC->cr;
@@ -1188,7 +1188,7 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
         pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
         pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
 
-    #ifdef DEBUG
+    #ifdef OGL_DEBUG
         if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
         if ( pF->bf > OGLRender.MaxF ) OGLRender.MaxF = pF->bf;
         if ( pF->af < OGLRender.MinF ) OGLRender.MinF = pF->af;
@@ -1196,7 +1196,7 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
     #endif
     }
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     if ( pC->ar > OGLRender.MaxR ) OGLRender.MaxR = pC->ar;
     if ( pC->br > OGLRender.MaxR ) OGLRender.MaxR = pC->br;
     if ( pC->ar < OGLRender.MinR ) OGLRender.MinR = pC->ar;
@@ -1657,13 +1657,13 @@ void RenderAddPoint( const GrVertex *a )
     {
         pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
 
-    #ifdef DEBUG
+    #ifdef OGL_DEBUG
         if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
         if ( pF->af < OGLRender.MinF ) OGLRender.MinF = pF->af;
     #endif
     }
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     if ( pC->ar > OGLRender.MaxR ) OGLRender.MaxR = pC->ar;
     if ( pC->ar < OGLRender.MinR ) OGLRender.MinR = pC->ar;
     

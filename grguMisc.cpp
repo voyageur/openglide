@@ -23,7 +23,7 @@ extern void (*ExternErrorFunction)(const char *string, FxBool fatal);
 DLLEXPORT void __stdcall
 grErrorSetCallback( void (*function)(const char *string, FxBool fatal) )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grErrorSetCallback( --- )\n" );
 #endif
 
@@ -36,7 +36,7 @@ grErrorSetCallback( void (*function)(const char *string, FxBool fatal) )
 DLLEXPORT void __stdcall
 grCullMode( GrCullMode_t mode )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grCullMode( %d )\n", mode );
 #endif
 
@@ -87,7 +87,7 @@ grCullMode( GrCullMode_t mode )
 DLLEXPORT void __stdcall 
 grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("grClipWindow( %d, %d, %d, %d )\n", minx, miny, maxx, maxy );
 #endif
 
@@ -120,7 +120,7 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 DLLEXPORT void __stdcall 
 grDisableAllEffects( void )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("grDisableAllEffects()\n");
 #endif
 
@@ -135,7 +135,7 @@ grDisableAllEffects( void )
 DLLEXPORT void __stdcall
 grResetTriStats( void )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("grResetTriStats\n");
 #endif
 }
@@ -144,7 +144,7 @@ grResetTriStats( void )
 DLLEXPORT void __stdcall
 grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("grTriStats\n");
 #endif
 }
@@ -153,7 +153,7 @@ grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 DLLEXPORT void __stdcall
 grHints( GrHint_t hintType, FxU32 hintMask )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("grHints( %d, %d )\n", hintType, hintMask );
 #endif
 
@@ -169,7 +169,7 @@ grHints( GrHint_t hintType, FxU32 hintMask )
 DLLEXPORT void __stdcall
 grSplash( float x, float y, float width, float height, FxU32 frame )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("grSplash( %-4.2f, %-4.2f, %-4.2f, %-4.2f, %lu )\n",
         x, y, width, height, frame );
 #endif
@@ -194,7 +194,7 @@ ConvertAndDownloadRle( GrChipID_t        tmu,
                        FxU32             dest_height,
                        FxU16             *tlut )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "ConvertAndDownloadRle( %d, %lu, %d, %d, %d, %d, %d, ---, %l, %lu, %lu, %lu, %lu, %lu, %lu, --- )\n",
         tmu, startAddress, thisLod, largeLod, aspectRatio, format, evenOdd, bm_h, u0, v0, width, height,
         dest_width, dest_height );
@@ -205,7 +205,7 @@ ConvertAndDownloadRle( GrChipID_t        tmu,
 DLLEXPORT void __stdcall 
 grCheckForRoom( FxI32 n )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grCheckForRoom( %l )\n", n );
 #endif
 }
@@ -214,7 +214,7 @@ grCheckForRoom( FxI32 n )
 DLLEXPORT void __stdcall
 grParameterData( FxU32 param, FxU32 components, FxU32 type, FxI32 offset )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grParameterData( %lu, %lu, %lu, %l )\n",
         param, components, type, offset );
 #endif
@@ -227,7 +227,7 @@ guEncodeRLE16( void *dst,
                FxU32 width, 
                FxU32 height )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("guEncodeRLE16( ---, ---, %lu, %lu )\n", width, height ); 
 #endif
 
@@ -238,7 +238,7 @@ guEncodeRLE16( void *dst,
 DLLEXPORT FxU32 __stdcall
 guEndianSwapWords( FxU32 value )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "guEndianSwapWords( %lu )\n", value );
 #endif
 
@@ -249,7 +249,7 @@ guEndianSwapWords( FxU32 value )
 DLLEXPORT FxU16 __stdcall
 guEndianSwapBytes( FxU16 value )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "guEndianSwapBytes( %u )\n", value );
 #endif
     return ( value << 8 ) | ( value >> 8 );

@@ -52,7 +52,7 @@ grLfbLock( GrLock_t dwType,
            FxBool bPixelPipeline, 
            GrLfbInfo_t *lfbInfo )
 { 
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grLfbLock( %d, %d, %d, %d, %d, --- )\n", dwType, dwBuffer, dwWriteMode, dwOrigin, bPixelPipeline ); 
 #endif
 
@@ -69,10 +69,26 @@ grLfbLock( GrLock_t dwType,
 
         if ( InternalConfig.OGLVersion > 1 )
         {
-            glReadPixels( 0, 0, 
-                          Glide.WindowWidth, Glide.WindowHeight, 
-                          GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
-                          (void *)Glide.SrcBuffer.Address );
+            if ( dwOrigin == GR_ORIGIN_UPPER_LEFT )
+            {
+                glReadPixels( 0, 0, 
+                            Glide.WindowWidth, Glide.WindowHeight, 
+                            GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
+                            (void *)Glide.DstBuffer.Address );
+                for ( j = 0; j < Glide.WindowHeight; j++ )
+                {
+                    memcpy( Glide.SrcBuffer.Address + ( j * Glide.WindowWidth ),
+                            Glide.DstBuffer.Address + ( ( Glide.WindowHeight - 1 - j ) * Glide.WindowWidth ),
+                            2 * Glide.WindowWidth );
+                }
+            }
+            else
+            {
+                glReadPixels( 0, 0, 
+                            Glide.WindowWidth, Glide.WindowHeight, 
+                            GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
+                            (void *)Glide.SrcBuffer.Address );
+            }
         }
         else
         {
@@ -130,7 +146,7 @@ grLfbLock( GrLock_t dwType,
 DLLEXPORT FxBool __stdcall
 grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 { 
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif
     
@@ -276,7 +292,7 @@ grLfbReadRegion( GrBuffer_t src_buffer,
                  FxU32 src_width, FxU32 src_height,
                  FxU32 dst_stride, void *dst_data )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("grLfbReadRegion( %d, %d, %d, %d, %d, %d, --- )\n",
         src_buffer, src_x, src_y, src_width, src_height, dst_stride );
 #endif
@@ -314,7 +330,7 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
                   FxU32 src_width, FxU32 src_height,
                   FxI32 src_stride, void *src_data )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("grLfbWriteRegion( %d, %d, %d, %d, %d, %d, %d, --- )\n",
         dst_buffer, dst_x, dst_y, src_format, src_width, src_height, src_stride );
 #endif
@@ -373,7 +389,7 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
 DLLEXPORT void __stdcall 
 grLfbConstantAlpha( GrAlpha_t alpha )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grLfbConstantAlpha( %lu )\n", alpha );
 #endif
 }
@@ -381,7 +397,7 @@ grLfbConstantAlpha( GrAlpha_t alpha )
 DLLEXPORT void __stdcall 
 grLfbConstantDepth( FxU16 depth )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grLfbConstantDepth( %u )\n", depth );
 #endif
 }
@@ -389,7 +405,7 @@ grLfbConstantDepth( FxU16 depth )
 DLLEXPORT void __stdcall 
 grLfbWriteColorSwizzle(FxBool swizzleBytes, FxBool swapWords)
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grLfbWriteColorSwizzle( %d, %d )\n",
         swizzleBytes, swapWords );
 #endif
@@ -398,7 +414,7 @@ grLfbWriteColorSwizzle(FxBool swizzleBytes, FxBool swapWords)
 DLLEXPORT void __stdcall
 grLfbWriteColorFormat(GrColorFormat_t colorFormat)
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg("grLfbWriteColorFormat( %u )\n", colorFormat );
 #endif
 }

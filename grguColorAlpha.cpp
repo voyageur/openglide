@@ -27,7 +27,7 @@ GrColor_t ConvertConstantColor( float R, float G, float B, float A );
 DLLEXPORT void __stdcall
 grDitherMode( GrDitherMode_t mode )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grDitherMode( %d )\n", mode );
 #endif
 
@@ -58,7 +58,7 @@ grDitherMode( GrDitherMode_t mode )
 DLLEXPORT void __stdcall
 grConstantColorValue( GrColor_t value )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grConstantColorValue( %x )\n", value );
 #endif
 
@@ -77,7 +77,7 @@ grConstantColorValue( GrColor_t value )
 DLLEXPORT void __stdcall
 grConstantColorValue4( float a, float r, float g, float b )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grConstantColorValue4( %f, %f, %f, %f )\n", a, r, g, b );
 #endif
 
@@ -94,7 +94,7 @@ grConstantColorValue4( float a, float r, float g, float b )
 DLLEXPORT void __stdcall
 grColorMask( FxBool rgb, FxBool a )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grColorMask( %d, %d )\n", rgb, a );
 #endif
 
@@ -129,7 +129,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
                 FxBool invert )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grColorCombine( %d, %d, %d, %d, %d )\n",
         function, factor, local, other, invert );
 #endif
@@ -376,7 +376,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 DLLEXPORT void __stdcall
 guColorCombineFunction( GrColorCombineFnc_t fnc )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "guColorCombineFunction( %d )\n", fnc );
 #endif
 
@@ -469,7 +469,7 @@ guColorCombineFunction( GrColorCombineFnc_t fnc )
 DLLEXPORT void __stdcall
 grAlphaTestReferenceValue( GrAlpha_t value )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grAlphaTestReferenceValue( %d )\n", value );
 #endif
 
@@ -491,7 +491,7 @@ grAlphaTestReferenceValue( GrAlpha_t value )
 DLLEXPORT void __stdcall
 grAlphaTestFunction( GrCmpFnc_t function )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grAlphaTestFunction( %d )\n", function );
 #endif
 
@@ -528,7 +528,7 @@ DLLEXPORT void __stdcall
 grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
                      GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grAlphaBlendFunction( %d, %d, %d, %d )\n",
         rgb_sf, rgb_df, alpha_sf, alpha_df );
 #endif
@@ -561,7 +561,7 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_ONE_MINUS_DST_ALPHA:  OpenGL.SrcBlend = GL_ONE_MINUS_DST_ALPHA;   break;
     case GR_BLEND_ALPHA_SATURATE:       OpenGL.SrcBlend = GL_SRC_ALPHA_SATURATE;    break;
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     default:
         Error( "grAlphaBlendFunction: Unknow RGB source blend factor.\n" );
         OpenGL.SrcBlend = GL_ONE;
@@ -581,7 +581,7 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_ONE_MINUS_DST_ALPHA:  OpenGL.DstBlend = GL_ONE_MINUS_DST_ALPHA;   break;
     case GR_BLEND_PREFOG_COLOR:         OpenGL.DstBlend = GL_ONE;                   break;
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     default:
         Error( "grAlphaBlendFunction: Unknow RGB destination blend factor.\n" );
         OpenGL.DstBlend = GL_ZERO;
@@ -633,7 +633,7 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
                GrCombineLocal_t local, GrCombineOther_t other,
                FxBool invert )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grAlphaCombine( %d, %d, %d, %d, %d )\n",
         function, factor, local, other, invert );
 #endif
@@ -737,7 +737,7 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
 DLLEXPORT void __stdcall
 grAlphaControlsITRGBLighting( FxBool enable )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("grAlphaControlsTGBALighting( %d )\n", enable );
 #endif
 }
@@ -746,7 +746,7 @@ grAlphaControlsITRGBLighting( FxBool enable )
 DLLEXPORT void __stdcall
 guAlphaSource( GrAlphaSource_t dwMode )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "guAlphaSource(%d)\n", dwMode );
 #endif
 
@@ -780,7 +780,7 @@ guAlphaSource( GrAlphaSource_t dwMode )
 DLLEXPORT void __stdcall
 grChromakeyValue( GrColor_t value )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grChromakeyValue( %d )\n", value );
 #endif
 
@@ -802,7 +802,7 @@ grChromakeyValue( GrColor_t value )
 DLLEXPORT void __stdcall
 grChromakeyMode( GrChromakeyMode_t mode )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grChromakeyMode( %d )\n", mode );
 #endif
     RenderDrawTriangles( );
@@ -818,7 +818,7 @@ grChromakeyMode( GrChromakeyMode_t mode )
         break;
 
     case GR_CHROMAKEY_ENABLE:
-        #ifdef DEBUG
+        #ifdef OGL_PARTDONE
             GlideMsg( "Chromakey Enabled\n" );
         #endif
         OpenGL.ChromaKey = true;
@@ -830,7 +830,7 @@ grChromakeyMode( GrChromakeyMode_t mode )
 DLLEXPORT void __stdcall
 grGammaCorrectionValue( float value )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grGammaCorrectionValue( %f )\n", value );
 #endif
     RenderDrawTriangles();

@@ -26,7 +26,7 @@ DWORD GetTexSize(const int Lod, const int aspectRatio, const int format );
 DLLEXPORT FxU32 __stdcall
 grTexMinAddress( GrChipID_t tmu )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grTexMinAddress( %d )\n", tmu );
 #endif
 
@@ -39,7 +39,7 @@ grTexMinAddress( GrChipID_t tmu )
 DLLEXPORT FxU32 __stdcall
 grTexMaxAddress( GrChipID_t tmu )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grTexMaxAddress( %d ) = %lu\n", tmu, Glide.TexMemoryMaxPosition );
 #endif
 
@@ -55,7 +55,7 @@ grTexSource( GrChipID_t tmu,
              FxU32      evenOdd,
              GrTexInfo  *info )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grTexSource( %d, %d, %d, --- )\n", tmu, startAddress, evenOdd );
 #endif
 
@@ -78,7 +78,7 @@ grTexSource( GrChipID_t tmu,
 DLLEXPORT FxU32 __stdcall
 grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("grTexTextureMemRequired( %u, --- )\n", dwEvenOdd );
 #endif
 
@@ -101,7 +101,7 @@ grTexDownloadMipMap( GrChipID_t tmu,
                      FxU32      evenOdd,
                      GrTexInfo  *info )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexDownloadMipMap( %d, %u, %u, --- )\n", tmu, 
         startAddress, evenOdd );
 #endif
@@ -128,12 +128,13 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
                           FxU32             evenOdd,
                           void              *data )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexDownloadMipMapLevel( %d, %lu, %d, %d, %d, %d, %d, %lu )\n",
         tmu, startAddress, thisLod, largeLod, aspectRatio, format, evenOdd, data );
 #endif
 
-    if ( tmu != GR_TMU0 || thisLod != largeLod)
+//    if ( ( tmu != GR_TMU0 ) || ( thisLod != largeLod ) )
+    if ( tmu != GR_TMU0 )
     {
         return;
     }
@@ -162,7 +163,7 @@ grTexDownloadMipMapLevelPartial( GrChipID_t        tmu,
                                  int               start,
                                  int               end )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexDownloadMipMapLevelPartial( %d, %lu, %d, %d, %d, %d, %d, ---, %d, %d )\n",
         tmu, startAddress, thisLod, largeLod, aspectRatio, format, evenOdd, start, end );
 #endif
@@ -184,7 +185,7 @@ grTexClampMode( GrChipID_t tmu,
                 GrTextureClampMode_t s_clampmode,
                 GrTextureClampMode_t t_clampmode )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grTexClampMode( %d, %d, %d )\n",
         tmu, s_clampmode, t_clampmode );
 #endif
@@ -223,7 +224,7 @@ grTexFilterMode( GrChipID_t tmu,
                  GrTextureFilterMode_t minfilter_mode,
                  GrTextureFilterMode_t magfilter_mode )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexFilterMode( %d, %d, %d )\n",
         tmu, minfilter_mode, magfilter_mode );
 #endif
@@ -296,7 +297,7 @@ grTexMipMapMode( GrChipID_t     tmu,
                  GrMipMapMode_t mode,
                  FxBool         lodBlend )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexMipMapMode( %d, %d, %d )\n",
         tmu, mode, lodBlend );
 #endif
@@ -325,7 +326,7 @@ DLLEXPORT FxU32 __stdcall
 grTexCalcMemRequired( GrLOD_t lodmin, GrLOD_t lodmax,
                       GrAspectRatio_t aspect, GrTextureFormat_t fmt )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grTexCalcMemRequired( %d, %d, %d, %d )\n",
         lodmin, lodmax, aspect, fmt );
 #endif
@@ -350,7 +351,7 @@ grTexDownloadTablePartial( GrChipID_t   tmu,
                            int          start,
                            int          end )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexDownloadTablePartial( %d, %d, ---, %d, %d )\n",
         tmu, type, start, end );
 #endif
@@ -373,7 +374,7 @@ grTexDownloadTable( GrChipID_t   tmu,
                     GrTexTable_t type, 
                     void         *data )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexDownloadTable( %d, %d, --- )\n", tmu, type );
 #endif
 
@@ -391,7 +392,7 @@ grTexDownloadTable( GrChipID_t   tmu,
 DLLEXPORT void __stdcall
 grTexLodBiasValue( GrChipID_t tmu, float bias )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grTexLodBiasValue( %d, %d )\n",
         tmu, bias );
 #endif
@@ -407,7 +408,7 @@ grTexCombine( GrChipID_t tmu,
               FxBool rgb_invert,
               FxBool alpha_invert )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grTexCombine( %d, %d, %d, %d, %d, %d, %d )\n",
         tmu, rgb_function, rgb_factor, alpha_function, alpha_factor, 
         rgb_invert, alpha_invert );
@@ -608,7 +609,7 @@ grTexCombine( GrChipID_t tmu,
 DLLEXPORT void __stdcall
 grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grTexNCCTable( %d, %u )\n", tmu, NCCTable );
 #endif
 
@@ -625,7 +626,7 @@ grTexDetailControl( GrChipID_t tmu,
                     FxU8 detail_scale,
                     float detail_max )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grTexDetailControl( %d, %d, %d, %-4.2f )\n",
         tmu, lod_bias, detail_scale, detail_max );
 #endif
@@ -636,7 +637,7 @@ DLLEXPORT void __stdcall
 grTexMultibase( GrChipID_t tmu,
                 FxBool     enable )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grTexMultibase( %d, %d )\n", tmu, enable );
 #endif
     if (tmu != GR_TMU0)
@@ -651,7 +652,7 @@ grTexMultibaseAddress( GrChipID_t       tmu,
                        FxU32            evenOdd,
                        GrTexInfo        *info )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg( "grTexMultibaseAddress( %d, %d, %lu, %lu, --- )\n",
         tmu, range, startAddress, evenOdd );
 #endif
@@ -661,7 +662,7 @@ grTexMultibaseAddress( GrChipID_t       tmu,
 DLLEXPORT void __stdcall
 grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("grTexCombineFunction( %d, %d )\n", tmu, func );
 #endif
 
@@ -721,7 +722,7 @@ grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 DLLEXPORT FxU32 __stdcall 
 guTexMemQueryAvail( GrChipID_t tmu )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("guTexMemQueryAvail( %d )\n", tmu );
 #endif
 
@@ -737,7 +738,7 @@ guTexMemQueryAvail( GrChipID_t tmu )
 DLLEXPORT void __stdcall
 guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("guTexCombineFunction( %d, %d )\n", tmu, func );
 #endif
 
@@ -795,7 +796,7 @@ guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 DLLEXPORT GrMipMapId_t __stdcall 
 guTexGetCurrentMipMap( GrChipID_t tmu )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("guTexGetCurrentMipMap( %d )\n", tmu );
 #endif
 
@@ -820,7 +821,7 @@ guTexChangeAttributes( GrMipMapId_t mmid,
                        GrTextureFilterMode_t minFilterMode,
                        GrTextureFilterMode_t magFilterMode )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "guTexChangeAttributes( %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d )\n",
         mmid, width, height, fmt, mm_mode, smallest_lod, largest_lod, aspect,
         s_clamp_mode, t_clamp_mode, minFilterMode, magFilterMode );
@@ -835,7 +836,7 @@ guTexChangeAttributes( GrMipMapId_t mmid,
 DLLEXPORT GrMipMapInfo * __stdcall 
 guTexGetMipMapInfo( GrMipMapId_t mmid )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "guTexGetMipMapInfo\n" );
 #endif
 
@@ -846,7 +847,7 @@ guTexGetMipMapInfo( GrMipMapId_t mmid )
 DLLEXPORT void __stdcall 
 guTexMemReset( void )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg("guTexMemReset\n");
 #endif
 
@@ -858,7 +859,7 @@ guTexMemReset( void )
 DLLEXPORT void __stdcall 
 guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("guTexDownloadMipMapLevel( %d, %d, --- )\n", mmid, lod );
 #endif
 
@@ -869,7 +870,7 @@ guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 DLLEXPORT void __stdcall 
 guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("guTexDownloadMipMap\n");
 #endif
 
@@ -892,7 +893,7 @@ guTexAllocateMemory( GrChipID_t tmu,
                      float lod_bias,
                      FxBool trilinear )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "guTexAllocateMemory( %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d )\n",
         tmu, odd_even_mask, width, height, fmt, mm_mode, smallest_lod, largest_lod, aspect,
         s_clamp_mode, t_clamp_mode, minfilter_mode, magfilter_mode, lod_bias, trilinear );
@@ -912,7 +913,7 @@ guTexAllocateMemory( GrChipID_t tmu,
 DLLEXPORT void __stdcall 
 guTexSource( GrMipMapId_t id )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("guTexSource( %d )\n", id );
 #endif
 
@@ -925,7 +926,7 @@ guTexSource( GrMipMapId_t id )
 DLLEXPORT FxU16 * __stdcall
 guTexCreateColorMipMap( void )
 {
-#ifdef NOTDONE
+#ifdef OGL_NOTDONE
     GlideMsg("guTexCreateColorMipMap()\n"); 
 #endif
 

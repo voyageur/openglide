@@ -33,7 +33,7 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 DLLEXPORT void __stdcall
 grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 {
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
 #endif
 
@@ -128,14 +128,14 @@ grBufferSwap( int swap_interval )
 
     static float    Temp = 1.0f;
 
-#ifdef CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grBufferSwap( %d )\n", swap_interval );
 #endif
 
     RenderDrawTriangles( );
     glFlush( );
 
-#ifdef DEBUG
+#ifdef OGL_DEBUG
     if ( OGLRender.FrameTriangles > OGLRender.MaxTriangles )
     {
         OGLRender.MaxTriangles = OGLRender.FrameTriangles;
@@ -170,7 +170,7 @@ grBufferSwap( int swap_interval )
 DLLEXPORT int __stdcall
 grBufferNumPending( void )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("grBufferNumPending()\n");
 #endif
 
@@ -183,7 +183,7 @@ grBufferNumPending( void )
 DLLEXPORT void __stdcall
 grRenderBuffer(GrBuffer_t dwBuffer)
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg("grRenderBuffer( %d )\n", dwBuffer);
 #endif
 

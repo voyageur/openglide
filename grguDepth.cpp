@@ -18,7 +18,7 @@
 DLLEXPORT void __stdcall
 grDepthBufferMode( GrDepthBufferMode_t mode )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grDepthBufferMode( %d )\n", mode );
 #endif
 
@@ -82,7 +82,7 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
 DLLEXPORT void __stdcall
 grDepthMask( FxBool enable )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grDepthMask( %d )\n", enable );
 #endif
 
@@ -112,7 +112,7 @@ grDepthMask( FxBool enable )
 DLLEXPORT void __stdcall
 grDepthBufferFunction( GrCmpFnc_t func )
 {
-#ifdef DONE
+#ifdef OGL_DONE
     GlideMsg( "grDepthBufferFunction( %d )\n", func );
 #endif
 
@@ -144,7 +144,7 @@ grDepthBufferFunction( GrCmpFnc_t func )
 DLLEXPORT void __stdcall
 grDepthBiasLevel( FxI16 level )
 {
-#ifdef PARTDONE
+#ifdef OGL_PARTDONE
     GlideMsg( "grDepthBiasLevel( %d )\n", level );
 #endif
 

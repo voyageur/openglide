@@ -9,9 +9,9 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
+#include "glogl.h"
 #include "PGTexture.h"
 #include "glextensions.h"
-#include "glogl.h"
 
 
 void genPaletteMipmaps( FxU32 width, FxU32 height, FxU8 *data )
@@ -337,6 +337,23 @@ PGTexture::PGTexture( int mem_size )
     m_tex_memory_size = mem_size;
     m_memory = new FxU8[ mem_size ];
     m_ncc_select = GR_NCCTABLE_NCC0;
+
+#ifdef OGL_DEBUG
+    Num_565_Tex = 0;
+    Num_1555_Tex = 0;
+    Num_4444_Tex = 0;
+    Num_332_Tex = 0;
+    Num_8332_Tex = 0;
+    Num_Alpha_Tex = 0;
+    Num_AlphaIntensity88_Tex = 0;
+    Num_AlphaIntensity44_Tex = 0;
+    Num_AlphaPalette_Tex = 0;
+    Num_Palette_Tex = 0;
+    Num_Intensity_Tex = 0;
+    Num_YIQ_Tex = 0;
+    Num_AYIQ_Tex = 0;
+    Num_Other_Tex = 0;
+#endif
 }
 
 PGTexture::~PGTexture( void )
@@ -360,6 +377,31 @@ void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *in
     /* Any texture based on memory crossing this range
      * is now out of date */
     m_db->WipeRange( startAddress, startAddress + tex_size, 0 );
+
+#ifdef OGL_DEBUG
+    if ( info->smallLod == info->largeLod )
+    {
+        switch ( info->format )
+        {
+        case GR_TEXFMT_RGB_332:             Num_332_Tex++;                  break;
+        case GR_TEXFMT_YIQ_422:             Num_YIQ_Tex++;                  break;
+        case GR_TEXFMT_ALPHA_8:             Num_Alpha_Tex++;                break;
+        case GR_TEXFMT_INTENSITY_8:         Num_Intensity_Tex++;            break;
+        case GR_TEXFMT_ALPHA_INTENSITY_44:  Num_AlphaIntensity44_Tex++;     break;
+        case GR_TEXFMT_P_8:                 Num_565_Tex++;                  break;
+        case GR_TEXFMT_ARGB_8332:           Num_8332_Tex++;                 break;
+        case GR_TEXFMT_AYIQ_8422:           Num_AYIQ_Tex++;                 break;
+        case GR_TEXFMT_RGB_565:             Num_565_Tex++;                  break;
+        case GR_TEXFMT_ARGB_1555:           Num_1555_Tex++;                 break;
+        case GR_TEXFMT_ARGB_4444:           Num_4444_Tex++;                 break;
+        case GR_TEXFMT_ALPHA_INTENSITY_88:  Num_AlphaIntensity88_Tex++;     break;
+        case GR_TEXFMT_AP_88:               Num_AlphaPalette_Tex++;         break;
+        case GR_TEXFMT_RSVD0:
+        case GR_TEXFMT_RSVD1:
+        case GR_TEXFMT_RSVD2:               Num_Other_Tex++;                break;
+        }
+    }
+#endif
 }
 
 void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
