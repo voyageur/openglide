@@ -477,14 +477,13 @@ void GetOptions()
 	UserConfig.Wrap565Enable			= false;
 
 	UserConfig.MultiTextureEXTEnable	= false;
-	UserConfig.PaletteEXTEnable			= false;
+	UserConfig.PaletteEXTEnable			= true;
 	UserConfig.PackedPixelsEXTEnable	= false;
 	UserConfig.TextureEnvEXTEnable		= false;
 	UserConfig.VertexArrayEXTEnable		= false;
 	UserConfig.SecondaryColorEXTEnable	= false;
 	UserConfig.FogCoordEXTEnable		= true;
 
-	UserConfig.PalettePrecision			= 32;
 	UserConfig.TextureMemorySize		= 16;
 	UserConfig.FrameBufferMemorySize	= 8;
 
@@ -524,13 +523,12 @@ void GetOptions()
 		fprintf( IniFile, "EnablePrecisionFix=%d\n", UserConfig.PrecisionFixEnable );
 		fprintf( IniFile, "EnableWrap565=%d\n", UserConfig.Wrap565Enable );
 //		fprintf( IniFile, "EnableMultiTextureEXT=%d\n", UserConfig.MultiTextureEXTEnable );
-//		fprintf( IniFile, "EnablePaletteEXT=%d\n", UserConfig.PaletteEXTEnable );
+		fprintf( IniFile, "EnablePaletteEXT=%d\n", UserConfig.PaletteEXTEnable );
 		fprintf( IniFile, "EnablePackedPixelsEXT=%d\n", UserConfig.PackedPixelsEXTEnable );
 		fprintf( IniFile, "EnableVertexArrayEXT=%d\n", UserConfig.VertexArrayEXTEnable );
 //		fprintf( IniFile, "EnableTextureEnvEXT=%d\n", UserConfig.TextureEnvEXTEnable );
 		fprintf( IniFile, "EnableSecondaryColorEXT=%d\n", UserConfig.SecondaryColorEXTEnable );
 		fprintf( IniFile, "EnableFogCoordEXT=%d\n", UserConfig.FogCoordEXTEnable );
-		fprintf( IniFile, "PalettePrecision=%d\n", UserConfig.PalettePrecision );
 		fprintf( IniFile, "TextureMemorySize=%d\n", UserConfig.TextureMemorySize );
 		fprintf( IniFile, "WrapperPriority=%d\n", UserConfig.Priority );
 		fprintf( IniFile, "FrameBufferMemorySize=%d\n", UserConfig.FrameBufferMemorySize );
@@ -561,8 +559,8 @@ void GetOptions()
 			UserConfig.Wrap565Enable = atoi( Pointer );
 //			Pointer = FindConfig( Path, "EnableMultiTextureEXT" );
 //			UserConfig.MultiTextureEXTEnable = atoi( Pointer );
-//			Pointer = FindConfig( Path, "EnablePaletteEXT" );
-//			UserConfig.PaletteEXTEnable = atoi( Pointer );
+			Pointer = FindConfig( Path, "EnablePaletteEXT" );
+			UserConfig.PaletteEXTEnable = atoi( Pointer );
 			Pointer = FindConfig( Path, "EnablePackedPixelsEXT" );
 			UserConfig.PackedPixelsEXTEnable = atoi( Pointer );
 			Pointer = FindConfig( Path, "EnableVertexArrayEXT" );
@@ -573,8 +571,6 @@ void GetOptions()
 			UserConfig.SecondaryColorEXTEnable = atoi( Pointer );
 			Pointer = FindConfig( Path, "EnableFogCoordEXT" );
 			UserConfig.FogCoordEXTEnable = atoi( Pointer );
-			Pointer = FindConfig( Path, "PalettePrecision" );
-			UserConfig.PalettePrecision = atoi( Pointer );
 			Pointer = FindConfig( Path, "TextureMemorySize" );
 			UserConfig.TextureMemorySize = atoi( Pointer );
 			Pointer = FindConfig( Path, "WrapperPriority" );

@@ -42,12 +42,12 @@ public:
                 && inf->largeLod == info.largeLod
                 && inf->aspectRatio == info.aspectRatio
                 && inf->format == info.format
-                && hash == h);
+                && (hash == h || h == 0));
         };
     };
 	GLuint Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash);
 	void WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash);
-	bool Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum);
+	bool Find(FxU32 startAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, bool *pal_change);
 	TexDB();
 	virtual ~TexDB();
 private:

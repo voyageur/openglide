@@ -3,12 +3,51 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "PGTexture.h"
+#include "glextensions.h"
 #include "glogl.h"
 
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+
+void genPaletteMipmaps(FxU32 width, FxU32 height, FxU8 *data)
+{
+    FxU8 buf[128*128];
+    FxU32 mmwidth;
+    FxU32 mmheight;
+    FxU32 lod;
+    FxU32 skip;
+
+    mmwidth = width;
+    mmheight = height;
+    lod = 0;
+    skip = 1;
+
+    while(mmwidth > 1 && mmheight > 1)
+    {
+        FxU32 x, y;
+
+        mmwidth /= 2;
+        mmheight /= 2;
+        lod += 1;
+        skip *= 2;
+
+        for(y = 0; y < mmheight; y++)
+        {
+            FxU8 *in, *out;
+
+            in = data + width * y * skip;
+            out = buf + mmwidth * y;
+            for(x = 0; x < mmwidth; x++)
+            {
+                out[x] = in[x * skip];
+            }
+        }
+
+        glTexImage2D( GL_TEXTURE_2D, lod, GL_COLOR_INDEX8_EXT, mmwidth, mmheight, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buf );
+    }
+}
 
 inline void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
@@ -272,10 +311,18 @@ void PGTexture::MakeReady()
     TexValues texVals;
     GLuint texNum;
     FxU32 size;
-    FxU32 hash = 0;;
+    FxU32 test_hash;
+    FxU32 wipe_hash;
+    bool palette_changed;
+    bool *pal_change_ptr;
 
     if(!m_valid)
         return;
+
+    test_hash = 0;
+    wipe_hash = 0;
+    palette_changed = false;
+    pal_change_ptr = NULL;
     
     data = m_memory + m_startAddress;
 
@@ -286,25 +333,37 @@ void PGTexture::MakeReady()
     switch(m_info.format)
     {
     case GR_TEXFMT_P_8:
+        if(InternalConfig.PaletteEXTEnable)
+            pal_change_ptr = &palette_changed;
+        ApplyKeyToPalette();
+        test_hash = m_palette_hash;
+        wipe_hash = m_palette_hash;
+        break;
     case GR_TEXFMT_AP_88:
         ApplyKeyToPalette();
-        hash = m_palette_hash;
+        test_hash = m_palette_hash;
+        wipe_hash = 0;
+        break;
     }
 
     /* See if we already have an OpenGL texture to match this */
-    if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, hash, &texNum))
+    if(m_db.Find(m_startAddress, &m_info, test_hash, &texNum, pal_change_ptr))
     {
         ::glBindTexture(GL_TEXTURE_2D, texNum);
+
+        if(palette_changed)
+            glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette);
+
     }
     else
     {
         /* Any existing textures crossing this memory range
          * is unlikely to be used, so remove the OpenGL version
          * of them */
-        m_db.WipeRange(m_startAddress, m_startAddress + size, hash);
+        m_db.WipeRange(m_startAddress, m_startAddress + size, wipe_hash);
 
         /* Add this new texture to the data base */
-        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, hash);
+        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, test_hash);
 
         ::glBindTexture(GL_TEXTURE_2D, texNum);
         ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -335,6 +394,15 @@ void PGTexture::MakeReady()
             break;
             
         case GR_TEXFMT_P_8:
+            if(InternalConfig.PaletteEXTEnable)
+            {
+                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette);
+                
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, texVals.width, texVals.height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, data );
+                if(InternalConfig.BuildMipMaps)
+                    genPaletteMipmaps(texVals.width, texVals.height, data);
+            }
+            else
             {
                 ConvertP8to8888( data, m_tex_temp, texVals.nPixels, m_palette );
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
@@ -576,7 +644,7 @@ void PGTexture::ApplyKeyToPalette()
             else
                 m_palette[i] |= 0xff000000;
             
-            hash = ((hash << 5) | (hash >> 26));
+            hash = ((hash << 5) | (hash >> 27));
             hash += (InternalConfig.IgnorePaletteChange
                               ? (m_palette[i] & 0xff000000)
                               : m_palette[i]);

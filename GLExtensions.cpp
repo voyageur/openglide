@@ -97,19 +97,12 @@ void ValidateUserConfig()
 	InternalConfig.SecondaryColorEXTEnable	= false;
 	InternalConfig.FogCoordEXTEnable		= false;
 
-	InternalConfig.PalettePrecision			= 8;
 	InternalConfig.TextureMemorySize		= 16;
 	InternalConfig.FrameBufferMemorySize	= 8;
 
 	InternalConfig.MMXEnable				= false;
 	InternalConfig.TDnowEnable				= false;
 	
-	int PalPrec = UserConfig.PalettePrecision;
-	if ((PalPrec > 0) && (PalPrec < 128))
-	{
-		InternalConfig.PalettePrecision		= UserConfig.PalettePrecision;
-	}
-
 	int TexSize = UserConfig.TextureMemorySize;
 	if ((TexSize > 1) && (TexSize <= 16))
 	{
@@ -135,7 +128,7 @@ void ValidateUserConfig()
 
 	if ( UserConfig.PaletteEXTEnable )
 	{
-		if ( isExtensionSupported( "GL_EXT_shared_texture_palette" ) )
+		if ( isExtensionSupported( "GL_EXT_paletted_texture" ) )
 		{
 			InternalConfig.PaletteEXTEnable			= true;
 		}
@@ -295,12 +288,6 @@ void GLExtensions()
 		else
 		{
 			GlideMsg( "Using Palette Extension.\n" );
-			glEnable( GL_SHARED_TEXTURE_PALETTE_EXT );
-
-			if ( glIsEnabled( GL_SHARED_TEXTURE_PALETTE_EXT ) == GL_FALSE )
-			{
-				GlideMsg( "Nao habilitou a Shared Palette Texture" );
-			}
 		}
 	}
 

@@ -221,7 +221,6 @@ struct ConfigStruct
 	int		TDnowEnable;
 	int		CreateWindow;
 
-	WORD	PalettePrecision;
 	DWORD	TextureMemorySize;
 	DWORD	FrameBufferMemorySize;
 };

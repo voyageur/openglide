@@ -35,7 +35,7 @@ TexDB::~TexDB()
     }
 }
 
-bool TexDB::Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum)
+bool TexDB::Find(FxU32 startAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, bool *pal_change)
 {
     Record *r;
     FxU32 sect;
@@ -46,9 +46,13 @@ bool TexDB::Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
 
     for(r = m_first[sect]; r != NULL; r = r->next)
     {
-        if(r->Match(startAddress, info, hash))
+        if(r->Match(startAddress, info, (pal_change == NULL) ? hash : 0))
         {
             *pTexNum = r->texNum;
+
+            if(pal_change != NULL && r->hash != hash)
+                *pal_change = true;
+
 #ifdef UTEXSS
             GlideMsg("Found tex %d\n", r->texNum);
 #endif
