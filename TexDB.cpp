@@ -20,7 +20,7 @@ TexDB::TexDB( unsigned int MemorySize )
 {
     numberOfTexSections = MemorySize / ( 32 * 1024 );
 
-    m_first.resize( numberOfTexSections );
+    m_first = new Record*[ numberOfTexSections ];
 
     for ( unsigned int i = 0; i < numberOfTexSections; i++ )
     {
@@ -43,6 +43,7 @@ TexDB::~TexDB( void )
             delete tmp;
         }
     }
+    delete[] m_first;
 }
 
 bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 

@@ -13,7 +13,6 @@
 #define __TEXDB_H__
 
 #include <windows.h>
-#include <vector>
 #include "glide.h"
 #include "GL/gl.h"
 
@@ -46,7 +45,7 @@ public:
 
 private:
     unsigned int numberOfTexSections;
-    std::vector<Record *> m_first;
+    Record ** m_first;
 };
 
 #endif
