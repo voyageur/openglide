@@ -16,7 +16,7 @@
 
 class PGUTexture  
 {
-    enum { MAX_MM = 500 };
+    enum { MAX_MM = 1024 };
     GrMipMapInfo mm_info[ MAX_MM ];
     FxU32 mm_start[ MAX_MM ];
     FxU32 m_free_mem;
