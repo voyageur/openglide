@@ -2,7 +2,7 @@
 #ifndef __OGL_TABLES_H__
 #define __OGL_TABLES_H__
 
-#include "glogl.h"
+#include "GlOgl.h"
 #include "GLRender.h"
 
 typedef struct 
