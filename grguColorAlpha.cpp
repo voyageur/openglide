@@ -617,19 +617,7 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 
     glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
 
-    if ((rgb_sf == GR_BLEND_ONE) && (rgb_df == GR_BLEND_ZERO))
-    {
-        OpenGL.Blend = false;
-    }
-    else
-    {
-        for ( int i = 0; i < 4; i++ )
-        {
-            OpenGL.ConstantColor[ i ] = OpenGL.AlphaColor[ i ];
-        }
-
-        OpenGL.Blend = true;
-    }
+    OpenGL.Blend = !(( rgb_sf == GR_BLEND_ONE ) && ( rgb_df == GR_BLEND_ZERO ));
 
     OpenGL.Texture = ( OpenGL.ColorTexture || ( OpenGL.Blend && OpenGL.AlphaTexture ) );
 
@@ -657,11 +645,6 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
     Glide.State.AlphaLocal = local;
     Glide.State.AlphaOther = other;
     Glide.State.AlphaInvert = invert;
-
-    for ( int i = 0; i < 4; i++ )
-    {
-        OpenGL.AlphaColor[ i ] = OpenGL.ConstantColor[ i ];
-    }
 
     Glide.ALocal = false;
     Glide.AOther = false;
