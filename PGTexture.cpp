@@ -62,9 +62,11 @@ inline void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = (   ( *Buffer1 )   & 0xFFC0 ) |
-                     ( ( ( *Buffer1++ ) & 0x001F ) << 1) |
+        *Buffer2 = (   ( *Buffer1 ) & 0xFFC0 )       |
+                   ( ( ( *Buffer1 ) & 0x001F ) << 1) |
                      0x0001;
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -73,10 +75,12 @@ inline void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = 0xFF000000 |                       // A
+        *Buffer2 = 0xFF000000 |                         // A
             ( ( *Buffer1 )     & 0x001F ) << 19 |       // B
             ( ( *Buffer1 )     & 0x07E0 ) << 5  |       // G
-            ( ( *Buffer1++ )   & 0xF800 ) >> 8;         // R
+            ( ( *Buffer1 )     & 0xF800 ) >> 8;         // R
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -85,10 +89,12 @@ inline void Convert4444to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = ( ( *Buffer1 )    & 0xF000 ) << 16 |   // A
+        *Buffer2   = ( ( *Buffer1 )    & 0xF000 ) << 16 |   // A
                      ( ( *Buffer1 )    & 0x000F ) << 20 |   // B
                      ( ( *Buffer1 )    & 0x00F0 ) <<  8 |   // G
-                     ( ( *Buffer1++ )  & 0x0F00 ) >>  4;    // R
+                     ( ( *Buffer1 )    & 0x0F00 ) >>  4;    // R
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -97,7 +103,9 @@ inline void Convert4444to4444( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = ( ( ( *Buffer1) << 4 ) | ( ( *Buffer1++ ) >> 12 ) );
+        *Buffer2 = ( ( ( *Buffer1) << 4 ) | ( ( *Buffer1 ) >> 12 ) );
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -115,11 +123,13 @@ inline void Convert1555to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = 
+        *Buffer2 = 
             ( ( ( *Buffer1 )    & 0x8000 ) ? 0xFF000000 : 0 ) |       // A
             ( ( ( *Buffer1 )    & 0x001F )       << 19 )      |       // B
             ( ( ( *Buffer1 )    & 0x03E0 )       <<  6 )      |       // G
-            ( ( ( *Buffer1++ )  & 0x7C00 )       >>  7 );             // R
+            ( ( ( *Buffer1 )    & 0x7C00 )       >>  7 );             // R
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -128,7 +138,9 @@ inline void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = ( ( ( *Buffer1 ) << 8 ) | ( *Buffer1++ ) );
+        *Buffer2 = ( ( ( *Buffer1 ) << 8 ) | ( *Buffer1 ) );
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -147,11 +159,13 @@ inline void ConvertI8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = 
+        *Buffer2 = 
             0xFF000000              |       // A
             ( ( *Buffer1 ) << 16 )  |       // B
             ( ( *Buffer1 ) <<  8 )  |       // G
-            (   *Buffer1++) ;               // R
+            (   *Buffer1) ;                 // R
+        Buffer1++;
+        Buffer2++;
         Pixels--;
     }
 }
@@ -160,11 +174,13 @@ inline void ConvertAI88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
-        *Buffer2++ = 
+        *Buffer2 = 
             ( ( ( *Buffer1 )    & 0xFF00 )   << 16 )    |       // A
             ( ( ( *Buffer1 )    & 0x00FF )   << 16 )    |       // B
             ( ( ( *Buffer1 )    & 0x00FF )   <<  8 )    |       // G
-            (   ( *Buffer1++ )  & 0x00FF);                      // R
+            (   ( *Buffer1 )    & 0x00FF);                      // R
+        Buffer2++;
+        Buffer1++;
         Pixels--;
     }
 }
@@ -190,7 +206,9 @@ inline void ConvertAI44toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     for ( DWORD i = Pixels; i > 0; i-- )
     {
-        *Buffer2++ = ( ( ( ( *Buffer1 ) & 0xF0 ) << 8 ) | ( ( ( *Buffer1++ ) & 0x0F ) << 4 ) );
+        *Buffer2 = ( ( ( ( *Buffer1 ) & 0xF0 ) << 8 ) | ( ( ( *Buffer1 ) & 0x0F ) << 4 ) );
+        Buffer2++;
+        Buffer1++;
     }
 }
 
@@ -248,6 +266,62 @@ inline void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWOR
     }
 }
 
+inline void ConvertYIQto8888( BYTE *in, DWORD *out, DWORD Pixels, GuNccTable *ncc)
+{
+    LONG   R;
+    LONG   G;
+    LONG   B;
+
+    for ( DWORD i = Pixels; i > 0; i-- )
+    {
+        R = ncc->yRGB[ *in >> 4 ] + ncc->iRGB[ ( *in >> 2 ) & 0x3 ][ 0 ]
+                                  + ncc->qRGB[ ( *in      ) & 0x3 ][ 0 ];
+
+        G = ncc->yRGB[ *in >> 4 ] + ncc->iRGB[ ( *in >> 2 ) & 0x3 ][ 1 ]
+                                  + ncc->qRGB[ ( *in      ) & 0x3 ][ 1 ];
+
+        B = ncc->yRGB[ *in >> 4 ] + ncc->iRGB[ ( *in >> 2 ) & 0x3 ][ 2 ]
+                                  + ncc->qRGB[ ( *in      ) & 0x3 ][ 2 ];
+
+        R = ( ( R < 0 ) ? 0 : ( ( R > 255 ) ? 255 : R ) );
+        G = ( ( G < 0 ) ? 0 : ( ( G > 255 ) ? 255 : G ) );
+        B = ( ( B < 0 ) ? 0 : ( ( B > 255 ) ? 255 : B ) );
+
+        *out = ( R | ( G << 8 ) | ( B << 16 ) | 0xff000000 );
+
+        in++;
+        out++;
+    }
+}
+
+inline void ConvertAYIQto8888( WORD *in, DWORD *out, DWORD Pixels, GuNccTable *ncc)
+{
+    LONG   R;
+    LONG   G;
+    LONG   B;
+
+    for ( DWORD i = Pixels; i > 0; i-- )
+    {
+        R = ncc->yRGB[ ( *in >> 4 ) & 0xf ] + ncc->iRGB[ ( *in >> 2 ) & 0x3 ][ 0 ]
+                                            + ncc->qRGB[ ( *in      ) & 0x3 ][ 0 ];
+
+        G = ncc->yRGB[ ( *in >> 4 ) & 0xf ] + ncc->iRGB[ ( *in >> 2 ) & 0x3 ][ 1 ]
+                                            + ncc->qRGB[ ( *in      ) & 0x3 ][ 1 ];
+
+        B = ncc->yRGB[ ( *in >> 4 ) & 0xf ] + ncc->iRGB[ ( *in >> 2 ) & 0x3 ][ 2 ]
+                                            + ncc->qRGB[ ( *in      ) & 0x3 ][ 2 ];
+
+        R = ( ( R < 0 ) ? 0 : ( ( R > 255 ) ? 255 : R ) );
+        G = ( ( G < 0 ) ? 0 : ( ( G > 255 ) ? 255 : G ) );
+        B = ( ( B < 0 ) ? 0 : ( ( B > 255 ) ? 255 : B ) );
+
+        *out = ( R | ( G << 8 ) | ( B << 16 ) | ( 0xff000000 & ( *in << 16 ) ) );
+
+        in++;
+        out++;
+    }
+}
+
 inline void SplitAP88( WORD *ap88, BYTE *index, BYTE *alpha, DWORD pixels )
 {
     for ( DWORD i = pixels; i > 0; i-- )
@@ -265,6 +339,7 @@ PGTexture::PGTexture( int mem_size )
     m_chromakey_mode = GR_CHROMAKEY_DISABLE;
     m_tex_memory_size = mem_size;
     m_memory = new FxU8[ mem_size ];
+    m_ncc_select = GR_NCCTABLE_NCC0;
 }
 
 PGTexture::~PGTexture( void )
@@ -323,19 +398,50 @@ void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 
 void PGTexture::DownloadTable( GrTexTable_t type, void *data, int first, int count )
 {
-    if ( type == GR_TEXTABLE_PALETTE )
+    switch ( type )
     {
-        FxU32   * idata = (FxU32 *)data;
-
-        for ( int i = 0; i < count; i++ )
+    case GR_TEXTABLE_PALETTE:
         {
-            m_palette[first+i] = (    ( idata[ i ] & 0xff00ff00 )
-                                  | ( ( idata[ i ] & 0x00ff0000 ) >> 16 )
-                                  | ( ( idata[ i ] & 0x000000ff ) << 16 )
-                                 );
+            FxU32   * idata = (FxU32 *)data;
+            
+            for ( int i = 0; i < count; i++ )
+            {
+                m_palette[first+i] = (    ( idata[ i ] & 0xff00ff00 )
+                    | ( ( idata[ i ] & 0x00ff0000 ) >> 16 )
+                    | ( ( idata[ i ] & 0x000000ff ) << 16 )
+                    );
+            }
+            
+            m_palette_dirty = true;
         }
+        break;
 
-        m_palette_dirty = true;
+    case GR_TEXTABLE_NCC0:
+    case GR_TEXTABLE_NCC1:
+        {
+            int         i;
+            GuNccTable *ncc = &(m_ncc[ type ]);
+
+            memcpy( ncc, data, sizeof( GuNccTable ) );
+
+            for ( i = 0; i < 4; i++ )
+            {
+                if ( ncc->iRGB[ i ][ 0 ] & 0x100 )
+                    ncc->iRGB[ i ][ 0 ] |= 0xff00;
+                if ( ncc->iRGB[ i ][ 1 ] & 0x100 )
+                    ncc->iRGB[ i ][ 1 ] |= 0xff00;
+                if ( ncc->iRGB[ i ][ 2 ] & 0x100 )
+                    ncc->iRGB[ i ][ 2 ] |= 0xff00;
+
+                if ( ncc->qRGB[ i ][ 0 ] & 0x100 )
+                    ncc->qRGB[ i ][ 0 ] |= 0xff00;
+                if ( ncc->qRGB[ i ][ 1 ] & 0x100 )
+                    ncc->qRGB[ i ][ 1 ] |= 0xff00;
+                if ( ncc->qRGB[ i ][ 2 ] & 0x100 )
+                    ncc->qRGB[ i ][ 2 ] |= 0xff00;
+            }
+        }
+        break;
     }
 }
 
@@ -604,7 +710,23 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_YIQ_422:
+            ConvertYIQto8888( (BYTE*)data, m_tex_temp, texVals.nPixels, &(m_ncc[m_ncc_select]) );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.BuildMipMaps )
+            {
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
+            break;
+            
         case GR_TEXFMT_AYIQ_8422:
+            ConvertAYIQto8888( (WORD*)data, m_tex_temp, texVals.nPixels, &(m_ncc[m_ncc_select]) );
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.BuildMipMaps )
+            {
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
+            break;
+            
         case GR_TEXFMT_RSVD0:
         case GR_TEXFMT_RSVD1:
         case GR_TEXFMT_RSVD2:
@@ -815,5 +937,15 @@ void PGTexture::ApplyKeyToPalette( void )
         
         m_palette_hash = hash;
         m_palette_dirty = false;
+    }
+}
+
+void PGTexture::NCCTable(GrNCCTable_t tab)
+{
+    switch ( tab )
+    {
+    case GR_NCCTABLE_NCC0:
+    case GR_NCCTABLE_NCC1:
+        m_ncc_select = tab;
     }
 }

@@ -608,9 +608,14 @@ grTexCombine( GrChipID_t tmu,
 DLLEXPORT void __stdcall
 grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
 {
-#ifdef NOTDONE
-    GlideMsg("grTexNCCTable( %d, %u )\n", tmu, NCCTable );
+#ifdef DONE
+    GlideMsg( "grTexNCCTable( %d, %u )\n", tmu, NCCTable );
 #endif
+
+    if ( tmu == GR_TMU0 )
+    {
+        Textures->NCCTable( NCCTable );
+    }
 }
 
 //----------------------------------------------------------------

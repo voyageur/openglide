@@ -63,6 +63,18 @@ static FxU32 ReadDataLong( FILE *fp )
     return data;
 }
 
+static FxU32 ReadDataShort( FILE *fp )
+{
+    FxU32   data;
+    FxU8    byte[2];
+
+    fread( byte, 2, 1, fp );
+    data = (((FxU32) byte[ 0 ]) << 8) |
+            ((FxU32) byte[ 1 ]);
+
+    return data;
+}
+
 //----------------------------------------------------------------
 DLLEXPORT FxBool __stdcall
 gu3dfLoad( const char *filename, Gu3dfInfo *data )
@@ -79,7 +91,7 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
     GlideMsg( "Total Bytes to be Read = %d\n", data->mem_required );
 #endif
 
-    file3df = fopen( filename, "r" );
+    file3df = fopen( filename, "rb" );
 
     fseek( file3df, jump, SEEK_SET );
 
@@ -95,7 +107,91 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
 #endif
     }
 
-    fread( data->data, sizeof( BYTE ), data->mem_required, file3df );
+    if ( ( data->header.format == GR_TEXFMT_YIQ_422 ) ||
+         ( data->header.format == GR_TEXFMT_AYIQ_8422 ) )
+    {
+        int   i;
+        int   pi;
+        FxU32 pack;
+
+        GuNccTable *ncc = &(data->table.nccTable);
+
+        for ( i = 0; i < 16; i++ )
+        {
+            ncc->yRGB[i] = (FxU8) ReadDataShort( file3df );
+        }
+
+        for ( i = 0; i < 4; i++ )
+        {
+            /* Masking with 0x1ff is strange but correct apparently */
+            ncc->iRGB[i][0] = (FxI16) ( ReadDataShort( file3df ) & 0x1ff );
+            ncc->iRGB[i][1] = (FxI16) ( ReadDataShort( file3df ) & 0x1ff );
+            ncc->iRGB[i][2] = (FxI16) ( ReadDataShort( file3df ) & 0x1ff );
+        }
+
+        for ( i = 0; i < 4; i++ )
+        {
+            ncc->qRGB[i][0] = (FxI16) ( ReadDataShort( file3df ) & 0x1ff );
+            ncc->qRGB[i][1] = (FxI16) ( ReadDataShort( file3df ) & 0x1ff );
+            ncc->qRGB[i][2] = (FxI16) ( ReadDataShort( file3df ) & 0x1ff );
+        }
+
+        pi = 0;
+
+        for ( i = 0; i < 4; i++ )
+        {
+            pack =  ( ncc->yRGB[i*4 + 0]       );
+            pack |= ( ncc->yRGB[i*4 + 1] << 8  );
+            pack |= ( ncc->yRGB[i*4 + 2] << 16 );
+            pack |= ( ncc->yRGB[i*4 + 3] << 24 );
+
+            ncc->packed_data[pi++] = pack;
+        }
+
+        for ( i = 0; i < 4; i++ )
+        {
+            pack =  ( ncc->iRGB[i][0] << 18 );
+            pack |= ( ncc->iRGB[i][1] << 9  );
+            pack |= ( ncc->iRGB[i][2]       );
+
+            ncc->packed_data[pi++] = pack;
+        }
+
+        for ( i = 0; i < 4; i++ )
+        {
+            pack =  ( ncc->qRGB[i][0] << 18 );
+            pack |= ( ncc->qRGB[i][1] << 9  );
+            pack |= ( ncc->qRGB[i][2]       );
+
+            ncc->packed_data[pi++] = pack;
+        }
+    }
+
+    switch ( data->header.format )
+    {
+    case GR_TEXFMT_RGB_565:
+    case GR_TEXFMT_ARGB_8332:
+    case GR_TEXFMT_ARGB_1555:
+    case GR_TEXFMT_AYIQ_8422:
+    case GR_TEXFMT_ARGB_4444:
+    case GR_TEXFMT_ALPHA_INTENSITY_88:
+    case GR_TEXFMT_AP_88:
+        {
+            FxU16 *d = (FxU16 *) (data->data);
+            int i;
+
+            for ( i = data->mem_required; i > 0; i -= 2 )
+            {
+                *d++ = (FxU16) ReadDataShort( file3df );
+            }
+        }
+        break;
+        
+    default:
+        fread( data->data, sizeof( BYTE ), data->mem_required, file3df );
+        break;
+    }
+
     fclose( file3df );
 
     return FXTRUE;
@@ -130,6 +226,18 @@ GrTextureFormat_t ParseTextureFormat( const char * text )
     if ( !strcmp( text, "ap88\n" ) )
     {
         return GR_TEXFMT_AP_88;
+    }
+    if ( !strcmp( text, "ai44\n" ) )
+    {
+        return GR_TEXFMT_ALPHA_INTENSITY_44;
+    }
+    if ( !strcmp( text, "yiq\n" ) )
+    {
+        return GR_TEXFMT_YIQ_422;
+    }
+    if ( !strcmp( text, "ayiq8422\n" ) )
+    {
+        return GR_TEXFMT_AYIQ_8422;
     }
 
     return 0;
@@ -184,7 +292,7 @@ int Read3dfHeader( const char *filename, Gu3dfInfo *data )
             nWidth, 
             nHeight;
 
-    file3df = fopen( filename, "r" );
+    file3df = fopen( filename, "rb" );
 
     if ( file3df == NULL )
     {
@@ -209,21 +317,29 @@ int Read3dfHeader( const char *filename, Gu3dfInfo *data )
 
     switch ( data->header.aspect_ratio )
     {
-    case GR_ASPECT_8x1: nWidth = lod1;      nHeight = lod1 >> 3;    break;
-    case GR_ASPECT_4x1: nWidth = lod1;      nHeight = lod1 >> 2;    break;
-    case GR_ASPECT_2x1: nWidth = lod1;      nHeight = lod1 >> 1;    break;
-    case GR_ASPECT_1x1: nWidth = lod1;      nHeight = lod1;         break;
-    case GR_ASPECT_1x2: nWidth = lod1 >> 1; nHeight = lod1;         break;
-    case GR_ASPECT_1x4: nWidth = lod1 >> 2; nHeight = lod1;         break;
-    case GR_ASPECT_1x8: nWidth = lod1 >> 3; nHeight = lod1;         break;
+    case GR_ASPECT_8x1: nWidth = lod2;      nHeight = lod2 >> 3;    break;
+    case GR_ASPECT_4x1: nWidth = lod2;      nHeight = lod2 >> 2;    break;
+    case GR_ASPECT_2x1: nWidth = lod2;      nHeight = lod2 >> 1;    break;
+    case GR_ASPECT_1x1: nWidth = lod2;      nHeight = lod2;         break;
+    case GR_ASPECT_1x2: nWidth = lod2 >> 1; nHeight = lod2;         break;
+    case GR_ASPECT_1x4: nWidth = lod2 >> 2; nHeight = lod2;         break;
+    case GR_ASPECT_1x8: nWidth = lod2 >> 3; nHeight = lod2;         break;
     }
 
     data->header.width = nWidth;
     data->header.height = nHeight;
-    data->mem_required = GetTexSize( data->header.large_lod, data->header.aspect_ratio, data->header.format );
+
+    {
+        GrLOD_t l;
+
+        data->mem_required = 0;
+        
+        for ( l = data->header.large_lod; l <= data->header.small_lod; l++ )
+            data->mem_required += GetTexSize( l, data->header.aspect_ratio, data->header.format );
+    }
 
     temp1 = ftell( file3df );
     fclose( file3df );
 
-    return temp1 % 2 ? temp1+1 : temp1;
+    return temp1;
 }

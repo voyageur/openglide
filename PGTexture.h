@@ -43,8 +43,11 @@ private:
     FxU32 m_evenOdd;
     GrTexInfo m_info;
     FxU32 m_palette[ 256 ];
+    GrNCCTable_t m_ncc_select;
+    GuNccTable m_ncc[2];
 
 public:
+	void NCCTable(GrNCCTable_t tab);
     FxU32 m_tex_memory_size;
 
     static FxU32 MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, 
