@@ -323,7 +323,11 @@ void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
     {
+#if defined(CONSTANT_LUMINOSITY_ALPHA_TEXTURE)
+        *Buffer2 = ( ( ( *Buffer1 ) << 8 ) | 0xFF );
+#else
         *Buffer2 = ( ( ( *Buffer1 ) << 8 ) | ( *Buffer1 ) );
+#endif
         Buffer1++;
         Buffer2++;
         Pixels--;
