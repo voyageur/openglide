@@ -208,6 +208,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 
             glDrawBuffer( OpenGL.RenderBuffer );
 
+            /* PHBG: don't think this resetting of blend state is needed */
             if ( OpenGL.Blend )
             {
                 glEnable( GL_BLEND );
