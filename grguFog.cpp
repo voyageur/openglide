@@ -137,13 +137,29 @@ guFogGenerateExp( GrFog_t *fogtable, float density )
 #ifdef PARTDONE
     GlideMsg( "guFogGenerateExp( ---, %-4.2f )\n", density );
 #endif
-
-    float Temp;
-
+    
+    float f;
+    float scale;
+    float dp;
+    
+    dp = density * guFogTableIndexToW( GR_FOG_TABLE_SIZE - 1 );
+    scale = 255.0F / ( 1.0F - (float) exp( -dp ) );
+    
     for ( int i = 0; i < GR_FOG_TABLE_SIZE; i++ )
     {
-        Temp = ( 1.0f - (float) exp( (- density) * guFogTableIndexToW( i ) ) ) * 255.0f;
-        fogtable[ i ] = (BYTE) Temp;
+        dp = density * guFogTableIndexToW( i );
+        f = ( 1.0F - (float) exp( -dp ) ) * scale;
+        
+        if ( f > 255.0F )
+        {
+            f = 255.0F;
+        }
+        else if ( f < 0.0F )
+        {
+            f = 0.0F;
+        }
+        
+        fogtable[i] = (GrFog_t) f;
     }
 }
 
