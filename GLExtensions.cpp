@@ -87,6 +87,7 @@ void ValidateUserConfig()
 	InternalConfig.PrecisionFixEnable		= UserConfig.PrecisionFixEnable;
 	InternalConfig.Wrap565Enable			= UserConfig.Wrap565Enable;
 	InternalConfig.BuildMipMaps				= UserConfig.BuildMipMaps;
+    InternalConfig.IgnorePaletteChange      = UserConfig.IgnorePaletteChange;
 
 	InternalConfig.MultiTextureEXTEnable	= false;
 	InternalConfig.PaletteEXTEnable			= false;

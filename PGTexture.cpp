@@ -266,7 +266,7 @@ void PGTexture::DownloadTable(GrTexTable_t type, void *data)
             hash += m_palette[i];
         }
 
-        m_palette_hash = hash;
+        m_palette_hash = (InternalConfig.IgnorePaletteChange ? 0 : hash);
     }
 }
 
