@@ -5,6 +5,10 @@
 #if !defined(AFX_TEXDB_H__4D8DBC18_A31F_4E9E_9863_E0DC9635872E__INCLUDED_)
 #define AFX_TEXDB_H__4D8DBC18_A31F_4E9E_9863_E0DC9635872E__INCLUDED_
 
+#include <windows.h>
+#include "glide.h"
+#include "GL/gl.h"
+
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000

@@ -6,8 +6,6 @@
 
 #include "GlOGl.h"
 #include "GLRender.h"
-#include "GLTexture.h"
-#include "PGTexture.h"
 #include "GLextensions.h"
 #include "amd3dx.h"
 #include "profile.h"
@@ -18,8 +16,6 @@ void (*ColorFactor3Func)( TColorStruct *Result, TColorStruct *ColorComponent, TC
 void (*ColorFunctionFunc)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 
 // extern variables
-extern BYTE	TexTemp[256*256*4];
-extern float CurrentTextureWidth, CurrentTextureHeight;
 
 void MMXCopyByteFlip( void *Dst, void *Src, DWORD NumberOfBytes );
 
@@ -773,8 +769,6 @@ void RenderInitialize()
 	OGLRender.MinR = OGLRender.MinG = OGLRender.MinB = OGLRender.MinA = 99999999.0f;
 	OGLRender.MaxR = OGLRender.MaxG = OGLRender.MaxB = OGLRender.MaxA = -99999999.0f;
 #endif
-
-	CurrentTextureWidth = CurrentTextureHeight = D1OVER256;
 
 	OGLRender.TColor = new TColorStruct[MAXTRIANGLES+1]; // One more for Lines and Point
 	OGLRender.TColor2 = new TColorStruct[MAXTRIANGLES+1];

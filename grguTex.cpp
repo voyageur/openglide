@@ -6,11 +6,9 @@
 
 #include "GlOgl.h"
 #include "GLRender.h"
-#include "GLTexture.h"
 #include "GLextensions.h"
 
-// Temporary Texture memory
-BYTE	TexTemp[256*256*4];
+
 
 // extern functions
 DWORD GetTexSize(const int Lod, const int aspectRatio, const int format );
@@ -65,8 +63,6 @@ grTexSource( GrChipID_t tmu,
 	Glide.State.TexSource.StartAddress = startAddress;
 	Glide.State.TexSource.EvenOdd = evenOdd;
 
-	OpenGL.CurrentTexture = 0;
-    
     Textures->Source( startAddress, evenOdd, info );	
 }
 
@@ -473,7 +469,7 @@ bool TablePronta = false;
 DLLEXPORT void __stdcall
 grTexDownloadTablePartial( GrChipID_t   tmu,
                            GrTexTable_t type, 
-                           FxU32        *data,
+                           void        *data,
                            int          start,
                            int          end )
 {
@@ -898,7 +894,7 @@ guTexMemQueryAvail( GrChipID_t tmu )
 	if (tmu != GR_TMU0)
 		return 0;
 
-	return grTexMaxAddress( tmu ) - UTextures.TexMemoryCurrentPosition;
+	return UTextures.MemQueryAvail(tmu);
 }
 
 //----------------------------------------------------------------
@@ -959,7 +955,7 @@ guTexGetCurrentMipMap( GrChipID_t tmu )
 	if (tmu != GR_TMU0)
 		return GR_NULL_MIPMAP_HANDLE;
 
-	return UTextures.CurrentMipMap( tmu );
+	return UTextures.GetCurrentMipMap( tmu );
 }
 
 //----------------------------------------------------------------
@@ -994,7 +990,7 @@ guTexGetMipMapInfo( GrMipMapId_t mmid )
 	GlideMsg("guTexGetMipMapInfo\n");
 #endif
 
-	return UTextures.TextureInfo( mmid );
+	return UTextures.GetMipMapInfo( mmid );
 }
 
 //----------------------------------------------------------------
@@ -1005,7 +1001,7 @@ guTexMemReset()
 	GlideMsg("guTexMemReset\n");
 #endif
 
-	UTextures.Clear();
+	UTextures.MemReset();
 	Textures->Clear();
 }
 
@@ -1017,15 +1013,7 @@ guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 	GlideMsg("guTexDownloadMipMapLevel( %d, %d, --- )\n", mmid, lod );
 #endif
 
-	static GrMipMapInfo *MipMap;
-	MipMap = UTextures.TextureInfo( mmid );
-
-	grTexDownloadMipMapLevel( MipMap->tmu, MipMap->tmu_base_address, lod, MipMap->lod_max,
-		MipMap->aspect_ratio, MipMap->format, MipMap->odd_even_mask, (void*) *src );
-
-
-    //FIXME: by commenting out the line below, I have critically broken OpenGLide
-	//UTextures.SetOpenGLTexture( mmid, Textures->TextureNumber( MipMap->tmu_base_address ) );
+	UTextures.DownloadMipMapLevel(mmid, lod, src);
 }
 
 //----------------------------------------------------------------
@@ -1035,13 +1023,8 @@ guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table
 #ifdef DONE
 	GlideMsg("guTexDownloadMipMap\n");
 #endif
-	static GrMipMapInfo *MipMap;
-	static int i;
 
-	MipMap = UTextures.TextureInfo( mmid );
-
-	for( i = MipMap->lod_max; i <= MipMap->lod_min; i++ )
-		guTexDownloadMipMapLevel( mmid, i, &src );
+	UTextures.DownloadMipMap(mmid, src, table);
 }
 
 //----------------------------------------------------------------
@@ -1068,9 +1051,9 @@ guTexAllocateMemory( GrChipID_t tmu,
 	if (tmu != GR_TMU0)
 		return GR_NULL_MIPMAP_HANDLE;
 
-	return UTextures.Allocate( tmu, odd_even_mask, width, height, fmt, mm_mode,
+	return UTextures.AllocateMemory( tmu, odd_even_mask, width, height, fmt, mm_mode,
 		smallest_lod, largest_lod, aspect, s_clamp_mode, t_clamp_mode,
-		minfilter_mode, magfilter_mode, lod_bias, trilinear );
+		minfilter_mode, magfilter_mode, lod_bias, trilinear);
 }
 
 //----------------------------------------------------------------
@@ -1083,15 +1066,7 @@ guTexSource( GrMipMapId_t id )
 
 	RenderDrawTriangles();
 
-	if ( (int)id < 0 )
-	{
-		OpenGL.Texture = false;
-	}
-	else
-	{
-		OpenGL.Texture = true;
-		UTextures.SetSource( id );
-	}
+    UTextures.Source(id);
 }
 
 //----------------------------------------------------------------

@@ -7,6 +7,7 @@
 #include "GlOgl.h"
 #include "GLRender.h"
 
+
 // extern functions
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );

@@ -10,9 +10,7 @@
 #include <GL\gl.h>
 #include <GL\glu.h>
 
-//#include "GLRender.h"
 #include "GlOgl.h"
-//#include "GLTexture.h"
 #include "GLextensions.h"
 
 #include "Glide.h"
@@ -42,10 +40,8 @@ GlideStruct		Glide;
 OpenGLStruct	OpenGL;
 
 // Classes
-//WTexture		*Textures;
 PGTexture		*Textures;
-WUTexture		UTextures;
-//Render			OGLRender;
+PGUTexture		 UTextures;
 
 // Profiling variables
 __int64			InitialTick,FinalTick;
@@ -343,8 +339,6 @@ grGlideInit( void )
 	RDTSC( FinalTick );
 	RDTSC( InitialTick );
 	Fps = FpsAux = Frame = 0;
-
-	OpenGL.CurrentTexture = 0;
 
 	OpenGL.GlideInit = true;
 

@@ -161,7 +161,7 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
                  FxU32 dst_x, FxU32 dst_y,
 				 GrLfbSrcFmt_t src_format,
                  FxU32 src_width, FxU32 src_height,
-                 FxU32 src_stride, void *src_data )
+                 FxI32 src_stride, void *src_data )
 {
 #ifdef NOTDONE
 	GlideMsg("grLfbWriteRegion( %d, %d, %d, %d, %d, %d, %d, --- )\n",
@@ -174,7 +174,7 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
 	static DWORD *Buffer2;
 	static DWORD Pixels;
 
-	if (src_stride != src_width)
+	if (src_stride != (FxI32)src_width)
 	{
 //		Error( "grLfbWriteRegion: different width and stride.\n" );
 		return FXTRUE;

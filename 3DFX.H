@@ -55,7 +55,11 @@ typedef struct { float r, g, b, a; } FxColor4;
 ** export macros
 */
 
-#if defined(__MSC__)
+#if defined(CPPDLL)
+#define DLLEXPORT extern "C" __declspec(dllexport)
+#  define FX_ENTRY DLLEXPORT
+#  define FX_CALL __stdcall
+#elif defined(__MSC__)
 #  if defined (MSVC16)
 #    define FX_ENTRY 
 #    define FX_CALL

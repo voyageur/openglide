@@ -19,7 +19,7 @@ void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes );
 //* Fog is applied after color combining and before alpha blending.
 //*************************************************
 DLLEXPORT void __stdcall
-grFogTable( GrFog_t *ft )
+grFogTable( const GrFog_t *ft )
 {
 #ifdef DONE
 	GlideMsg( "grFogTable( --- )\n" );
@@ -33,7 +33,7 @@ grFogTable( GrFog_t *ft )
 	{
 		if ( InternalConfig.MMXEnable )
 		{
-			MMXCopyMemory( Glide.FogTable, ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
+			MMXCopyMemory( Glide.FogTable, (GrFog_t *)ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
 		}
 		else
 		{

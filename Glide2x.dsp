@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x416 /d "_DEBUG"
@@ -130,6 +130,10 @@ SOURCE=.\PGTexture.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\PGUTexture.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\profile.h
 # End Source File
 # Begin Source File
@@ -172,14 +176,6 @@ SOURCE=.\GLRender.cpp
 # Begin Source File
 
 SOURCE=.\GLRender.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\GLTexture.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\GLTexture.h
 # End Source File
 # Begin Source File
 
@@ -228,6 +224,10 @@ SOURCE=.\Otimizaceos.txt
 # Begin Source File
 
 SOURCE=.\PGTexture.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\PGUTexture.cpp
 # End Source File
 # Begin Source File
 
