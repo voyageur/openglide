@@ -197,8 +197,40 @@ static void ResetScreenMode( void )
 
 void SwapBuffers ( void )
 {
-    glFlush( );
+    if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
+        return;
+    GLenum type = GL_UNSIGNED_SHORT_5_5_5_1_EXT;
+
+    // Will need to change this later
+    static FxU32 tempBuf[ 2048 * 2048 ];
+
+    if ( InternalConfig.OGLVersion > 1 )
+        type = GL_UNSIGNED_SHORT_5_6_5;
+
+    // What a pain.  Under Glide front/back buffers are swapped.
+    // Under linux X copies the back to front buffer and the
+    // back buffer becomes underfined.  So we have to copy the
+    // front buffer manually to the back (probably noticable
+    // performance hit).  NOTE the restored image looks quantised.
+    glDisable( GL_BLEND );
+    glDisable( GL_TEXTURE_2D );
+
+    glReadBuffer( GL_FRONT );
+    glReadPixels( 0, 0, 
+                  Glide.WindowWidth, Glide.WindowHeight,
+                  GL_RGB, type, (void *)tempBuf );
+
     glXSwapBuffers( dpy, win );
+
+    glDrawBuffer( GL_BACK );
+    glRasterPos2i(0, Glide.WindowHeight - 1);
+    glDrawPixels( Glide.WindowWidth, Glide.WindowHeight, GL_RGB,
+                  type, (void *)tempBuf );
+
+    if ( OpenGL.Blend )
+        glEnable( GL_BLEND );
+
+    glDrawBuffer( OpenGL.RenderBuffer );
 }
 
 #endif // __unix__
