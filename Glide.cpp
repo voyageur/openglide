@@ -623,14 +623,14 @@ grSstWinOpen(   FxU32 hwnd,
     // Initializing Glide and OpenGL
     InitOpenGL( );
 
-    Glide.SrcBuffer.Address = new WORD[OPENGLBUFFERMEMORY];
-    Glide.DstBuffer.Address = new WORD[OPENGLBUFFERMEMORY];
+    Glide.SrcBuffer.Address = new WORD[ OPENGLBUFFERMEMORY ];
+    Glide.DstBuffer.Address = new WORD[ OPENGLBUFFERMEMORY ];
     
     // Just checking
     if ( ( !Glide.SrcBuffer.Address ) || ( !Glide.DstBuffer.Address ) )
     {
         Error( "Could NOT allocate sufficient memory for Buffers... Sorry\n" );
-        throw -1;
+        exit( -1 );
     }
 
     ZeroMemory( Glide.SrcBuffer.Address, OPENGLBUFFERMEMORY * 2 );
