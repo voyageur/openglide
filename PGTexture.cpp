@@ -54,82 +54,6 @@ void genPaletteMipmaps( FxU32 width, FxU32 height, FxU8 *data )
     }
 }
 
-inline void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2 = (   ( *Buffer1 ) & 0xFFC0 )       |
-                   ( ( ( *Buffer1 ) & 0x001F ) << 1) |
-                     0x0001;
-        Buffer1++;
-        Buffer2++;
-        Pixels--;
-    }
-}
-
-inline void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2 = 0xFF000000 |                         // A
-            ( ( *Buffer1 )     & 0x001F ) << 19 |       // B
-            ( ( *Buffer1 )     & 0x07E0 ) << 5  |       // G
-            ( ( *Buffer1 )     & 0xF800 ) >> 8;         // R
-        Buffer1++;
-        Buffer2++;
-        Pixels--;
-    }
-}
-
-inline void Convert4444to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2   = ( ( *Buffer1 )    & 0xF000 ) << 16 |   // A
-                     ( ( *Buffer1 )    & 0x000F ) << 20 |   // B
-                     ( ( *Buffer1 )    & 0x00F0 ) <<  8 |   // G
-                     ( ( *Buffer1 )    & 0x0F00 ) >>  4;    // R
-        Buffer1++;
-        Buffer2++;
-        Pixels--;
-    }
-}
-
-inline void Convert4444to4444( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2 = ( ( ( *Buffer1) << 4 ) | ( ( *Buffer1 ) >> 12 ) );
-        Buffer1++;
-        Buffer2++;
-        Pixels--;
-    }
-}
-
-inline void Convert1555to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2++ = ( ( ( *Buffer1 ) << 1 ) | ( ( *Buffer1++ ) >> 15 ) );
-        Pixels--;
-    }
-}
-
-inline void Convert1555to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2 = 
-            ( ( ( *Buffer1 )    & 0x8000 ) ? 0xFF000000 : 0 ) |       // A
-            ( ( ( *Buffer1 )    & 0x001F )       << 19 )      |       // B
-            ( ( ( *Buffer1 )    & 0x03E0 )       <<  6 )      |       // G
-            ( ( ( *Buffer1 )    & 0x7C00 )       >>  7 );             // R
-        Buffer1++;
-        Buffer2++;
-        Pixels--;
-    }
-}
-
 inline void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
 {
     while ( Pixels )
@@ -141,93 +65,12 @@ inline void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
     }
 }
 
-inline void ConvertA8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2++ = 
-            ( ( *Buffer1++ ) << 24 | 0xffffff );
-        Pixels--;
-    }
-}
-
-inline void ConvertI8to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2 = 
-            0xFF000000              |       // A
-            ( ( *Buffer1 ) << 16 )  |       // B
-            ( ( *Buffer1 ) <<  8 )  |       // G
-            (   *Buffer1) ;                 // R
-        Buffer1++;
-        Buffer2++;
-        Pixels--;
-    }
-}
-
-inline void ConvertAI88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    while ( Pixels )
-    {
-        *Buffer2 = 
-            ( ( ( *Buffer1 )    & 0xFF00 )   << 16 )    |       // A
-            ( ( ( *Buffer1 )    & 0x00FF )   << 16 )    |       // B
-            ( ( ( *Buffer1 )    & 0x00FF )   <<  8 )    |       // G
-            (   ( *Buffer1 )    & 0x00FF);                      // R
-        Buffer2++;
-        Buffer1++;
-        Pixels--;
-    }
-}
-
-inline void Convert332to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    DWORD   R, 
-            G, 
-            B, 
-            A = 0xFF000000;
-    for ( DWORD i = Pixels; i > 0; i-- )
-    {
-        R = ( ( ( *Buffer1 ) >> 5 ) & 0x07 ) << 5;
-        G = ( ( ( *Buffer1 ) >> 2 ) & 0x07 ) << 5;
-        B = (   ( *Buffer1 ) & 0x03 ) << 6;
-        *Buffer2 = A | ( B << 16 ) | ( G << 8 ) | R;
-        Buffer1++;
-        Buffer2++;
-    }
-}
-
-inline void ConvertAI44toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels )
-{
-    for ( DWORD i = Pixels; i > 0; i-- )
-    {
-        *Buffer2 = ( ( ( ( *Buffer1 ) & 0xF0 ) << 8 ) | ( ( ( *Buffer1 ) & 0x0F ) << 4 ) );
-        Buffer2++;
-        Buffer1++;
-    }
-}
-
-inline void ConvertAI44to8888( BYTE *Buffer1, DWORD *Buffer2, DWORD Pixels )
-{
-    DWORD   A, 
-            I;
-    for ( DWORD i = Pixels; i > 0; i-- )
-    {
-        A = ( ( ( *Buffer1 ) >> 4 ) & 0x0F ) << 4;
-        I = (   ( *Buffer1 ) & 0x0F ) << 4;
-        *Buffer2 = ( A << 24 ) | ( I << 16 ) | ( I << 8 ) | I;
-        Buffer1++;
-        Buffer2++;
-    }
-}
-
 inline void Convert8332to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 {
-    DWORD   R, 
-            G, 
-            B, 
-            A;
+    static DWORD    R, 
+                    G, 
+                    B, 
+                    A;
     for ( DWORD i = Pixels; i > 0; i-- )
     {
         A = ( ( ( *Buffer1 ) >> 8 ) & 0xFF );
@@ -616,71 +459,26 @@ bool PGTexture::MakeReady( void )
         switch ( m_info.format )
         {
         case GR_TEXFMT_RGB_565:
-            if ( InternalConfig.OGLVersion > 1 )
-            {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 3, texVals.width, texVals.height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
-            }
-            else
-            {
-                Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-            }
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 3, texVals.width, texVals.height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
             if ( InternalConfig.BuildMipMaps )
             {
-                if ( InternalConfig.OGLVersion > 1 )
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 3, texVals.width, texVals.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
-                }
-                else
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-                }
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 3, texVals.width, texVals.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
             }
             break;
             
         case GR_TEXFMT_ARGB_4444:
-            if ( InternalConfig.OGLVersion > 1 )
-            {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
-            }
-            else
-            {
-                Convert4444to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-            }
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
             if ( InternalConfig.BuildMipMaps )
             {
-                if ( InternalConfig.OGLVersion > 1 )
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
-                }
-                else
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-                }
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
             }
             break;
             
         case GR_TEXFMT_ARGB_1555:
-            if ( InternalConfig.OGLVersion > 1 )
-            {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
-            }
-            else
-            {
-                Convert1555to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-            }
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
             if ( InternalConfig.BuildMipMaps )
             {
-                if ( InternalConfig.OGLVersion > 1 )
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
-                }
-                else
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-                }
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
             }
             break;
             
@@ -745,11 +543,8 @@ bool PGTexture::MakeReady( void )
         case GR_TEXFMT_ALPHA_8:
             ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
             glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
-//                ConvertA8to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
-//                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
             if ( InternalConfig.BuildMipMaps )
             {
-//                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
                 gluBuild2DMipmaps( GL_TEXTURE_2D, 2, texVals.width, texVals.height, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
             }
             break;
@@ -771,48 +566,18 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ALPHA_INTENSITY_44:
-            if ( InternalConfig.OGLVersion > 1 )
-            {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_LUMINANCE4_ALPHA4, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
-            }
-            else
-            {
-                ConvertAI44toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
-            }
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_LUMINANCE4_ALPHA4, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
             if ( InternalConfig.BuildMipMaps )
             {
-                if ( InternalConfig.OGLVersion > 1 )
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE4_ALPHA4, texVals.width, texVals.height, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
-                }
-                else
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 2, texVals.width, texVals.height, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
-                }
+                gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE4_ALPHA4, texVals.width, texVals.height, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
             }
             break;
             
         case GR_TEXFMT_8BIT://GR_TEXFMT_RGB_332
-            if ( InternalConfig.OGLVersion > 1 )
-            {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 3, texVals.width, texVals.height, 0, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
-            }
-            else
-            {
-                Convert332to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-            }
+            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 3, texVals.width, texVals.height, 0, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
             if ( InternalConfig.BuildMipMaps )
             {
-                if ( InternalConfig.OGLVersion > 1 )
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
-                }
-                else
-                {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-                }
+                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
             }
             break;
             
