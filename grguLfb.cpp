@@ -43,6 +43,8 @@ grLfbLock(GrLock_t dwType,
 #ifdef CRITICAL
 	GlideMsg("grLfbLock( %d, %d, %d, %d, %d, --- )\n", dwType, dwBuffer, dwWriteMode, dwOrigin, bPixelPipeline); 
 #endif
+    int width = Glide.WindowWidth;
+    int height = Glide.WindowHeight;
 
 	RenderDrawTriangles();
 
@@ -53,20 +55,20 @@ grLfbLock(GrLock_t dwType,
 
     if((dwType & 1) == 0)
     {
-        FxU32 *buf = new FxU32[640 * 480];
+        FxU32 *buf = new FxU32[width * height];
         int i, j;
 
         glReadBuffer(dwBuffer == GR_BUFFER_BACKBUFFER
             ? GL_BACK : GL_FRONT);
 
-        glReadPixels(0, 0, 640, 480, GL_RGBA, GL_UNSIGNED_BYTE, (void *) buf);
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void *) buf);
         
-        for(j = 0; j < 480; j++)
+        for(j = 0; j < height; j++)
         {
-            WORD *line = Glide.SrcBuffer.Address + (479 - j) * 640;
-            FxU32 *bufl = buf + j * 640;
+            WORD *line = Glide.SrcBuffer.Address + (height - 1 - j) * width;
+            FxU32 *bufl = buf + j * width;
 
-            for(i = 0; i < 640; i++)
+            for(i = 0; i < width; i++)
             {
                 line[i] = (WORD)
                     (((bufl[i] & 0xf8) << 8)
@@ -80,7 +82,7 @@ grLfbLock(GrLock_t dwType,
     }
     else
     {
-        memset(Glide.SrcBuffer.Address, 0, 640 * 480 * 2);
+        memset(Glide.SrcBuffer.Address, 0, width * height * 2);
     }
 
 	lfbInfo->lfbPtr = Glide.SrcBuffer.Address;
