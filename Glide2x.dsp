@@ -94,10 +94,6 @@ LINK32=link.exe
 # PROP Default_Filter ".h"
 # Begin Source File
 
-SOURCE=.\3dfx.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\amd3dx.h
 # End Source File
 # Begin Source File
@@ -107,18 +103,6 @@ SOURCE=.\glext.h
 # Begin Source File
 
 SOURCE=.\Glextensions.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Glide.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\glidesys.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\glideutl.h
 # End Source File
 # Begin Source File
 
@@ -138,7 +122,23 @@ SOURCE=.\PGUTexture.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Sst1vid.h
+SOURCE=.\sdk2_3dfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sdk2_glide.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sdk2_glidesys.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sdk2_glideutl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sdk2_sst1vid.h
 # End Source File
 # Begin Source File
 
