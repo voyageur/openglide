@@ -57,7 +57,7 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
     glEnable( GL_DEPTH_TEST );
 
     glMatrixMode( GL_PROJECTION );
-    glLoadIdentity();
+    glLoadIdentity( );
 
     if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
     {

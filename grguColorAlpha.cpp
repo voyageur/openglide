@@ -783,6 +783,7 @@ grChromakeyValue( GrColor_t value )
 #ifdef PARTDONE
     GlideMsg( "grChromakeyValue( %d )\n", value );
 #endif
+
     RenderDrawTriangles( );
 
     Textures->ChromakeyValue( value );

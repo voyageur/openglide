@@ -36,10 +36,11 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 #ifdef CRITICAL
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
 #endif
-    if(Glide.State.ClipMinX == 0
-        && Glide.State.ClipMinY == 0
-        && Glide.State.ClipMaxX == (FxU32) Glide.WindowWidth
-        && Glide.State.ClipMaxY == (FxU32) Glide.WindowHeight )
+
+    if ( ( Glide.State.ClipMinX == 0 ) && 
+         ( Glide.State.ClipMinY == 0 ) && 
+         ( Glide.State.ClipMaxX == (FxU32) Glide.WindowWidth ) &&
+         ( Glide.State.ClipMaxY == (FxU32) Glide.WindowHeight ) )
     {
         static float        BR, 
                             BG, 
@@ -68,11 +69,11 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
     }
     else
     {
-        static float        BR, 
-                            BG, 
-                            BB, 
-                            BA;
-        GLboolean           alpha_test;
+        static float    BR, 
+                        BG, 
+                        BB, 
+                        BA;
+        GLboolean       alpha_test;
 
         ConvertColorF( color, BR, BG, BB, BA );
 

@@ -55,11 +55,11 @@ grCullMode( GrCullMode_t mode )
         glEnable( GL_CULL_FACE );
         if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
         {
-            glFrontFace( GL_CW );
+            glFrontFace( GL_CCW );
         }
         else
         {
-            glFrontFace( GL_CCW );
+            glFrontFace( GL_CW );
         }
         break;
 
@@ -67,11 +67,11 @@ grCullMode( GrCullMode_t mode )
         glEnable( GL_CULL_FACE );
         if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
         {
-            glFrontFace( GL_CCW );
+            glFrontFace( GL_CW );
         }
         else
         {
-            glFrontFace( GL_CW );
+            glFrontFace( GL_CCW );
         }
         break;
     }
