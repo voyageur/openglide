@@ -51,7 +51,10 @@ bool TexDB::Find(FxU32 startAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNu
             *pTexNum = r->texNum;
 
             if(pal_change != NULL && r->hash != hash)
+            {
+                r->hash = hash;
                 *pal_change = true;
+            }
 
 #ifdef UTEXSS
             GlideMsg("Found tex %d\n", r->texNum);

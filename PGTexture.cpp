@@ -335,21 +335,26 @@ void PGTexture::MakeReady()
     switch(m_info.format)
     {
     case GR_TEXFMT_P_8:
-        if(InternalConfig.PaletteEXTEnable)
-            pal_change_ptr = &palette_changed;
         ApplyKeyToPalette();
+        if(InternalConfig.PaletteEXTEnable)
+        {
+           /*
+            * OpenGL's mipmap generation doesn't seem
+            * to handle paletted textures.
+            */
+            use_mipmap_ext = false;
+            pal_change_ptr = &palette_changed;
+        }
+        else
+        {
+            wipe_hash = m_palette_hash;
+        }
+
         test_hash = m_palette_hash;
-        wipe_hash = m_palette_hash;
-       /*
-        * OpenGL's mipmap generation doesn't seem
-        * to handle paletted textures.
-        */
-        use_mipmap_ext = false;
         break;
     case GR_TEXFMT_AP_88:
         ApplyKeyToPalette();
         test_hash = m_palette_hash;
-        wipe_hash = 0;
         break;
     }
 
