@@ -137,170 +137,175 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif
     
-    if ( Glide.DstBuffer.Lock )
+    if ( dwType & 1 )
     {
-        if ( dwType & 1 )
+        if ( ! Glide.DstBuffer.Lock )
         {
-            int ii,
-                x,
-                y,
-                maxx = 0,
-                maxy = 0,
-                minx = 2048, 
-                miny = 2048;
+            return FXFALSE;
+        }
 
-            for ( ii = 0, x = 0, y = 0; ii < Glide.WindowTotalPixels; ii++ )
+        int ii,
+            x,
+            y,
+            maxx = 0,
+            maxy = 0,
+            minx = 2048, 
+            miny = 2048;
+
+        for ( ii = 0, x = 0, y = 0; ii < Glide.WindowTotalPixels; ii++ )
+        {
+            if ( Glide.DstBuffer.Address[ ii ] != BLUE_SCREEN )
             {
-                if ( Glide.DstBuffer.Address[ ii ] != BLUE_SCREEN )
+                if ( x > maxx ) maxx = x;
+                if ( y > maxy ) maxy = y;
+                if ( x < minx ) minx = x;
+                if ( y < miny ) miny = y;
+            }
+            x++;
+            if ( x == Glide.WindowWidth )
+            {
+                x = 0;
+                y++;
+            }
+        }
+        for ( y = 0; y < Glide.WindowHeight; y++ )
+        {
+            for ( x = 0; x < Glide.WindowWidth; x++ )
+            {
+                if ( Glide.DstBuffer.Address[ y * Glide.WindowWidth + x ] != BLUE_SCREEN )
                 {
                     if ( x > maxx ) maxx = x;
                     if ( y > maxy ) maxy = y;
                     if ( x < minx ) minx = x;
                     if ( y < miny ) miny = y;
                 }
-                x++;
-                if ( x == Glide.WindowWidth )
+            }
+        }
+
+        if ( maxx >= minx )
+        {
+            int xsize = maxx + 1 - minx;
+            int ysize = maxy + 1 - miny;
+
+            glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
+                        ? GL_BACK : GL_FRONT );
+
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
+                                xsize, ysize, 
+                                GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+            }
+            else
+            {
+                glReadPixels( minx, Glide.WindowHeight - miny - ysize,
+                                xsize, ysize, 
+                                GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
+                                (void *)tempBuf );
+                if ( InternalConfig.MMXEnable )
                 {
-                    x = 0;
-                    y++;
+                    MMXConvert5551to565( tempBuf, tempBuf, xsize * ysize );
+                }
+                else
+                {
+                    Convert5551to565( tempBuf, (DWORD*)tempBuf, xsize * ysize );
                 }
             }
-            for ( y = 0; y < Glide.WindowHeight; y++ )
+
+            for ( y = 0; y < ysize; y++ )
             {
-                for ( x = 0; x < Glide.WindowWidth; x++ )
+                WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
+                                    Glide.WindowWidth + minx;
+                WORD    * bufl = (WORD*)tempBuf + y * xsize;
+
+                for ( x = 0; x < xsize; x++ )
                 {
-                    if ( Glide.DstBuffer.Address[ y * Glide.WindowWidth + x ] != BLUE_SCREEN )
+                    if ( line[ x ] != BLUE_SCREEN )
                     {
-                        if ( x > maxx ) maxx = x;
-                        if ( y > maxy ) maxy = y;
-                        if ( x < minx ) minx = x;
-                        if ( y < miny ) miny = y;
+                        bufl[ x ] = line[ x ];
                     }
                 }
             }
 
-            if ( maxx >= minx )
+            glDisable( GL_BLEND );
+
+            glDisable( GL_TEXTURE_2D );
+
+            glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
+                        ? GL_BACK : GL_FRONT );
+
+            glRasterPos2i( minx,  miny + ysize );
+
+            if ( ! Glide.DstBuffer.PixelPipeline )
             {
-                int xsize = maxx + 1 - minx;
-                int ysize = maxy + 1 - miny;
-
-                glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
-                            ? GL_BACK : GL_FRONT );
-
                 if ( InternalConfig.OGLVersion > 1 )
                 {
-                    glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
-                                  xsize, ysize, 
-                                  GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
                 }
                 else
                 {
-                    glReadPixels( minx, Glide.WindowHeight - miny - ysize,
-                                  xsize, ysize, 
-                                  GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
-                                  (void *)tempBuf );
                     if ( InternalConfig.MMXEnable )
                     {
-                        MMXConvert5551to565( tempBuf, tempBuf, xsize * ysize );
+                        MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
                     }
                     else
                     {
-                        Convert5551to565( tempBuf, (DWORD*)tempBuf, xsize * ysize );
+                        Convert565to5551( tempBuf, tempBuf, xsize * ysize );
                     }
+                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
                 }
-
-                for ( y = 0; y < ysize; y++ )
+            }
+            else
+            {
+      		    glEnable( GL_SCISSOR_TEST );
+                if ( InternalConfig.OGLVersion > 1 )
                 {
-                    WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
-                                        Glide.WindowWidth + minx;
-                    WORD    * bufl = (WORD*)tempBuf + y * xsize;
-
-                    for ( x = 0; x < xsize; x++ )
-                    {
-                        if ( line[ x ] != BLUE_SCREEN )
-                        {
-                            bufl[ x ] = line[ x ];
-                        }
-                    }
-                }
-
-                glDisable( GL_BLEND );
-
-                glDisable( GL_TEXTURE_2D );
-
-                glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
-                            ? GL_BACK : GL_FRONT );
-
-                glRasterPos2i( minx,  miny + ysize );
-
-                if ( ! Glide.DstBuffer.PixelPipeline )
-                {
-                    if ( InternalConfig.OGLVersion > 1 )
-                    {
-                        glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-                    }
-                    else
-                    {
-                        if ( InternalConfig.MMXEnable )
-                        {
-                            MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
-                        }
-                        else
-                        {
-                            Convert565to5551( tempBuf, tempBuf, xsize * ysize );
-                        }
-                        glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
-                    }
+                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
                 }
                 else
                 {
-      		        glEnable( GL_SCISSOR_TEST );
-                    if ( InternalConfig.OGLVersion > 1 )
+                    if ( InternalConfig.MMXEnable )
                     {
-                        glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+                        MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
                     }
                     else
                     {
-                        if ( InternalConfig.MMXEnable )
-                        {
-                            MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
-                        }
-                        else
-                        {
-                            Convert565to5551( tempBuf, tempBuf, xsize * ysize );
-                        }
-                        glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
+                        Convert565to5551( tempBuf, tempBuf, xsize * ysize );
                     }
-                    glDisable( GL_SCISSOR_TEST );
+                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
                 }
-                glDrawBuffer( OpenGL.RenderBuffer );
+                glDisable( GL_SCISSOR_TEST );
+            }
+            glDrawBuffer( OpenGL.RenderBuffer );
 
-                /* PHBG: don't think this resetting of blend state is needed */
-                if ( OpenGL.Blend )
-                {
-                    glEnable( GL_BLEND );
-                }
-
-                if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
-                {
-                    glFlush( );
-                }
+            /* PHBG: don't think this resetting of blend state is needed */
+            if ( OpenGL.Blend )
+            {
+                glEnable( GL_BLEND );
             }
 
-            Glide.DstBuffer.Lock = false;
-
-            return FXTRUE;
+            if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
+            {
+                glFlush( );
+            }
         }
-        else
+
+        Glide.DstBuffer.Lock = false;
+
+        return FXTRUE;
+    }
+    else
+    {
+        if ( Glide.SrcBuffer.Lock )
         {
             Glide.SrcBuffer.Lock = false;
             
             return FXTRUE; 
         }
-    }
-    else
-    {
-        return FXFALSE;
+        else
+        {
+            return FXFALSE; 
+        }
     }
 }
 
