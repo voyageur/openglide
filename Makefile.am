@@ -35,7 +35,6 @@ GLRender.h \
 OGLTables.h \
 PGTexture.h \
 PGUTexture.h \
-resource.h \
 sdk2_3dfx.h \
 sdk2_glide.h \
 sdk2_glidesys.h \
