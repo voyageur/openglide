@@ -351,22 +351,18 @@ PGTexture::~PGTexture( void )
 
 void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 {
-//    int size = TextureMemRequired( evenOdd, info );
     int mip_size = MipMapMemRequired( info->smallLod, 
                                       info->aspectRatio, 
                                       info->format );
     int tex_size = TextureMemRequired( evenOdd, info );
 
-//    if ( startAddress + size <= m_tex_memory_size )
     if ( startAddress + tex_size <= m_tex_memory_size )
     {
-//        memcpy( m_memory + startAddress, info->data, size );
         memcpy( m_memory + startAddress + tex_size - mip_size, info->data, mip_size );
     }
 
     /* Any texture based on memory crossing this range
      * is now out of date */
-//    m_db->WipeRange( startAddress, startAddress + size, 0 );
     m_db->WipeRange( startAddress, startAddress + tex_size, 0 );
 }
 
@@ -605,9 +601,9 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ARGB_4444:
-            if ( false && InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > 1 )
             {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
             }
             else
             {
@@ -618,7 +614,7 @@ bool PGTexture::MakeReady( void )
             {
                 if ( InternalConfig.OGLVersion > 1 )
                 {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data );
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
                 }
                 else
                 {
@@ -709,9 +705,9 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ALPHA_8:
-            if ( false && InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > 1 )
             {
-                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_INTENSITY, GL_UNSIGNED_BYTE, data );
             }
             else
             {
@@ -722,7 +718,7 @@ bool PGTexture::MakeReady( void )
             {
                 if ( InternalConfig.OGLVersion > 1 )
                 {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 1, texVals.width, texVals.height, GL_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 1, texVals.width, texVals.height, GL_INTENSITY, GL_UNSIGNED_BYTE, m_tex_temp );
                 }
                 else
                 {
@@ -822,6 +818,21 @@ bool PGTexture::MakeReady( void )
     }
 
     return use_two_textures;
+}
+
+FxU32 PGTexture::LodOffset( FxU32 evenOdd, GrTexInfo *info )
+{
+    FxU32   total = 0;
+    GrLOD_t i;
+
+    for( i = info->largeLod; i < info->smallLod; i++ )
+    {
+        total += MipMapMemRequired( i, info->aspectRatio, info->format );
+    }
+
+    total = ( total + 7 ) & ~7;
+
+    return total;
 }
 
 FxU32 PGTexture::TextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
