@@ -301,6 +301,9 @@ void InitOpenGL( void )
 //  glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND );
 //  glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
 //  glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+
+    glPixelStorei( GL_PACK_ALIGNMENT, 2);
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 2);
 }
 
 //*****************************************************************
