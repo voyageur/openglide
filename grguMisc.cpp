@@ -118,6 +118,10 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
         glViewport( Glide.State.ClipMinX, Glide.State.ClipMinY, 
                     Glide.State.ClipMaxX - Glide.State.ClipMinX, 
                     Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
+        // Used for the buffer clearing
+	    glScissor( Glide.State.ClipMinX, Glide.State.ClipMinY,
+    			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
+    			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
     }
     else
     {
@@ -127,11 +131,11 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
         glViewport( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
                     Glide.State.ClipMaxX - Glide.State.ClipMinX, 
                     Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
+        // Used for the buffer clearing
+	    glScissor( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
+    			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
+    			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
     }
-    // Used for the buffer clearing
-	glScissor( Glide.State.ClipMinX, Glide.State.ClipMinY,
-			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
-			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
 
     glMatrixMode( GL_MODELVIEW );
 }
