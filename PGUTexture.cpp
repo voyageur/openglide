@@ -10,7 +10,7 @@
 //**************************************************************
 
 
-#include "glogl.h"
+#include "GlOgl.h"
 #include "PGTexture.h"
 #include "PGUTexture.h"
 
