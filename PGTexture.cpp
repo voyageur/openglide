@@ -192,6 +192,7 @@ inline void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWOR
 
 PGTexture::PGTexture(int mem_size)
 {
+    m_palette_dirty = true;
     m_valid = false;
     m_chromakey_mode = GR_CHROMAKEY_DISABLE;
     m_tex_memory_size = mem_size;
@@ -244,29 +245,24 @@ void PGTexture::Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
     m_valid = (startAddress + size <= m_tex_memory_size);
 }
 
-void PGTexture::DownloadTable(GrTexTable_t type, void *data)
+void PGTexture::DownloadTable(GrTexTable_t type, void *data, int first, int count)
 {
     if(type == GR_TEXTABLE_PALETTE)
     {
-        FxU32 hash;
         FxU32 *idata;
         int i;
 
         idata = (FxU32 *)data;
 
-        hash = 0;
-        for(i = 0; i < 256; i++)
+        for(i = 0; i < count; i++)
         {
-            m_palette[i] = (  (idata[i] & 0xff00ff00)
-                            | ((idata[i] & 0x00ff0000) >> 16)
-                            | ((idata[i] & 0x000000ff) << 16)
-                           );
-                             
-            hash = ((hash << 5) | (hash >> 26));
-            hash += m_palette[i];
+            m_palette[first+i] = (  (idata[i] & 0xff00ff00)
+                                  | ((idata[i] & 0x00ff0000) >> 16)
+                                  | ((idata[i] & 0x000000ff) << 16)
+                                 );
         }
 
-        m_palette_hash = (InternalConfig.IgnorePaletteChange ? 0 : hash);
+        m_palette_dirty = true;
     }
 }
 
@@ -285,6 +281,13 @@ void PGTexture::MakeReady()
     GetTexValues(&texVals);
     
     size = TextureMemRequired(m_evenOdd, &m_info);
+
+    switch(m_info.format)
+    {
+    case GR_TEXFMT_P_8:
+    case GR_TEXFMT_AP_88:
+        ApplyKeyToPalette();
+    }
 
     /* See if we already have an OpenGL texture to match this */
     if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, m_palette_hash, &texNum))
@@ -331,9 +334,7 @@ void PGTexture::MakeReady()
             
         case GR_TEXFMT_P_8:
             {
-                FxU32 pal[256];
-                ApplyKeyToPalette(pal);
-                ConvertP8to8888( data, m_tex_temp, texVals.nPixels, pal );
+                ConvertP8to8888( data, m_tex_temp, texVals.nPixels, m_palette );
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
                 if(InternalConfig.BuildMipMaps)
                     gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
@@ -342,9 +343,7 @@ void PGTexture::MakeReady()
             
         case GR_TEXFMT_AP_88:
             {
-                FxU32 pal[256];
-                ApplyKeyToPalette(pal);
-                ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, pal );
+                ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
                 if(InternalConfig.BuildMipMaps)
                     gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
@@ -546,26 +545,40 @@ void PGTexture::GetAspect(float *hAspect, float *wAspect)
 void PGTexture::ChromakeyValue(GrColor_t value)
 {
     m_chromakey_value = (
-                         (value & 0xff00ff00)
+                         (value & 0x0000ff00)
                          | ((value & 0x00ff0000) >> 16)
                          | ((value & 0x000000ff) << 16)
                          );
+
+    m_palette_dirty = true;
 }
 
 void PGTexture::ChromakeyMode(GrChromakeyMode_t mode)
 {
     m_chromakey_mode = mode;
+    m_palette_dirty = true;
 }
 
-void PGTexture::ApplyKeyToPalette(FxU32 *pal)
+void PGTexture::ApplyKeyToPalette()
 {
+    FxU32 hash;
     int i;
     
-    for(i = 0; i < 256; i++)
+    if(m_palette_dirty)
     {
-        if(m_chromakey_mode && (m_palette[i] & 0x00ffffff) == m_chromakey_value)
-            pal[i] = (m_palette[i] & 0x00ffffff);
-        else
-            pal[i] = (m_palette[i] |= 0xff000000);
+        hash = 0;
+        for(i = 0; i < 256; i++)
+        {
+            if(m_chromakey_mode && (m_palette[i] & 0x00ffffff) == m_chromakey_value)
+                m_palette[i] &= 0x00ffffff;
+            else
+                m_palette[i] |= 0xff000000;
+            
+            hash = ((hash << 5) | (hash >> 26));
+            hash += m_palette[i];
+        }
+        
+        m_palette_hash = (InternalConfig.IgnorePaletteChange ? 0 : hash);
+        m_palette_dirty = false;
     }
 }

@@ -81,6 +81,7 @@ grCullMode( GrCullMode_t mode )
 DLLEXPORT void __stdcall 
 grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 {
+#if 0  // This does completely the wrong thing.
 #ifdef PARTDONE
 	GlideMsg("grClipWindow( %d, %d, %d, %d )\n", minx, miny, maxx, maxy );
 #endif
@@ -97,6 +98,7 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 
 #ifdef OPENGL_DEBUG
 	GLErro( "grClipWindow" );
+#endif
 #endif
 }
 

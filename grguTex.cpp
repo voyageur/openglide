@@ -370,98 +370,6 @@ grTexCalcMemRequired(GrLOD_t lodmin, GrLOD_t lodmax,
 
 	return nTotalBytes;
 }
-/*
-inline void ConvertTable()
-{
-	static int i;
-	for( i = 0; i < 256; i++ )
-	{
-		OpenGL.RTable[i] = (Glide.ColorPalette.data[i] & 0x00FF0000) >> 16;
-		OpenGL.GTable[i] = (Glide.ColorPalette.data[i] & 0x0000FF00) >> 8;
-		OpenGL.BTable[i] = (Glide.ColorPalette.data[i] & 0x000000FF);
-	}
-}
-*/
-inline FxU32 CalcPalette()
-{
-	static DWORD Result;
-	register DWORD *Point = (DWORD*) OpenGL.PTable;
-	register int i;
-	Result = 0;
-	for( i = 0; i < 256; i += InternalConfig.PalettePrecision )
-	{
-//		Result += Glide.ColorPalette.data[i];
-		Result += Point[i];
-	}
-	return Result;
-}
-
-inline DWORD MMXCalcPalette()
-{
-	static DWORD Result;
-	__asm
-	{
-		xor EAX, EAX
-		PXOR MM0, MM0
-		mov EBX, offset OpenGL.PTable
-		mov AX, InternalConfig.PalettePrecision
-		mov CX, 256
-		mov DX, AX
-		shl EAX, 2
-looping:
-		PADDD MM0, [EBX]
-		add EBX, EAX
-		sub CX, DX
-		ja looping
-		MOVD Result, MM0
-		EMMS
-	}
-	return Result;
-}
-
-
-BYTE MaskPalette3[8] = { 0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0xFF };
-BYTE MaskPalette2[8] = { 0x00,0x00,0xFF,0x00,0x00,0x00,0xFF,0x00 };
-BYTE MaskPalette1[8] = { 0x00,0xFF,0x00,0x00,0x00,0xFF,0x00,0x00 };
-BYTE MaskPalette0[8] = { 0xFF,0x00,0x00,0x00,0xFF,0x00,0x00,0x00 };
-
-inline void MMXCopyTable( void *Dst, void *Src, DWORD NumberOfBytes )
-{
-	__asm
-	{
-		mov EAX, Src
-		mov EDX, Dst
-		mov ECX, NumberOfBytes
-		MOVQ MM4, [MaskPalette3]
-		MOVQ MM5, [MaskPalette2]
-		MOVQ MM6, [MaskPalette1]
-		MOVQ MM7, [MaskPalette0]
-		shr ECX, 3
-copying:
-		MOVQ MM1, [EAX]
-		add EAX, 8
-		MOVQ MM2, MM1
-		MOVQ MM3, MM1
-
-		PAND MM1, MM5
-		PAND MM2, MM6
-		PAND MM3, MM7
-
-		PSRLD MM1, 16
-		PSLLD MM3, 16
-
-		POR MM3, MM4
-		POR MM1, MM2
-		POR MM1, MM3
-		MOVQ [EDX], MM1
-		add EDX, 8
-		dec ECX
-		jnz copying
-		EMMS
-	}
-}
-
-bool TablePronta = false;
 
 //*************************************************
 //* Download a subset of an NCC table or color palette
@@ -482,41 +390,7 @@ grTexDownloadTablePartial( GrChipID_t   tmu,
 
 	RenderDrawTriangles();
 
-	switch ( type )
-	{
-	case GR_TEXTABLE_PALETTE:
-		// If the entire palette was not initialized, initialize it now
-		if ( !TablePronta )
-		{
-			unsigned int datatemp[ 256 ];
-			TablePronta = true;
-			memset( datatemp, 0, 256 * sizeof( unsigned int ) );
-			glColorTableEXT( GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, &datatemp );
-		}
-
-		// Copying the Palette Table changing byte positions
-		if ( InternalConfig.MMXEnable )
-		{
-			MMXCopyTable( OpenGL.PTable[start], data, (end-start+1)*4 );
-			OpenGL.PaletteCalc = CalcPalette();
-		}
-		else
-		{
-			CopyMemory( &OpenGL.PTable[start][0], data, (end-start+1)*4 );
-			OpenGL.PaletteCalc = CalcPalette();
-		}
-
-		// Shared Palette Extension
-		if ( InternalConfig.PaletteEXTEnable )
-		{
-			glColorSubTableEXT( GL_SHARED_TEXTURE_PALETTE_EXT, start, ( end - start ) + 1, GL_RGBA, GL_UNSIGNED_BYTE, OpenGL.PTable[start] );
-		}
-		break;
-	case GR_TEXTABLE_NCC0:
-	case GR_TEXTABLE_NCC1:
-		Error( "grTexDownloadTablePartial:::: Does not work with NCC tables.\n" );
-		return;
-	}
+    Textures->DownloadTable(type, data, start, end + 1 - start);
 }
 
 //*************************************************
@@ -535,30 +409,7 @@ grTexDownloadTable( GrChipID_t   tmu,
 
 	RenderDrawTriangles();
 
-    Textures->DownloadTable(type, data);
-
-	if ( type == GR_TEXTABLE_PALETTE )
-	{
-		TablePronta = true;
-
-		// Copying the Palette Table changing byte positions
-		if ( InternalConfig.MMXEnable )
-		{
-			MMXCopyTable( OpenGL.PTable, data, 1024 );
-			OpenGL.PaletteCalc = MMXCalcPalette();
-		}
-		else
-		{
-			CopyMemory( OpenGL.PTable, data, 1024 );
-			OpenGL.PaletteCalc = CalcPalette();
-		}
-
-		// Shared Palette Extension
-		if ( InternalConfig.PaletteEXTEnable )
-		{
-			glColorTableEXT( GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, OpenGL.PTable );
-		}
-	}
+    Textures->DownloadTable(type, data, 0, 256);
 }
 
 //----------------------------------------------------------------

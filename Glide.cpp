@@ -334,7 +334,6 @@ grGlideInit( void )
 	ZeroMemory( &OpenGL, sizeof(OpenGLStruct) );
 
 	Glide.ActiveVoodoo				= 0;
-	OpenGL.PaletteCalc				= 0;
 
 	ExternErrorFunction = NULL;
 

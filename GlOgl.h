@@ -194,7 +194,6 @@ struct OpenGLStruct
 	bool					ChromaKey;
 	int						MultiTextureTMUs;
 	int						DepthBufferType;
-	DWORD					PaletteCalc;
 	BYTE					PTable[256][4];
 	DWORD					WaitSignal;
 };

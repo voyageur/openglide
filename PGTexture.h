@@ -24,8 +24,9 @@ class PGTexture
 
 public:
 private:
+	bool m_palette_dirty;
 	FxU32 m_palette_hash;
-	void ApplyKeyToPalette(FxU32 *pal);
+	void ApplyKeyToPalette();
 	TexDB m_db;
 	GrChromakeyMode_t m_chromakey_mode;
 	GrColor_t m_chromakey_value;
@@ -50,7 +51,7 @@ public:
 	void Clear();
 	static FxU32 TextureMemRequired(FxU32 evenOdd, GrTexInfo *info);
 	void MakeReady();
-	void DownloadTable(GrTexTable_t type, void *data);
+	void DownloadTable(GrTexTable_t type, void *data, int first, int count);
 	void Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info);
 	void DownloadMipMap(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info);
 	PGTexture(int mem_size);
