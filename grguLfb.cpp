@@ -14,7 +14,7 @@
 #include "GLRender.h"
 
 
-#define BLUE_SCREEN (0x7ff)
+#define BLUE_SCREEN     (0x07FF)
 
 // Will need to change this later
 static FxU32 tempBuf[ 2048 * 2048 ];
@@ -35,10 +35,9 @@ grLfbLock( GrLock_t dwType,
 
     RenderDrawTriangles( );
 
-    static int numPixels = Glide.WindowWidth * Glide.WindowHeight;
     if ( dwType & 1 )
     {
-        for ( int i = numPixels - 1; i >= 0; --i )
+        for ( int i = Glide.WindowTotalPixels - 1; i >= 0; --i )
         {
             Glide.DstBuffer.Address[ i ] = BLUE_SCREEN;
         }
@@ -60,9 +59,9 @@ grLfbLock( GrLock_t dwType,
         if ( dwOrigin == GR_ORIGIN_UPPER_LEFT )
         {
             glReadPixels( 0, 0, 
-                        Glide.WindowWidth, Glide.WindowHeight, 
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
-                        (void *)Glide.DstBuffer.Address );
+                          Glide.WindowWidth, Glide.WindowHeight, 
+                          GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
+                          (void *)Glide.DstBuffer.Address );
             for ( j = 0; j < Glide.WindowHeight; j++ )
             {
                 memcpy( Glide.SrcBuffer.Address + ( j * Glide.WindowWidth ),
@@ -101,108 +100,122 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif
     
-    if ( dwType & 1 )
+    if ( Glide.DstBuffer.Lock )
     {
-        int x,
-            y,
-            maxx = 0,
-            maxy = 0,
-            minx = 2048, 
-            miny = 2048;
-
-        if( ! Glide.DstBuffer.Lock )
+        if ( dwType & 1 )
         {
-            return FXFALSE;
-        }
+            int ii,
+                x,
+                y,
+                maxx = 0,
+                maxy = 0,
+                minx = 2048, 
+                miny = 2048;
 
-        for ( y = 0; y < Glide.WindowHeight; y++ )
-        {
-            for ( x = 0; x < Glide.WindowWidth; x++ )
+            for ( ii = 0, x = 0, y = 0; ii < Glide.WindowTotalPixels; ii++ )
             {
-                if ( Glide.DstBuffer.Address[ y * Glide.WindowWidth + x ] != BLUE_SCREEN )
+                if ( Glide.DstBuffer.Address[ ii ] != BLUE_SCREEN )
                 {
                     if ( x > maxx ) maxx = x;
                     if ( y > maxy ) maxy = y;
                     if ( x < minx ) minx = x;
                     if ( y < miny ) miny = y;
                 }
-            }
-        }
-
-        if ( maxx >= minx )
-        {
-            int xsize = maxx + 1 - minx;
-            int ysize = maxy + 1 - miny;
-
-            glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
-                          ? GL_BACK : GL_FRONT );
-
-            glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
-                        xsize, ysize, 
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-
-            for ( y = 0; y < ysize; y++ )
-            {
-                WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
-                                    Glide.WindowWidth + minx;
-                WORD    * bufl = (WORD*)tempBuf + y * xsize;
-
-                for ( x = 0; x < xsize; x++ )
+                x++;
+                if ( x == Glide.WindowWidth )
                 {
-                    if ( line[ x ] != BLUE_SCREEN )
+                    x = 0;
+                    y++;
+                }
+            }
+            for ( y = 0; y < Glide.WindowHeight; y++ )
+            {
+                for ( x = 0; x < Glide.WindowWidth; x++ )
+                {
+                    if ( Glide.DstBuffer.Address[ y * Glide.WindowWidth + x ] != BLUE_SCREEN )
                     {
-                        bufl[ x ] = line[ x ];
+                        if ( x > maxx ) maxx = x;
+                        if ( y > maxy ) maxy = y;
+                        if ( x < minx ) minx = x;
+                        if ( y < miny ) miny = y;
                     }
                 }
             }
 
-            glDisable( GL_BLEND );
-
-            glDisable( GL_TEXTURE_2D );
-
-            glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
-                        ? GL_BACK : GL_FRONT );
-
-            glRasterPos2i( minx,  miny + ysize );
-
-            if ( ! Glide.DstBuffer.PixelPipeline )
+            if ( maxx >= minx )
             {
-                glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-            }
-            else
-            {
-      		    glEnable( GL_SCISSOR_TEST );
-                glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-                glDisable( GL_SCISSOR_TEST );
-            }
-            glDrawBuffer( OpenGL.RenderBuffer );
+                int xsize = maxx + 1 - minx;
+                int ysize = maxy + 1 - miny;
 
-            /* PHBG: don't think this resetting of blend state is needed */
-            if ( OpenGL.Blend )
-            {
-                glEnable( GL_BLEND );
+                glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
+                            ? GL_BACK : GL_FRONT );
+
+                glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
+                              xsize, ysize, 
+                              GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+
+                for ( y = 0; y < ysize; y++ )
+                {
+                    WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
+                                        Glide.WindowWidth + minx;
+                    WORD    * bufl = (WORD*)tempBuf + y * xsize;
+
+                    for ( x = 0; x < xsize; x++ )
+                    {
+                        if ( line[ x ] != BLUE_SCREEN )
+                        {
+                            bufl[ x ] = line[ x ];
+                        }
+                    }
+                }
+
+                glDisable( GL_BLEND );
+
+                glDisable( GL_TEXTURE_2D );
+
+                glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
+                            ? GL_BACK : GL_FRONT );
+
+                glRasterPos2i( minx,  miny + ysize );
+
+                if ( ! Glide.DstBuffer.PixelPipeline )
+                {
+                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+                }
+                else
+                {
+      		        glEnable( GL_SCISSOR_TEST );
+                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+                    glDisable( GL_SCISSOR_TEST );
+                }
+                glDrawBuffer( OpenGL.RenderBuffer );
+
+                /* PHBG: don't think this resetting of blend state is needed */
+                if ( OpenGL.Blend )
+                {
+                    glEnable( GL_BLEND );
+                }
+
+                if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
+                {
+                    glFlush( );
+                }
             }
 
-            if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
-            {
-                glFlush( );
-            }
+            Glide.DstBuffer.Lock = false;
+
+            return FXTRUE;
         }
-
-        Glide.DstBuffer.Lock = false;
-
-        return FXTRUE;
+        else
+        {
+            Glide.SrcBuffer.Lock = false;
+            
+            return FXTRUE; 
+        }
     }
     else
     {
-        if ( ! Glide.SrcBuffer.Lock )
-        {
-            return FXFALSE;
-        }
-        
-        Glide.SrcBuffer.Lock = false;
-        
-        return FXTRUE; 
+        return FXFALSE;
     }
 }
 

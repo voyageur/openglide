@@ -148,6 +148,7 @@ struct GlideStruct
     // Frame Buffer Stuff
     int                     WindowWidth;
     int                     WindowHeight;
+    int                     WindowTotalPixels;
     GrScreenResolution_t    Resolution;
     GrScreenRefresh_t       Refresh;
     int                     NumBuffers,

@@ -593,6 +593,7 @@ grSstWinOpen(   FxU32 hwnd,
     }
     OpenGL.WindowWidth = Glide.WindowWidth;
     OpenGL.WindowHeight = Glide.WindowHeight;
+    Glide.WindowTotalPixels = Glide.WindowWidth * Glide.WindowHeight;
 
     Glide.Refresh = ref;
     switch ( Glide.Refresh )
