@@ -335,8 +335,7 @@ bool PGTexture::MakeReady( void )
         switch ( m_info.format )
         {
         case GR_TEXFMT_RGB_565:
-            // This is a special case for OpenGL versions less than 2
-            if ( false && InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > 1 )
             {
                 OGL_LOAD_CREATE_TEXTURE( 3, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
             }
@@ -370,11 +369,41 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ARGB_4444:
-            OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
+            }
+            else
+            {
+                if ( InternalConfig.MMXEnable )
+				{
+        			MMXConvert4444to4444special( data, m_tex_temp, texVals.nPixels );
+				}
+				else
+				{
+					Convert4444to4444special( (DWORD*)data, m_tex_temp, texVals.nPixels );
+				}
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4_EXT, m_tex_temp );
+            }
             break;
             
         case GR_TEXFMT_ARGB_1555:
-            OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
+            }
+            else
+            {
+                if ( InternalConfig.MMXEnable )
+				{
+        			MMXConvert1555to5551( data, m_tex_temp, texVals.nPixels );
+				}
+				else
+				{
+					Convert1555to5551( (DWORD*)data, m_tex_temp, texVals.nPixels );
+				}
+                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1_EXT, m_tex_temp );
+            }
             break;
             
         case GR_TEXFMT_P_8:
@@ -445,7 +474,7 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_8BIT: //GR_TEXFMT_RGB_332
-            OGL_LOAD_CREATE_TEXTURE( 3, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
+            OGL_LOAD_CREATE_TEXTURE( 3, GL_RGB, GL_UNSIGNED_BYTE_3_3_2_EXT, data );
             break;
             
         case GR_TEXFMT_16BIT: //GR_TEXFMT_ARGB_8332:
