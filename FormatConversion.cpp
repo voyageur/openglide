@@ -128,7 +128,12 @@ void MMXConvert565Kto5551( void *Src, DWORD key, void *Dst, int NumberOfPixels )
         movq mm5, [Mask565_5551_2]
         movq mm4, [Mask565_5551_1]
         movd mm7, key
-        punpcklwd mm7, mm7
+        movq mm0, mm7
+        psllq mm0, 16
+        por mm7, mm0
+        movq mm0, mm7
+        psllq mm0, 32
+        por mm7, mm0
     align 16
 copying:
         movq mm3, mm7
