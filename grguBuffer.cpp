@@ -36,30 +36,82 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 #ifdef CRITICAL
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
 #endif
-    static float        BR, 
-                        BG, 
-                        BB, 
-                        BA;
-    static unsigned int Bits;
-
-    Bits = 0;
-    
-    RenderDrawTriangles( );
-
-    if ( OpenGL.ColorMask )
+    if(Glide.State.ClipMinX == 0
+        && Glide.State.ClipMinY == 0
+        && Glide.State.ClipMaxX == (FxU32) Glide.WindowWidth
+        && Glide.State.ClipMaxY == (FxU32) Glide.WindowHeight )
     {
-        Bits = GL_COLOR_BUFFER_BIT;
+        static float        BR, 
+                            BG, 
+                            BB, 
+                            BA;
+        static unsigned int Bits;
+        
+        Bits = 0;
+        
+        RenderDrawTriangles( );
+        
+        if ( OpenGL.ColorMask )
+        {
+            Bits = GL_COLOR_BUFFER_BIT;
+            ConvertColorF( color, BR, BG, BB, BA );
+            glClearColor( BR, BG, BB, BA );
+        }
+        
+        if ( Glide.State.DepthBufferWritting )
+        {
+            glClearDepth( depth * D1OVER65536 );
+            Bits |= GL_DEPTH_BUFFER_BIT;
+        }
+        
+        glClear( Bits );
+    }
+    else
+    {
+        static float        BR, 
+                            BG, 
+                            BB, 
+                            BA;
+        GLboolean           alpha_test;
+
         ConvertColorF( color, BR, BG, BB, BA );
-        glClearColor( BR, BG, BB, BA );
-    }
 
-    if ( Glide.State.DepthBufferWritting )
-    {
-        glClearDepth( depth * D1OVER65536 );
-        Bits |= GL_DEPTH_BUFFER_BIT;
-    }
+       /*
+        * Remember alpha-test state because it is
+        * unclear how it relates to the stored
+        * Glide state
+        */
+        alpha_test = glIsEnabled( GL_ALPHA_TEST );
 
-    glClear( Bits );
+        glDisable( GL_TEXTURE_2D );
+        glDisable( GL_ALPHA_TEST );
+        glDisable( GL_BLEND );
+        glDisable( GL_DEPTH_TEST );
+        glDisable( GL_CULL_FACE );
+
+        glBegin( GL_QUADS );
+        glColor3f( BR, BG, BB );
+        glVertex3f( 0.0f,                      0.0f,                       depth * D1OVER65536 );
+        glVertex3f( (float) Glide.WindowWidth, 0.0f,                       depth * D1OVER65536 );
+        glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, depth * D1OVER65536 );
+        glVertex3f( 0.0f,                      (float) Glide.WindowHeight, depth * D1OVER65536 );
+        glEnd( );
+
+        if ( alpha_test )
+        {
+            glEnable( GL_ALPHA_TEST );
+        }
+
+        if ( Glide.State.DepthBufferMode != GR_DEPTHBUFFER_DISABLE )
+        {
+            glEnable( GL_DEPTH_TEST );
+        }
+
+        if ( Glide.State.CullMode != GR_CULL_DISABLE )
+        {
+            glEnable( GL_CULL_FACE );
+        }
+    }
 
 #ifdef OPENGL_DEBUG
     GLErro( "grBufferClear" );
