@@ -98,6 +98,10 @@ SOURCE=.\amd3dx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\FormatConversion.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\glext.h
 # End Source File
 # Begin Source File
@@ -111,6 +115,14 @@ SOURCE=.\GlOgl.h
 # Begin Source File
 
 SOURCE=.\GLRender.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLTables.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLWindow.h
 # End Source File
 # Begin Source File
 
@@ -148,6 +160,10 @@ SOURCE=.\TexDB.h
 # Begin Group "Source"
 
 # PROP Default_Filter ".c .cpp"
+# Begin Source File
+
+SOURCE=.\FormatConversion.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=.\GLExtensions.cpp
@@ -199,6 +215,26 @@ SOURCE=.\grguMisc.cpp
 # Begin Source File
 
 SOURCE=.\grguTex.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLColorAlphaTables.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLFogTables.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLMiscTables.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLTextureTables.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OGLWindow.cpp
 # End Source File
 # Begin Source File
 
