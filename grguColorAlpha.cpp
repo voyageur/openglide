@@ -533,6 +533,11 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 	}
 	else
 	{
+        int i;
+
+        for(i = 0; i < 4; i++)
+            OpenGL.ConstantColor[i] = OpenGL.AlphaColor[i];
+
 		OpenGL.Blend = true;
 	}
 

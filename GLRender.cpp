@@ -953,10 +953,6 @@ void RenderDrawTriangles()
 	if (OpenGL.Blend )
 	{
 		glEnable( GL_BLEND );
-       /*
-        * Hack for Lara's shadow in TR I
-        */
-        glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 	}
 	else
 	{
@@ -1145,7 +1141,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 			Local.ca = c->a * D1OVER255;
  			break;
 		case GR_COMBINE_LOCAL_CONSTANT:
-			Local.aa = Local.ba = Local.ca = OpenGL.AlphaColor[3];
+			Local.aa = Local.ba = Local.ca = OpenGL.ConstantColor[3];
 			break;
 		case GR_COMBINE_LOCAL_DEPTH:
 			Local.aa = a->z;
@@ -1165,7 +1161,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 			Other.ca = c->a * D1OVER255;
 			break;
 		case GR_COMBINE_OTHER_CONSTANT:
-			Other.aa = Other.ba = Other.ca = OpenGL.AlphaColor[3];
+			Other.aa = Other.ba = Other.ca = OpenGL.ConstantColor[3];
 			break;
 		case GR_COMBINE_OTHER_TEXTURE:
 			Other.aa = Other.ba = Other.ca = 1.0f;
