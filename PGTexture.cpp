@@ -718,7 +718,7 @@ bool PGTexture::MakeReady( void )
             {
                 if ( InternalConfig.OGLVersion > 1 )
                 {
-                    gluBuild2DMipmaps( GL_TEXTURE_2D, 1, texVals.width, texVals.height, GL_INTENSITY, GL_UNSIGNED_BYTE, m_tex_temp );
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 1, texVals.width, texVals.height, GL_INTENSITY, GL_UNSIGNED_BYTE, data );
                 }
                 else
                 {
@@ -753,11 +753,25 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_8BIT://GR_TEXFMT_RGB_332
-            Convert332to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 3, texVals.width, texVals.height, 0, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
+            }
+            else
+            {
+                Convert332to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             if ( InternalConfig.BuildMipMaps )
             {
-                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.OGLVersion > 1 )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, data );
+                }
+                else
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             break;
             
