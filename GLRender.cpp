@@ -1331,7 +1331,17 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 	}
 	else
 	{
-		if ( InternalConfig.PrecisionFixEnable )
+       /*
+        * For silly values of oow, depth buffering doesn't
+        * seem to work, so map them to a sensible z.  When
+        * games use these silly values, they probably don't
+        * use z buffering anyway.
+        */
+        if( a->oow > 1.0)
+        {
+            pV->az = pV->bz = pV->cz = 0.9f;
+        }
+		else if ( InternalConfig.PrecisionFixEnable )
 		{
 			if ( 0 ) // Will be 3dnow
 			{
@@ -1884,7 +1894,17 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 	}
 	else
 	{
-		if ( InternalConfig.PrecisionFixEnable )
+       /*
+        * For silly values of oow, depth buffering doesn't
+        * seem to work, so map them to a sensible z.  When
+        * games use these silly values, they probably don't
+        * use z buffering anyway.
+        */
+        if( a->oow > 1.0)
+        {
+            pV->az = pV->bz = pV->cz = 0.9f;
+        }
+		else if ( InternalConfig.PrecisionFixEnable )
 		{
 			w = 1.0f / a->oow;
 			pV->az = 1.0f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);

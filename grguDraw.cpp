@@ -45,6 +45,12 @@ grDrawLine( const GrVertex *a, const GrVertex *b )
 	GlideMsg("grDrawLine( ---, --- )\n");
 #endif
 	
+   /*
+    * RenderAddLine actually renders the line, so
+    * we must render the queued triangles first to
+    * avoid out-of-order rendering.
+    */
+    RenderDrawTriangles();
 	RenderAddLine( a, b );
 }
 
