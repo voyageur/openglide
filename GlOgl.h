@@ -218,6 +218,7 @@ struct ConfigStruct
     int     TextureEnvEXTEnable;
     int     VertexArrayEXTEnable;
     int     FogCoordEXTEnable;
+    int     BlendFuncSeparate;
 
     int     MMXEnable;
     int     CreateWindow;

@@ -445,6 +445,7 @@ void GetOptions( void )
     UserConfig.TextureEnvEXTEnable      = FALSE;
     UserConfig.VertexArrayEXTEnable     = FALSE;
     UserConfig.FogCoordEXTEnable        = TRUE;
+    UserConfig.BlendFuncSeparate        = FALSE;
 
     UserConfig.TextureMemorySize        = 16;
     UserConfig.FrameBufferMemorySize    = 8;

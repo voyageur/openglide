@@ -13,6 +13,7 @@
 
 #include "GlOgl.h"
 #include "GLRender.h"
+#include "Glextensions.h"
 
 
 // extern functions
@@ -121,7 +122,7 @@ grColorMask( FxBool rgb, FxBool a )
     GLErro( "grColorMask" );
 #endif
 }
-
+//grColorCombine( GR_COMBINE_FUNCTION_SCALE_OTHER, GR_COMBINE_FACTOR_ONE, GR_COMBINE_LOCAL_CONSTANT, GR_COMBINE_OTHER_TEXTURE, FXFALSE )
 DLLEXPORT void __stdcall
 grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
@@ -482,23 +483,7 @@ grAlphaTestFunction( GrCmpFnc_t function )
     // We can do this just because we know the constant values for both OpenGL and Glide
     // To port it to anything else than OpenGL we NEED to change this code
     OpenGL.AlphaTestFunction = GL_NEVER + function;
-/*
-    switch ( function )
-    {
-    case GR_CMP_NEVER:      OpenGL.AlphaTestFunction = GL_NEVER;        break;
-    case GR_CMP_LESS:       OpenGL.AlphaTestFunction = GL_LESS;         break;
-    case GR_CMP_EQUAL:      OpenGL.AlphaTestFunction = GL_EQUAL;        break;
-    case GR_CMP_LEQUAL:     OpenGL.AlphaTestFunction = GL_LEQUAL;       break;
-    case GR_CMP_GREATER:    OpenGL.AlphaTestFunction = GL_GREATER;      break;
-    case GR_CMP_NOTEQUAL:   OpenGL.AlphaTestFunction = GL_NOTEQUAL;     break;
-    case GR_CMP_GEQUAL:     OpenGL.AlphaTestFunction = GL_GEQUAL;       break;
-    case GR_CMP_ALWAYS:     OpenGL.AlphaTestFunction = GL_ALWAYS;       break;
-//  case GR_CMP_ALWAYS:     //Always passes, so AlphaTest is Disabled
-//      OpenGL.AlphaTestFunction = GL_ALWAYS;
-//      glDisable( GL_ALPHA_TEST );
-//      return;
-    }
-*/
+
     glEnable( GL_ALPHA_TEST );
     glAlphaFunc( OpenGL.AlphaTestFunction, OpenGL.AlphaReferenceValue );
 
@@ -518,15 +503,6 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 #endif
 
     RenderDrawTriangles( );
-
-//  if ( alpha_sf || alpha_df )
-//  {
-//      OpenGL.AlphaBuffer = true;
-//  }
-//  else
-//  {
-//      OpenGL.AlphaBuffer = false;
-//  }
 
     Glide.State.AlphaBlendRgbSf     = rgb_sf;
     Glide.State.AlphaBlendRgbDf     = rgb_df;
@@ -563,7 +539,7 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_ONE_MINUS_SRC_ALPHA:  OpenGL.DstBlend = GL_ONE_MINUS_SRC_ALPHA;   break;
     case GR_BLEND_DST_ALPHA:            OpenGL.DstBlend = GL_DST_ALPHA;             break;
     case GR_BLEND_ONE_MINUS_DST_ALPHA:  OpenGL.DstBlend = GL_ONE_MINUS_DST_ALPHA;   break;
-    case GR_BLEND_PREFOG_COLOR:         OpenGL.DstBlend = GL_ONE;                   break;
+    case GR_BLEND_PREFOG_COLOR:         OpenGL.DstBlend = GL_SRC_COLOR;             break;
 
 #ifdef OGL_DEBUG
     default:
@@ -599,7 +575,14 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     case GR_BLEND_PREFOG_COLOR:         OpenGL.DstAlphaBlend = GL_ONE;                  break;
     }
 
-    glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
+    if ( ! InternalConfig.BlendFuncSeparate )
+    {
+        glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
+    }
+    else
+    {
+        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
+    }
 
     OpenGL.Blend = !(( rgb_sf == GR_BLEND_ONE ) && ( rgb_df == GR_BLEND_ZERO ));
 

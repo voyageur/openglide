@@ -34,6 +34,8 @@ PFNGLGETCOLORTABLEEXTPROC               glGetColorTableEXT = NULL;
 PFNGLGETCOLORTABLEPARAMETERIVEXTPROC    glGetColorTableParameterivEXT = NULL;
 PFNGLGETCOLORTABLEPARAMETERFVEXTPROC    glGetColorTableParameterfvEXT = NULL;
 
+PFNGLBLENDFUNCSEPARATEEXTPROC            glBlendFuncSeparateEXT = NULL;
+
 // Declarations
 void GLExtensions( void );
 
@@ -110,6 +112,7 @@ void ValidateUserConfig( void )
     InternalConfig.TextureEnvEXTEnable      = false;
     InternalConfig.VertexArrayEXTEnable     = false;
     InternalConfig.FogCoordEXTEnable        = false;
+    InternalConfig.BlendFuncSeparate        = false;
 
     InternalConfig.TextureMemorySize        = 16;
     InternalConfig.FrameBufferMemorySize    = 8;
@@ -178,6 +181,11 @@ void ValidateUserConfig( void )
         {
             InternalConfig.FogCoordEXTEnable        = true;
         }
+    }
+
+    if ( isExtensionSupported( "GL_EXT_blend_func_separate" ) )
+    {
+        InternalConfig.BlendFuncSeparate            = true;
     }
 
     if ( DetectMMX( ) )

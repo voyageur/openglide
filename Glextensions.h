@@ -34,6 +34,8 @@ extern PFNGLGETCOLORTABLEEXTPROC                glGetColorTableEXT;
 extern PFNGLGETCOLORTABLEPARAMETERIVEXTPROC     glGetColorTableParameterivEXT;
 extern PFNGLGETCOLORTABLEPARAMETERFVEXTPROC     glGetColorTableParameterfvEXT;
 
+extern PFNGLBLENDFUNCSEPARATEEXTPROC            glBlendFuncSeparateEXT;
+
 
 void APIENTRY DummyV( const void *a );
 
