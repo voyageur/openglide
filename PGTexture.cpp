@@ -109,15 +109,46 @@ void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *in
                                         info->aspectRatio, 
                                         info->format );
     FxU32 mip_offset = startAddress + TextureMemRequired( evenOdd, info );
-
-    if ( mip_offset <= m_tex_memory_size )
+    
+    if ( info->format == GR_TEXFMT_BGRA_8888 )
     {
-        memcpy( m_memory + mip_offset - mip_size, info->data, mip_size );
-    }
+        // Glidos never defines an extension texture unless it intends to use
+        // it, so we can create the OpenGL texture here and not bother to
+        // copy anything to the virtual glide texture memory
+        GLuint  texNum;
+        TexValues  texVals;
 
-    // Any texture based on memory crossing this range
-    // is now out of date
-    m_db->WipeRange( startAddress, mip_offset, 0 );
+        texVals.width = texInfo[ info->aspectRatio ][ info->largeLod ].width;
+        texVals.height = texInfo[ info->aspectRatio ][ info->largeLod ].height;
+        texVals.nPixels = texInfo[ info->aspectRatio ][ info->largeLod ].numPixels;
+        texVals.lod = 0;
+
+        m_db->WipeRange( startAddress, mip_offset, 0 );
+        m_db->Add( startAddress, mip_offset, info, 0, &texNum, NULL);
+
+        glBindTexture( GL_TEXTURE_2D, texNum );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
+    
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
+
+        if ( InternalConfig.EnableMipMaps && !InternalConfig.BuildMipMaps )
+            glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true );
+
+        OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA, GL_UNSIGNED_BYTE, info->data );
+    }
+    else
+    {
+        if ( mip_offset <= m_tex_memory_size )
+        {
+            memcpy( m_memory + mip_offset - mip_size, info->data, mip_size );
+        }
+        
+        // Any texture based on memory crossing this range
+        // is now out of date
+        m_db->WipeRange( startAddress, mip_offset, 0 );
+    }
 
 #ifdef OGL_DEBUG
     if ( info->smallLod == info->largeLod )
@@ -533,6 +564,12 @@ FxU32 PGTexture::TextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
     // GR_TEXFMT_INTENSITY_8, GR_TEXFMT_ALPHA_INTENSITY_44, GR_TEXFMT_P_8
     // Reduces the size by 2
     //
+    
+    // The extension format doesn't use Glide texture memory, but its
+    // convenient to pretend it does because of the way TexDB works.
+    if( info->format == GR_TEXFMT_BGRA_8888)
+        return 2048;
+
     return nSquareTexLod[ info->format <= GR_TEXFMT_RSVD1 ][ info->aspectRatio ][ info->largeLod ][ info->smallLod ];
 }
 
@@ -544,6 +581,12 @@ FxU32 PGTexture::MipMapMemRequired( GrLOD_t lod, GrAspectRatio_t aspectRatio, Gr
     // GR_TEXFMT_INTENSITY_8, GR_TEXFMT_ALPHA_INTENSITY_44, GR_TEXFMT_P_8
     // Reduces the size by 2
     //
+
+    // The extension format doesn't use Glide texture memory, but its
+    // convenient to pretend it does because of the way TexDB works.
+    if( format == GR_TEXFMT_BGRA_8888)
+        return 2048;
+
     return nSquareLod[ format > GR_TEXFMT_RSVD1 ][ aspectRatio ][ lod ];
 }
 

@@ -415,6 +415,8 @@ typedef FxI32 GrTextureFormat_t;
 #define GR_TEXFMT_ALPHA_INTENSITY_88    0xd
 #define GR_TEXFMT_AP_88                 0xe /* 8-bit alpha 8-bit palette */
 #define GR_TEXFMT_RSVD2                 0xf
+/* Extension format for Glidos. Restricted use */
+#define GR_TEXFMT_BGRA_8888             0x10
 
 typedef FxU32 GrTexTable_t;
 #define GR_TEXTABLE_NCC0    0x0
