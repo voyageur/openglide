@@ -9,7 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
-#include "glogl.h"
+#include "GlOgl.h"
 #include "PGTexture.h"
 #include "Glextensions.h"
 #include "FormatConversion.h"
@@ -303,7 +303,7 @@ bool PGTexture::MakeReady( void )
 
         if ( palette_changed )
         {
-            glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
+            p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
         }
 
         if ( use_two_textures )
@@ -417,7 +417,7 @@ bool PGTexture::MakeReady( void )
         case GR_TEXFMT_P_8:
             if ( InternalConfig.EXT_paletted_texture )
             {
-                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
+                p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
                 
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, 
                               texVals.width, texVals.height, 0, 
@@ -439,7 +439,7 @@ bool PGTexture::MakeReady( void )
             {
                 FxU32 *tex_temp2 = m_tex_temp + 256 * 128;
 
-                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
+                p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
 
                 SplitAP88( (WORD *)data, (BYTE *)m_tex_temp, (BYTE *)tex_temp2, texVals.nPixels );
                 
