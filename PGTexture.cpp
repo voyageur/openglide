@@ -709,11 +709,25 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ALPHA_8:
-            ConvertA8to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data );
+            }
+            else
+            {
+                ConvertA8to8888( (BYTE*)data, m_tex_temp, texVals.nPixels );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             if ( InternalConfig.BuildMipMaps )
             {
-                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.OGLVersion > 1 )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 1, texVals.width, texVals.height, GL_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
+                else
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             break;
             
