@@ -54,6 +54,8 @@ GrMipMapId_t PGUTexture::AllocateMemory( GrChipID_t tmu, FxU8 odd_even_mask,
         size += PGTexture::MipMapMemRequired( lod, aspect, fmt );
     }
 
+    size = ((size + 7) & ~7);
+
 #ifdef OGL_UTEX
     GlideMsg( "Allocate id = %d size = %d\n", m_free_id, size );
 #endif
