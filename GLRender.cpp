@@ -1437,17 +1437,18 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 
 	if (OpenGL.Texture)
 	{
-		pTS->as = a->tmuvtx[0].sow * CurrentTextureWidth;// / a->oow;
-		pTS->at = a->tmuvtx[0].tow * CurrentTextureHeight;// / a->oow;
-		pTS->bs = b->tmuvtx[0].sow * CurrentTextureWidth;// / b->oow;
-		pTS->bt = b->tmuvtx[0].tow * CurrentTextureHeight;// / b->oow;
-		pTS->cs = c->tmuvtx[0].sow * CurrentTextureWidth;// / c->oow;
-		pTS->ct = c->tmuvtx[0].tow * CurrentTextureHeight;// / c->oow;
+        float maxoow = max(a->oow, max(b->oow, c->oow));
+		pTS->as = a->tmuvtx[0].sow * CurrentTextureWidth / maxoow;
+		pTS->at = a->tmuvtx[0].tow * CurrentTextureHeight / maxoow;
+		pTS->bs = b->tmuvtx[0].sow * CurrentTextureWidth / maxoow;
+		pTS->bt = b->tmuvtx[0].tow * CurrentTextureHeight / maxoow;
+		pTS->cs = c->tmuvtx[0].sow * CurrentTextureWidth / maxoow;
+		pTS->ct = c->tmuvtx[0].tow * CurrentTextureHeight / maxoow;
 
 		pTS->aq = pTS->bq = pTS->cq = 0.0f;
-		pTS->aoow = a->oow;
-		pTS->boow = b->oow;
-		pTS->coow = c->oow;
+		pTS->aoow = a->oow / maxoow;
+		pTS->boow = b->oow / maxoow;
+		pTS->coow = c->oow / maxoow;
 	}
 
 	if( InternalConfig.FogEnable )
