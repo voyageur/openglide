@@ -317,7 +317,7 @@ void GetOptions()
 	extern char *OpenGLideVersion;
 	char Path[255];
 
-	UserConfig.FogEnable				= false;
+	UserConfig.FogEnable				= true;
 	UserConfig.InitFullScreen			= false;
 	UserConfig.PrecisionFixEnable		= true;
 	UserConfig.CreateWindow				= false;
@@ -331,7 +331,7 @@ void GetOptions()
 	UserConfig.TextureEnvEXTEnable		= false;
 	UserConfig.VertexArrayEXTEnable		= false;
 	UserConfig.SecondaryColorEXTEnable	= false;
-	UserConfig.FogCoordEXTEnable		= false;
+	UserConfig.FogCoordEXTEnable		= true;
 
 	UserConfig.PalettePrecision			= 32;
 	UserConfig.TextureMemorySize		= 8;

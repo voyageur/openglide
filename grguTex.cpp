@@ -104,6 +104,8 @@ grTexDownloadMipMap( GrChipID_t tmu,
 	if (tmu != GR_TMU0)
 		return;
 
+	RenderDrawTriangles();
+
 	info->smallLod = info->largeLod;
 	Textures->DownloadMipMap( startAddress, evenOdd, info );
 //	register int i;
