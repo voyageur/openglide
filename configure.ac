@@ -51,7 +51,7 @@ case "$host" in
         ;;
 esac
 
-CXXFLAGS="$CXXFLAGS -D$osflag"
+CXXFLAGS="$CXXFLAGS -D__unix__ -D$osflag"
 
 AC_OUTPUT(
 Makefile \
