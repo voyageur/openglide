@@ -119,7 +119,7 @@ guFogGenerateExp( GrFog_t *fogtable, float density )
 
 	for( int i = 0; i < GR_FOG_TABLE_SIZE; i++ )
 	{
-		Temp = (1.0f - exp((- density) * guFogTableIndexToW(i))) * 255.0f;
+		Temp = (1.0f - (float) exp((- density) * guFogTableIndexToW(i))) * 255.0f;
 		fogtable[i] = (BYTE) Temp;
 	}
 }
@@ -135,7 +135,7 @@ guFogGenerateExp2( GrFog_t *fogtable, float density )
 
 	for( int i = 0; i < GR_FOG_TABLE_SIZE; i++ )
 	{
-		Temp = (1.0f - exp( (- density)  * guFogTableIndexToW(i) ) * exp((- density)  * guFogTableIndexToW(i)))  * 255.0f;
+		Temp = (1.0f - (float) exp( (- density)  * guFogTableIndexToW(i) ) * (float)exp((- density)  * guFogTableIndexToW(i)))  * 255.0f;
 		fogtable[i] = (BYTE) Temp;
 	}
 }

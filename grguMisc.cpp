@@ -10,8 +10,6 @@
 // Error Function variable
 extern void (*ExternErrorFunction)(const char *string, FxBool fatal);
 
-extern HDC				hDC;
-
 
 
 //*************************************************

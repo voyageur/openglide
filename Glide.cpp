@@ -37,13 +37,6 @@ char *OpenGLideVersion = "Version0.06b1";
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-// Internal Variables
-HWND			HWndOpenGL, HWnd;
-HDC				hDC;
-HGLRC			hRC;
-HINSTANCE		hInstance;
-
-
 // Main Structs
 GlideStruct		Glide;
 OpenGLStruct	OpenGL;
@@ -67,7 +60,8 @@ unsigned long NumberOfErrors;
 // Other Functions
 float ClockFrequency();
 void GetOptions();
-HWND CreateOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height );
+void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height );
+void FinaliseOpenGLWindow(void);
 void PrepareTables();
 
 // Support DLL functions
@@ -146,9 +140,6 @@ BOOL GenerateErrorFile()
 
 void InitMainVariables()
 {
-	hDC = 0;
-	hRC = 0;
-	HWndOpenGL = 0;
 	OpenGL.WinOpen = false;
 	OpenGL.GlideInit = false;
 	NumberOfErrors = 0;
@@ -171,7 +162,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved)
 			return false;
 		}
 		InitMainVariables();
-		hInstance = hinstDLL;
 
 		if ( SetPriorityClass( GetCurrentProcess(), NORMAL_PRIORITY_CLASS ) == 0 )
 		{
@@ -226,29 +216,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved)
 	return TRUE;
 }
 
-bool InitWindow()
+bool InitWindow(HWND hwnd)
 {
-	HWndOpenGL = CreateOpenGLWindow( HWnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
-
-	if ( HWndOpenGL == NULL ) 
-	{
-		MessageBox(NULL, "Glide->OpenGL Wrapper: "
-		   "Cannot create OpenGL window!", "Error", MB_OK);
-		exit(1);
-	} 
-
-	hDC = GetDC( HWndOpenGL );
-
-//	if ((GetDeviceCaps(hDC,VERTRES) < WindowHeight) ||
-//		(GetDeviceCaps(hDC,HORZRES) < WindowWidth))
-//	{
-//		WindowWidth = GetDeviceCaps(hDC,HORZRES);
-//		WindowHeight = GetDeviceCaps(hDC,VERTRES);
-//	}
-
-
-	hRC = wglCreateContext(hDC);
-	wglMakeCurrent(hDC, hRC);
+	InitialiseOpenGLWindow( hwnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
 
 	if (!strcmp( (char*)glGetString( GL_RENDERER ), "GDI Generic" ))
 	{
@@ -256,20 +226,6 @@ bool InitWindow()
 	}
 
 	ValidateUserConfig();
-
-    ShowWindow( HWndOpenGL, SW_SHOWNORMAL );
-    UpdateWindow( HWndOpenGL );
-
-    BringWindowToTop( HWndOpenGL );
-	SetForegroundWindow( HWndOpenGL );
-//    if ( InternalConfig.InitFullScreen )
-	{
-		SetActiveWindow( HWnd );
-	}
-//	else
-//	{
-//		SetActiveWindow( HWndOpenGL );
-//	}
 
 	GlideMsg( "-------------------------------------------\n" );
 	GlideMsg( " Setting in Use: \n" );
@@ -382,7 +338,6 @@ grGlideInit( void )
 	OpenGL.PaletteCalc				= 0;
 
 	ExternErrorFunction = NULL;
-	HWnd				= 0;
 
 	RDTSC( FinalTick );
 	RDTSC( InitialTick );
@@ -528,12 +483,10 @@ grSstWinOpen(	FxU32 hwnd,
 				int num_buffers,
 				int num_aux_buffers )
 {
-	if ((HWnd) || (OpenGL.WinOpen))
+	if (OpenGL.WinOpen)
 	{
 		grSstWinClose();
 	}
-
-	HWnd = (HWND) hwnd;
 
 	Glide.Resolution = res;
 	switch (Glide.Resolution)
@@ -633,7 +586,7 @@ grSstWinOpen(	FxU32 hwnd,
 	OpenGL.WaitSignal = (DWORD)( 1000 / OpenGL.Refresh );
 
 	// Initing OpenGL Window
-	if (!InitWindow())
+	if (!InitWindow((HWND)hwnd))
 		return FXFALSE;
 
 	Glide.State.ColorFormat	= cformat;
@@ -767,10 +720,7 @@ grSstWinClose( void )
 
 	Textures->Clear();
 
-	wglMakeCurrent(NULL, NULL);
-	wglDeleteContext(hRC);
-	ReleaseDC(HWndOpenGL, hDC);
-	DestroyWindow(HWndOpenGL);
+    FinaliseOpenGLWindow();
 
 	ChangeDisplaySettings( NULL, 0 );
 

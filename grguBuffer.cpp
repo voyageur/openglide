@@ -14,8 +14,6 @@ extern __int64			InitialTick,FinalTick;
 extern DWORD			Frame;
 extern double			Fps, FpsAux, ClockFreq;
 
-extern HDC				hDC;
-
 // extern functions
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
 //void GLPrintText( GLuint x, GLuint y, char* format );//GLuint scale )
@@ -55,6 +53,8 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 	GLErro( "grBufferClear" );
 #endif
 }
+
+extern HDC hDC;
 
 //*************************************************
 //* Swaps Front and Back Buffers

@@ -28,7 +28,7 @@ float g_TimeLastTick = -1.0f;
 void InitTime( void )
 {
 #ifdef _WIN32
-	g_StartTime = (1.0) / 1000.0f;
+	g_StartTime = (1.0f) / 1000.0f;
 #else
 	ftime(&g_StartTimeb);
 #endif
@@ -39,7 +39,7 @@ void InitTime( void )
 void MarkTimeThisTick( void )
 {
 #ifdef _WIN32
-	float newTime = ((1.0) / 1000.0f) - g_StartTime;
+	float newTime = ((1.0f) / 1000.0f) - g_StartTime;
 #else
 	struct timeb tp;
 
@@ -68,7 +68,7 @@ float GetElapsedTime( void )
 float GetExactTime( void )
 {
 #ifdef _WIN32
-	return( (1.0)/1000.0f );
+	return( (1.0f)/1000.0f );
 #else
 	struct timeb tp;
 

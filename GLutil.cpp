@@ -17,10 +17,6 @@ ConfigStruct	UserConfig,
 extern unsigned long NumberOfErrors;
 extern BOOL GenerateErrorFile();
 
-extern HINSTANCE hInstance;
-
-
-WNDPROC OldProc;
 
 // Functions
 
@@ -68,251 +64,65 @@ void GLErro( char *Funcao )
 	}
 }
 
-LONG WINAPI
-NewWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{ 
-	extern HWND HWnd;
-	BOOL fActive;
-	static int First = 0;
+HDC hDC;
+static HGLRC hRC;
+static HWND hWND;
 
-	switch(uMsg)
-	{
-//	case WM_CREATE:
-//		ShowWindow( hWnd, SW_MINIMIZE );
-//		break;
-
-	case WM_ACTIVATE:
-		fActive = LOWORD(wParam);
-		if (( fActive == WA_ACTIVE ) || ( fActive == WA_CLICKACTIVE ) )
-		{
-			return CallWindowProc( OldProc, hWnd, uMsg, wParam, lParam);
-		}
-		else
-		{
-			if ( First == 1 )
-			{
-				ShowWindow( hWnd, SW_RESTORE );
-				First = 2;
-			}
-		}
-		break;
-
-	case WM_ACTIVATEAPP:
-		fActive = (BOOL) wParam;
-		if ( fActive )
-		{ // Activating
-			if ( First == 0 )
-			{
-				ShowWindow( hWnd, SW_MINIMIZE );
-				First = 1;
-			}
-//			else
-//				return CallWindowProc( OldProc, hWnd, uMsg, wParam, lParam);
-		}
-//		else
-//		{ // Deactivating
-//			if ( First == 1 )
-//			{
-//				ShowWindow( hWnd, SW_RESTORE );
-//				First = 2;
-//			}
-//			else
-//				return CallWindowProc( OldProc, hWnd, uMsg, wParam, lParam);
-//		}
-//		return 0;
-	}
-
-	return CallWindowProc( OldProc, hWnd, uMsg, wParam, lParam); 
-} 
-
-
-LONG WINAPI
-WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{ 
-//    static PAINTSTRUCT ps;
-	extern HWND HWnd;
-	static int First = 0;
-	BOOL fActive;
-
-	switch(uMsg)
-	{
-	case WM_CREATE:
-		return 0;
-
-	case WM_DESTROY:
-	case WM_CLOSE:
-	case WM_QUIT:
-		PostQuitMessage(0);
-		return 0;
-	case WM_ACTIVATEAPP:
-		fActive = (BOOL) wParam;
-		if ( fActive )
-		{ // Activating
-			if ( First == 0 )
-			{
-				ShowWindow( hWnd, SW_MINIMIZE );
-				First = 1;
-			}
-		}
-		else
-		{ // Deactivating
-			if (First == 1 )
-			{
-				ShowWindow( hWnd, SW_RESTORE );
-				First = 2;
-			}
-		}
-		return 0;
-
-	default:
-		PostMessage(HWnd, uMsg, wParam, lParam);
-		break;
-	}
-
-	return DefWindowProc(hWnd, uMsg, wParam, lParam); 
-} 
-
-
-HWND CreateOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
+void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 {
-	DEVMODE					DevMode;
-	long					Result;
     PIXELFORMATDESCRIPTOR	pfd;
 	int						PixFormat;
-	HDC						hdc;
 	unsigned int			BitsPerPixel;
-	bool					IsFullScreen = false;
 
-	static WNDPROC wndTemp = 0;
-	static HINSTANCE		hInstance = 0;
-	WNDCLASS				wc;
-	extern HWND				HWnd;
+    hWND = hwnd;
 
+	hDC = GetDC( hwnd );
+	BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
 
-	if ( hwnd == 0 )
-	{
-		hwnd = GetActiveWindow();
-	}
-	
-	HWnd = hwnd;
+    if(hwnd)
+		MoveWindow( hwnd, x, y, width, height+30, true ); 
 
-	hdc = GetDC( hwnd );
-	BitsPerPixel = GetDeviceCaps( hdc, BITSPIXEL );
-	ReleaseDC( hwnd, hdc );
-
-	if (!hInstance) 
-	{	
-		hInstance = GetModuleHandle(NULL);
-		wc.style         = CS_OWNDC;	//CS_PARENTDC;//
-		wc.lpfnWndProc   = (WNDPROC)WindowProc;//GetWindowLong( hwnd, GWL_WNDPROC );
-		wc.cbClsExtra    = 0;	
-		wc.cbWndExtra    = 0;	
-		wc.hInstance     = hInstance;
-		wc.hIcon         = LoadIcon(NULL, IDI_WINLOGO);
-		wc.hCursor       = LoadCursor(NULL, IDC_ARROW);	
-		wc.hbrBackground = NULL;
-		wc.lpszMenuName  = NULL;	
-		wc.lpszClassName = "OpenGL";
-	
-		if (!RegisterClass(&wc))
-		{	    
-			MessageBox(NULL, "RegisterClass() failed:  "
-					"Cannot register window class.", "Error", MB_OK);	    
-			return NULL;	
-		}
-    }
-
-	if( UserConfig.InitFullScreen )
-	{
-		// Change the display to correct resolution
-
-		DevMode.dmSize = sizeof(DEVMODE);
-
-		for( int i = 0; EnumDisplaySettings(NULL, i, &DevMode) != FALSE; i++ )
-		{
-			if((DevMode.dmPelsWidth == width) && (DevMode.dmPelsHeight == height) && 
-				(DevMode.dmBitsPerPel == BitsPerPixel))
-						break;
-		}
-
-		if((Result = ChangeDisplaySettings( &DevMode, 0 )) != DISP_CHANGE_SUCCESSFUL)
-		{
-			switch(Result)
-			{
-			case DISP_CHANGE_RESTART:	Error("Could not change resulution: Display needs restart!");	break;
-			case DISP_CHANGE_BADFLAGS:	Error("Could not change resulution: Bad Flags!");				break;
-			case DISP_CHANGE_BADMODE:	Error("Could not change resulution: Bad Mode!");				break;
-			case DISP_CHANGE_FAILED:	Error("Could not change resulution: Change Failed!");			break;
-			}
-		}
-		else
-		{
-			IsFullScreen = true;
-		}
-	}
-
-	if ( UserConfig.CreateWindow )
-	{
-//		if ( IsFullScreen )
-//		{
-//			hwnd = CreateWindowEx (WS_EX_TOPMOST, "OpenGL", "OpenGLide", WS_POPUP |	// WS_OVERLAPPEDWINDOW |
-//			   WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-//			   x, y, width, height, NULL, NULL, hInstance, NULL);
-//			ShowCursor (FALSE);
-//		}
-//		else
-//		{
-			MoveWindow( HWnd, x, y, width+5, height+65, true ); 
-			hwnd = CreateWindowEx (WS_EX_TOPMOST, "OpenGL", "OpenGLide",
-			   WS_CHILD | //WS_OVERLAPPEDWINDOW |
-			   WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-			   x, y, width, height, HWnd, NULL, hInstance, NULL);
-//		}
-	}
-	else
-	{
-		MoveWindow( HWnd, x, y, width, height+30, true ); 
-//		OldProc = (WNDPROC) GetWindowLong( HWnd, GWL_WNDPROC );
-//		SetWindowLong( HWnd, GWL_WNDPROC, (LONG) NewWindowProc );
-	}
-
-	hdc = GetDC(hwnd);
 
 	ZeroMemory( &pfd, sizeof(pfd) );
 	pfd.nSize        = sizeof(pfd);
 	pfd.nVersion     = 1;
 	pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 	pfd.iPixelType   = PFD_TYPE_RGBA;
-	pfd.cColorBits   = 32;
-	pfd.cDepthBits   = 32;//(depth_alpha_buffer ? 32 : 0);
+	pfd.cColorBits   = BitsPerPixel;
+	pfd.cDepthBits   = BitsPerPixel;
 
 
-	if (!(PixFormat = ChoosePixelFormat(hdc, &pfd)))
+	if (!(PixFormat = ChoosePixelFormat(hDC, &pfd)))
 	{
 		MessageBox(NULL, "ChoosePixelFormat() failed:  "
 		   "Cannot find a suitable pixel format.", "Error", MB_OK); 
-		return 0;
+		exit(1);
 	} 
 
-	if (!SetPixelFormat(hdc, PixFormat, &pfd))
+	if (!SetPixelFormat(hDC, PixFormat, &pfd))
 	{
 		MessageBox(NULL, "SetPixelFormat() failed:  "
 			   "Cannot set format specified.", "Error", MB_OK);
-		return 0;
+		exit(1);
 	} 
 
-	DescribePixelFormat( hdc, PixFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd );
+	DescribePixelFormat( hDC, PixFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd );
 	GlideMsg( "ColorBits	= %d\n", pfd.cColorBits );
 	GlideMsg( "DepthBits	= %d\n", pfd.cDepthBits );
-	if ( pfd.cDepthBits > 16 )
-	{
-		UserConfig.PrecisionFixEnable = false;
-//		InternalConfig.PrecisionFixEnable = false;
-	}
-	ReleaseDC(hwnd, hdc);
 
-	return hwnd;
+	if ( pfd.cDepthBits > 16 )
+        UserConfig.PrecisionFixEnable = false;
+
+	hRC = wglCreateContext(hDC);
+	wglMakeCurrent(hDC, hRC);
 }    
+
+void FinaliseOpenGLWindow(void)
+{
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hRC);
+	ReleaseDC(hWND, hDC);
+}
 
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
 {
