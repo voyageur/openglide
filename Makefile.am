@@ -1,3 +1,4 @@
+AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = libglide2x.la
 
