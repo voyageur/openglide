@@ -29,14 +29,8 @@ grFogTable( const GrFog_t *ft )
 
     if ( InternalConfig.FogEnable )
     {
-        if ( InternalConfig.MMXEnable )
-        {
-            MMXCopyMemory( Glide.FogTable, (GrFog_t *)ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
-        }
-        else
-        {
-            CopyMemory( Glide.FogTable, ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
-        }
+        MMXCopyMemory( Glide.FogTable, (GrFog_t *)ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
+//        CopyMemory( Glide.FogTable, ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
         Glide.FogTable[ GR_FOG_TABLE_SIZE ] = 255;
 
         for ( DWORD i = 0; i < GR_FOG_TABLE_SIZE; i++ )

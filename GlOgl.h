@@ -271,6 +271,15 @@ extern ConfigStruct         UserConfig;
 extern ConfigStruct         InternalConfig;
 extern GLIDEERRORFUNCTION   ExternErrorFunction;
 
+#ifdef OGL_DEBUG
+    // Profiling variables
+    extern __int64          InitialTick;
+    extern __int64          FinalTick;
+    extern DWORD            Frame;
+    extern double           Fps;
+    extern double           FpsAux;
+#endif
+
 // Genral Prototypes
 void __cdecl GlideMsg( char *szString, ... );
 void __cdecl Error( char *szString, ... );

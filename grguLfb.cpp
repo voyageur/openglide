@@ -72,14 +72,8 @@ grLfbLock( GrLock_t dwType,
                               Glide.WindowWidth, Glide.WindowHeight, 
                               GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
                               (void *)tempBuf );
-                if ( InternalConfig.MMXEnable )
-                {
-                    MMXConvert5551to565( tempBuf, Glide.DstBuffer.Address, Glide.WindowTotalPixels );
-                }
-                else
-                {
-                    Convert5551to565( tempBuf, (DWORD*)Glide.DstBuffer.Address, Glide.WindowTotalPixels );
-                }
+                MMXConvert5551to565( tempBuf, Glide.DstBuffer.Address, Glide.WindowTotalPixels );
+//                Convert5551to565( tempBuf, (DWORD*)Glide.DstBuffer.Address, Glide.WindowTotalPixels );
             }
 
             for ( j = 0; j < Glide.WindowHeight; j++ )
@@ -104,14 +98,8 @@ grLfbLock( GrLock_t dwType,
                               Glide.WindowWidth, Glide.WindowHeight, 
                               GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
                               (void *)tempBuf );
-                if ( InternalConfig.MMXEnable )
-                {
-                    MMXConvert5551to565( tempBuf, Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
-                }
-                else
-                {
-                    Convert5551to565( tempBuf, (DWORD*)Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
-                }
+                MMXConvert5551to565( tempBuf, Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
+//                Convert5551to565( tempBuf, (DWORD*)Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
             }
         }    
         Glide.SrcBuffer.Lock            = true;
@@ -193,23 +181,17 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             if ( InternalConfig.OGLVersion > 1 )
             {
                 glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
-                                xsize, ysize, 
-                                GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+                              xsize, ysize, 
+                              GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
             }
             else
             {
                 glReadPixels( minx, Glide.WindowHeight - miny - ysize,
-                                xsize, ysize, 
-                                GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
-                                (void *)tempBuf );
-                if ( InternalConfig.MMXEnable )
-                {
-                    MMXConvert5551to565( tempBuf, tempBuf, xsize * ysize );
-                }
-                else
-                {
-                    Convert5551to565( tempBuf, (DWORD*)tempBuf, xsize * ysize );
-                }
+                              xsize, ysize, 
+                              GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
+                              (void *)tempBuf );
+                MMXConvert5551to565( tempBuf, tempBuf, xsize * ysize );
+//                Convert5551to565( tempBuf, (DWORD*)tempBuf, xsize * ysize );
             }
 
             for ( y = 0; y < ysize; y++ )
@@ -244,34 +226,22 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                 }
                 else
                 {
-                    if ( InternalConfig.MMXEnable )
-                    {
-                        MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
-                    }
-                    else
-                    {
-                        Convert565to5551( tempBuf, tempBuf, xsize * ysize );
-                    }
+                    MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
+//                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
                 }
             }
             else
             {
-      		    glEnable( GL_SCISSOR_TEST );
+                glEnable( GL_SCISSOR_TEST );
                 if ( InternalConfig.OGLVersion > 1 )
                 {
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
                 }
                 else
                 {
-                    if ( InternalConfig.MMXEnable )
-                    {
-                        MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
-                    }
-                    else
-                    {
-                        Convert565to5551( tempBuf, tempBuf, xsize * ysize );
-                    }
+                    MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
+//                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
                 }
                 glDisable( GL_SCISSOR_TEST );

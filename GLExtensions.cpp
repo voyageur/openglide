@@ -294,6 +294,15 @@ void ValidateUserConfig( void )
     {
         InternalConfig.MMXEnable    = true;
     }
+    else
+    {
+        char szError[ 256 ];
+        sprintf( szError, "Severe Problem: MMX is required for OpenGLide!" );
+        Error( szError );
+        GlideMsg( szError );
+        MessageBox( 0, szError, "PROBLEM", MB_OK );
+        exit( 1 );
+    }
 
     GLExtensions( );
 }
