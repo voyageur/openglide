@@ -149,13 +149,48 @@ static struct
             WORD green[256];
             WORD blue[256];
         } old_ramp;
+
 static BOOL ramp_stored = FALSE;
+static bool mode_changed = false;
+
+static bool SetScreenMode(HWND hWnd, int xsize, int ysize)
+{
+    HDC hdc;
+    DWORD bits_per_pixel;
+    bool found;
+    DEVMODE DevMode;
+
+    hdc = ::GetDC(hWnd);
+    bits_per_pixel = GetDeviceCaps(hdc, BITSPIXEL);
+    ::ReleaseDC(hWnd, hdc);
+    
+    found = false;
+    DevMode.dmSize = sizeof(DEVMODE);
+    
+    for(int i = 0; !found && EnumDisplaySettings(NULL, i, &DevMode) != FALSE; i++ )
+    {
+        if((DevMode.dmPelsWidth == (DWORD)xsize) && (DevMode.dmPelsHeight == (DWORD)ysize) && 
+            (DevMode.dmBitsPerPel == bits_per_pixel))
+            found = true;
+    }
+    
+    return (found && ChangeDisplaySettings( &DevMode, CDS_RESET|CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL);
+}
+
+static void ResetScreenMode()
+{
+    ChangeDisplaySettings(NULL, 0);
+}
+
 
 void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 {
     PIXELFORMATDESCRIPTOR	pfd;
 	int						PixFormat;
 	unsigned int			BitsPerPixel;
+
+    mode_changed = (UserConfig.InitFullScreen ? SetScreenMode(hwnd, width, height)
+                                                  : false);
 
     hWND = hwnd;
 
@@ -218,6 +253,9 @@ void FinaliseOpenGLWindow(void)
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(hRC);
 	ReleaseDC(hWND, hDC);
+
+    if(mode_changed)
+        ResetScreenMode();
 }
 
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
