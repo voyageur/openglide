@@ -47,8 +47,8 @@ void genPaletteMipmaps( FxU32 width, FxU32 height, FxU8 *data )
         FxU32   x, 
                 y;
 
-		mmwidth = mmwidth > 1 ? mmwidth / 2 : 1;
-		mmheight = mmheight > 1 ? mmheight / 2 : 1;
+        mmwidth = mmwidth > 1 ? mmwidth / 2 : 1;
+        mmheight = mmheight > 1 ? mmheight / 2 : 1;
         lod += 1;
         skip *= 2;
 
@@ -325,8 +325,16 @@ bool PGTexture::MakeReady( void )
         case GR_TEXFMT_RGB_565:
             if ( m_chromakey_mode )
             {
-                Convert565Kto8888( (WORD*)data, m_chromakey_value, m_tex_temp, texVals.nPixels );
-                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.MMXEnable )
+                {
+                    MMXConvert565Kto5551( data, m_chromakey_value_565, m_tex_temp, texVals.nPixels );
+                    OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1_EXT, m_tex_temp );
+                }
+                else
+                {
+                    Convert565Kto8888( (WORD*)data, m_chromakey_value_565, m_tex_temp, texVals.nPixels );
+                    OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             else if ( InternalConfig.OGLVersion > 1 )
             {
@@ -334,30 +342,30 @@ bool PGTexture::MakeReady( void )
             }
             else
             {
-				if ( InternalConfig.Wrap565to5551 )
-				{
+                if ( InternalConfig.Wrap565to5551 )
+                {
                     if ( InternalConfig.MMXEnable )
                     {
                         MMXConvert565to5551( data, m_tex_temp, texVals.nPixels );
                     }
                     else
                     {
-					    Convert565to5551( (DWORD*)data, m_tex_temp, texVals.nPixels );
+                        Convert565to5551( (DWORD*)data, m_tex_temp, texVals.nPixels );
                     }
                     OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1_EXT, m_tex_temp );
-				}
-				else
-				{
+                }
+                else
+                {
                     if ( InternalConfig.MMXEnable )
-					{
-						MMXConvert565to8888( data, m_tex_temp, texVals.nPixels );
-					}
-					else
-					{
-						Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-					}
+                    {
+                        MMXConvert565to8888( data, m_tex_temp, texVals.nPixels );
+                    }
+                    else
+                    {
+                        Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+                    }
                     OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-				}
+                }
             }
             break;
             
@@ -369,13 +377,13 @@ bool PGTexture::MakeReady( void )
             else
             {
                 if ( InternalConfig.MMXEnable )
-				{
-        			MMXConvert4444to4444special( data, m_tex_temp, texVals.nPixels );
-				}
-				else
-				{
-					Convert4444to4444special( (DWORD*)data, m_tex_temp, texVals.nPixels );
-				}
+                {
+                    MMXConvert4444to4444special( data, m_tex_temp, texVals.nPixels );
+                }
+                else
+                {
+                    Convert4444to4444special( (DWORD*)data, m_tex_temp, texVals.nPixels );
+                }
                 OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4_EXT, m_tex_temp );
             }
             break;
@@ -388,13 +396,13 @@ bool PGTexture::MakeReady( void )
             else
             {
                 if ( InternalConfig.MMXEnable )
-				{
-        			MMXConvert1555to5551( data, m_tex_temp, texVals.nPixels );
-				}
-				else
-				{
-					Convert1555to5551( (DWORD*)data, m_tex_temp, texVals.nPixels );
-				}
+                {
+                    MMXConvert1555to5551( data, m_tex_temp, texVals.nPixels );
+                }
+                else
+                {
+                    Convert1555to5551( (DWORD*)data, m_tex_temp, texVals.nPixels );
+                }
                 OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1_EXT, m_tex_temp );
             }
             break;
@@ -575,8 +583,10 @@ void PGTexture::GetAspect( float *hAspect, float *wAspect )
 
 void PGTexture::ChromakeyValue( GrColor_t value )
 {
-    m_chromakey_value = value & 0x00ffffff;
-
+    m_chromakey_value_8888 = value & 0x00ffffff;
+    m_chromakey_value_565  = (WORD)( ( value & 0x00F80000 ) >> 8 |
+                                     ( value & 0x0000FC00 ) >> 5 |
+                                     ( value & 0x000000F8 ) >> 3 );
     m_palette_dirty = true;
 }
 
@@ -597,7 +607,7 @@ void PGTexture::ApplyKeyToPalette( void )
         for ( i = 0; i < 256; i++ )
         {
             if ( ( m_chromakey_mode ) && 
-                 ( ( m_palette[i] & 0x00ffffff ) == m_chromakey_value ) )
+                 ( ( m_palette[i] & 0x00ffffff ) == m_chromakey_value_8888 ) )
             {
                 m_palette[i] &= 0x00ffffff;
             }

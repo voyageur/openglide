@@ -203,6 +203,12 @@
 				RelativePath="OGLColorAlphaTables.cpp">
 			</File>
 			<File
+				RelativePath="OGLFogTables.cpp">
+			</File>
+			<File
+				RelativePath="OGLMiscTables.cpp">
+			</File>
+			<File
 				RelativePath="OGLTextureTables.cpp">
 			</File>
 			<File
@@ -244,12 +250,6 @@
 		</Filter>
 		<File
 			RelativePath=".\Glide2x.rc">
-		</File>
-		<File
-			RelativePath="OGLFogTables.cpp">
-		</File>
-		<File
-			RelativePath="OGLMiscTables.cpp">
 		</File>
 	</Files>
 	<Globals>

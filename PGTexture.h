@@ -67,7 +67,8 @@ private:
     void ApplyKeyToPalette( void );
     TexDB * m_db;
     GrChromakeyMode_t m_chromakey_mode;
-    GrColor_t m_chromakey_value;
+    DWORD m_chromakey_value_8888;
+    WORD m_chromakey_value_565;
     float m_wAspect;
     float m_hAspect;
     void GetTexValues( TexValues *tval );
