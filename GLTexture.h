@@ -42,6 +42,7 @@ private:
 	FxU32	* PaletteNumbers;
 
 	int		ActualNumber;
+    int     CurrentNumber;
 	int		PMaxTextures;
 };
 
@@ -62,6 +63,22 @@ public:
 	BYTE				*Data;						// Points to the Lod Data in the Voodoo Memory
 	bool				NeedUpdate;					// If texture needs an update in SetSource
 	FxU32				PaletteEXT;
+
+    TextureStruct()
+    {
+        Width = 0;
+        Height = 0;
+        WAspect = 0.0f;
+        HAspect = 0.0f;
+        Texture = 0;
+        Palette = 0;
+        Format = 0;
+        NBytes = 0;
+        NPixels = 0;
+        Data = NULL;
+        NeedUpdate = false;
+        PaletteEXT = 0;
+    }
 };
 
 class WTexture

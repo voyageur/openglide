@@ -266,14 +266,13 @@ void WTexture::Clear(void)
 	{
 		if ( Textures[ i ].Texture )
 		{
+            Textures[ i ].PaletteOpt.Clear();
 			glDeleteTextures( 1, &Textures[ i ].Texture );
 		}
 	}
 	ActualTexture = 0;
 
 	FillMemory( TexMem, TextureMemory * sizeof( short ), 255 ); // TexMem[ x ] = -1
-
-	ZeroMemory( Textures, sizeof( Textures ) );
 }
 
 TextureStruct *WTexture::SetSource( const FxU32 Address )
@@ -1154,10 +1153,12 @@ CPalette::~CPalette( )
 
 void CPalette::Init( void )
 {
-	ActualNumber = 0;
+	CurrentNumber = ActualNumber = 0;
 
 	TextureNumbers = new GLuint[PMaxTextures];
 	PaletteNumbers = new FxU32[PMaxTextures];
+    if(TextureNumbers == NULL || PaletteNumbers == NULL)
+        Clear();
 
 //	Clear();
 
@@ -1170,35 +1171,34 @@ void CPalette::Init( void )
 
 FxU32 CPalette::GetPalette( void )
 {
-	return PaletteNumbers[ActualNumber];
+	return PaletteNumbers[CurrentNumber];
 }
 
 GLuint CPalette::GetTexture( void )
 {
-	return TextureNumbers[ActualNumber];
+	return TextureNumbers[CurrentNumber];
 }
 
 GLuint CPalette::SetPalette( FxU32 gPalette )
 {
 	Next();
 
-	PaletteNumbers[ActualNumber] = gPalette;
-	if ( TextureNumbers[ActualNumber] == 0 )
+	PaletteNumbers[CurrentNumber] = gPalette;
+	if ( TextureNumbers[CurrentNumber] == 0 )
 	{
-		glGenTextures( 1, &TextureNumbers[ActualNumber] );
+		glGenTextures( 1, &TextureNumbers[CurrentNumber] );
 	}
 
-	return TextureNumbers[ActualNumber];
+	return TextureNumbers[CurrentNumber];
 }
 
 GLuint CPalette::SearchPalette( FxU32 gPalette )
 {
-	for( int i = 0; i < PMaxTextures; i++ )
+	for( int i = 0; i < ActualNumber; i++ )
 	{
 		if ( PaletteNumbers[i] == gPalette )
 		{
-//			Error( "Found = %d\n", i );
-			ActualNumber = i;
+			CurrentNumber = i;
 			return TextureNumbers[i];
 		}
 	}
@@ -1208,23 +1208,20 @@ GLuint CPalette::SearchPalette( FxU32 gPalette )
 
 void CPalette::Clear( void )
 {
-	for( int i = 0; i < PMaxTextures; i++ )
+	for( int i = 0; i < ActualNumber; i++ )
 	{
+        glDeleteTextures(1, &TextureNumbers[i]);
+        TextureNumbers[i] = 0;
 		PaletteNumbers[i] = 0;
 	}
+
+    CurrentNumber = ActualNumber = 0;
 }
 
 void CPalette::Next( void )
 {
-	static int MaxNumber = 0;
-	ActualNumber++;
 	if ( ActualNumber >= PMaxTextures )
-	{
-		ActualNumber = 0;
-	}
-	if ( ActualNumber > MaxNumber )
-	{
-		MaxNumber = ActualNumber;
-//		Error( "Max = %d\n", MaxNumber );
-	}
+        Clear();
+
+	CurrentNumber = ActualNumber++;
 }
