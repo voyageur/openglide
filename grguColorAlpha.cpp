@@ -88,7 +88,7 @@ grConstantColorValue4( float a, float r, float g, float b )
 DLLEXPORT void __stdcall
 grColorMask( FxBool rgb, FxBool a )
 {
-#ifdef OGL_PARTDONE
+#ifdef OGL_DONE
     GlideMsg( "grColorMask( %s, %s )\n", 
         rgb ? "TRUE" : "FALSE", a  ? "TRUE" : "FALSE" );
 #endif
@@ -793,11 +793,11 @@ grGammaCorrectionValue( float value )
         int i;
         HDC pDC = GetDC( NULL );
 
-        for(i = 0; i < 256; i++)
+        for ( i = 0; i < 256; i++ )
         {
             WORD v = (WORD)( 0xffff * pow( i / 255.0, 1.0 / value ) );
 
-            ramp.red[i] = ramp.green[i] = ramp.blue[i] = ( v & 0xff00 );
+            ramp.red[ i ] = ramp.green[ i ] = ramp.blue[ i ] = ( v & 0xff00 );
         }
 
         BOOL res = SetDeviceGammaRamp( pDC, &ramp );

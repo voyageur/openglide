@@ -449,7 +449,7 @@ void GetOptions( void )
     UserConfig.EXT_vertex_array             = false;
     UserConfig.EXT_fog_coord                = true;
     UserConfig.EXT_blend_func_separate      = false;
-    UserConfig.Wrap565to5551                = false;
+    UserConfig.Wrap565to5551                = true;
 
     UserConfig.TextureMemorySize            = 16;
     UserConfig.FrameBufferMemorySize        = 8;

@@ -31,13 +31,16 @@ grFogTable( const GrFog_t *ft )
     GlideMsg( "grFogTable( --- )\n" );
 #endif
 
-    static DWORD    i, 
-                    j,
-                    s_i, 
-                    e_i,
-                    s, 
-                    e,
-                    forth_root[ 4 ] = { 0x10000, 0x1306F, 0x16A09, 0x1AE89 };
+    static DWORD se[ GR_FOG_TABLE_SIZE + 1 ] = {
+        1, 1, 1, 1, 2, 2, 2, 3, 4, 4, 5, 6, 8, 9, 11, 13, 16, 19, 22, 26, 32, 38, 45, 53, 
+        64, 76, 90, 107, 128, 152, 181, 215, 256, 304, 362, 430, 512, 608, 724, 861, 
+        1024, 1217, 1448, 1722, 2048, 2435, 2896, 3444, 4096, 4870, 5792, 6888, 8192, 
+        9741, 11585, 13777, 16384, 19483, 23170, 27554, 32768, 38967, 46340, 55108, 65536 };
+    static DWORD e_minus_s[ GR_FOG_TABLE_SIZE ] = {
+        0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 2, 1, 2, 2, 3, 3, 3, 4, 6, 6, 7, 8, 11, 12, 14,
+        17, 21, 24, 29, 34, 41, 48, 58, 68, 82, 96, 116, 137, 163, 193, 231, 274, 326,
+        387, 461, 548, 652, 774, 922, 1096, 1304, 1549, 1844, 2192, 2607, 3099, 3687, 
+        4384, 5214, 6199, 7373, 8768, 10428 };
 
     if ( InternalConfig.FogEnable )
     {
@@ -49,17 +52,15 @@ grFogTable( const GrFog_t *ft )
         {
             CopyMemory( Glide.FogTable, ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
         }
+        Glide.FogTable[ GR_FOG_TABLE_SIZE ] = 255;
 
-        for ( i = 0; i < GR_FOG_TABLE_SIZE; i++ )
+        for ( DWORD i = 0; i < GR_FOG_TABLE_SIZE; i++ )
         {
-            s_i = ( forth_root[ i & 3 ] >> ( 16 - ( i >> 2 ) ) );
-            e_i = ( forth_root[ ( i + 1 ) & 3 ] >> ( 16 - ( ( i + 1 ) >> 2 ) ) );
-            s = ft[ i ];
-            e = ( ( i + 1 ) < GR_FOG_TABLE_SIZE ) ? ft[ i + 1 ] : 255;
-
-            for ( j = s_i; j < e_i; j++ )
+            for ( DWORD j = se[ i ]; j < se[ i + 1 ]; j++ )
             {
-                OpenGL.FogTable[ j ] = (BYTE)( s + ( e - s ) * ( j - s_i ) / ( e_i - s_i ) );
+                OpenGL.FogTable[ j ] = (BYTE)( Glide.FogTable[ i ] + 
+                    ( Glide.FogTable[ i + 1 ] - Glide.FogTable[ i ] ) * ( j - se[ i ] ) / 
+                    e_minus_s[ i ] );
             }
         }
     }

@@ -18,7 +18,7 @@
 
 TexDB::TexDB( unsigned int MemorySize )
 {
-    numberOfTexSections = MemorySize / ( 32 * 1024 );
+    numberOfTexSections = MemorySize >> 15; // ( 32 * 1024 );
 
     m_first = new Record*[ numberOfTexSections ];
 
@@ -50,7 +50,7 @@ GrTexInfo * TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
                   GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change )
 {
     Record  * r;
-    FxU32   sect = startAddress / ( 32 * 1024 );
+    FxU32   sect = startAddress >> 15; // ( 32 * 1024 );
 
     for ( r = m_first[ sect ]; r != NULL; r = r->next )
     {
@@ -89,7 +89,7 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
     FxU32   stt_sect;
     FxU32   end_sect;
 
-    stt_sect = startAddress / ( 32 * 1024 );
+    stt_sect = startAddress >> 15; // ( 32 * 1024 );
 
    /*
     * Textures can be as large as 128K, so
@@ -105,7 +105,7 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
         stt_sect -= 4;
     }
  
-    end_sect = endAddress / ( 32 * 1024 );
+    end_sect = endAddress >> 15; // ( 32 * 1024 );
 
     if ( end_sect >= numberOfTexSections )
     {
@@ -142,7 +142,7 @@ void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
     Record  *r = new Record( pTex2Num != NULL );
     FxU32   sect;
 
-    sect = startAddress / ( 32 * 1024 );
+    sect = startAddress >> 15; // 32 * 1024
 
     r->startAddress = startAddress;
     r->endAddress = endAddress;
@@ -212,9 +212,9 @@ TexDB::Record::~Record( void )
 
 bool TexDB::Record::Match( FxU32 stt, GrTexInfo *inf, FxU32 h )
 {
-   return (startAddress == stt
-         && inf->largeLod == info.largeLod
-         && inf->aspectRatio == info.aspectRatio
-         && inf->format == info.format
-         && (hash == h || h == 0));
+   return ( ( startAddress == stt ) && 
+            ( inf->largeLod == info.largeLod ) && 
+            ( inf->aspectRatio == info.aspectRatio ) && 
+            ( inf->format == info.format ) && 
+            ( ( hash == h ) || ( h == 0 ) ) );
 }

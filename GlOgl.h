@@ -161,7 +161,7 @@ struct GlideStruct
     int                     NumBuffers;
     int                     AuxBuffers;
     // States and Constants
-    FxU8                    FogTable[ GR_FOG_TABLE_SIZE ];
+    FxU8                    FogTable[ GR_FOG_TABLE_SIZE + 1 ];
     FxU32                   TexMemoryMaxPosition;
     bool                    CLocal;
     bool                    COther;

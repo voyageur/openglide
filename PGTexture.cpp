@@ -104,19 +104,19 @@ PGTexture::~PGTexture( void )
 
 void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 {
-    int mip_size = MipMapMemRequired( info->smallLod, 
-                                      info->aspectRatio, 
-                                      info->format );
-    int tex_size = TextureMemRequired( evenOdd, info );
+    FxU32 mip_size = MipMapMemRequired( info->smallLod, 
+                                        info->aspectRatio, 
+                                        info->format );
+    FxU32 mip_offset = startAddress + TextureMemRequired( evenOdd, info );
 
-    if ( startAddress + tex_size <= m_tex_memory_size )
+    if ( mip_offset <= m_tex_memory_size )
     {
-        memcpy( m_memory + startAddress + tex_size - mip_size, info->data, mip_size );
+        memcpy( m_memory + mip_offset - mip_size, info->data, mip_size );
     }
 
     /* Any texture based on memory crossing this range
      * is now out of date */
-    m_db->WipeRange( startAddress, startAddress + tex_size, 0 );
+    m_db->WipeRange( startAddress, mip_offset, 0 );
 
 #ifdef OGL_DEBUG
     if ( info->smallLod == info->largeLod )
@@ -172,9 +172,9 @@ void PGTexture::DownloadTable( GrTexTable_t type, FxU32 *data, int first, int co
 
     if ( type == GR_TEXTABLE_PALETTE )
     {
-        for ( int i = 0; i < count; i++ )
+        for ( int i = count - 1; i >= 0; i-- )
         {
-              m_palette[ first + i ] = data[ i ] & 0x00FFFFFF; 
+              m_palette[ first + i ] = data[ i ]; 
         }
         
         m_palette_dirty = true;
@@ -304,9 +304,9 @@ bool PGTexture::MakeReady( void )
 
         /* Add this new texture to the data base */
         m_db->Add( m_startAddress, m_startAddress + size, &m_info, test_hash,
-            &texNum, use_two_textures ? &tex2Num : NULL );
+                   &texNum, use_two_textures ? &tex2Num : NULL );
 
-        glBindTexture( GL_TEXTURE_2D, texNum);
+        glBindTexture( GL_TEXTURE_2D, texNum );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
@@ -620,25 +620,32 @@ void PGTexture::GetTexValues( TexValues *tval )
 
     switch ( m_info.aspectRatio )
     {
-    case GR_ASPECT_8x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ] >> 3;
+    case GR_ASPECT_8x1: tval->width = lodSize[ m_info.largeLod ];      
+                        tval->height = lodSize[ m_info.largeLod ] >> 3;
 						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 3;
                         break;
-    case GR_ASPECT_4x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ] >> 2;
+    case GR_ASPECT_4x1: tval->width = lodSize[ m_info.largeLod ];      
+                        tval->height = lodSize[ m_info.largeLod ] >> 2;
 						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 2;
                         break;
-    case GR_ASPECT_2x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ] >> 1;
+    case GR_ASPECT_2x1: tval->width = lodSize[ m_info.largeLod ];
+                        tval->height = lodSize[ m_info.largeLod ] >> 1;
 						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 1;
                         break;
-    case GR_ASPECT_1x1: tval->width = lodSize[ m_info.largeLod ];      tval->height = lodSize[ m_info.largeLod ];
+    case GR_ASPECT_1x1: tval->width = lodSize[ m_info.largeLod ];
+                        tval->height = lodSize[ m_info.largeLod ];
 						tval->nPixels = nSquarePixels[ m_info.largeLod ];
                         break;
-    case GR_ASPECT_1x2: tval->width = lodSize[ m_info.largeLod ] >> 1; tval->height = lodSize[ m_info.largeLod ];
+    case GR_ASPECT_1x2: tval->width = lodSize[ m_info.largeLod ] >> 1; 
+                        tval->height = lodSize[ m_info.largeLod ];
 						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 1;
                         break;
-    case GR_ASPECT_1x4: tval->width = lodSize[ m_info.largeLod ] >> 2; tval->height = lodSize[ m_info.largeLod ];
+    case GR_ASPECT_1x4: tval->width = lodSize[ m_info.largeLod ] >> 2; 
+                        tval->height = lodSize[ m_info.largeLod ];
 						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 2;
                         break;
-    case GR_ASPECT_1x8: tval->width = lodSize[ m_info.largeLod ] >> 3; tval->height = lodSize[ m_info.largeLod ];
+    case GR_ASPECT_1x8: tval->width = lodSize[ m_info.largeLod ] >> 3; 
+                        tval->height = lodSize[ m_info.largeLod ];
 						tval->nPixels = nSquarePixels[ m_info.largeLod ] >> 3;
                         break;
     }
