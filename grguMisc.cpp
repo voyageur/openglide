@@ -136,9 +136,15 @@ grTriStats(FxU32 *trisProcessed, FxU32 *trisDrawn)
 DLLEXPORT void __stdcall
 grHints( GrHint_t hintType, FxU32 hintMask )
 {
-#ifdef NOTDONE
+#ifdef PARTDONE
 	GlideMsg("grHints( %d, %d )\n", hintType, hintMask );
 #endif
+    switch(hintType)
+    {
+    case GR_HINT_STWHINT:
+        Glide.State.STWHint = hintMask;
+        break;
+    }
 }
 
 //----------------------------------------------------------------

@@ -651,6 +651,7 @@ grSstWinOpen(	FxU32 hwnd,
 	grConstantColorValue( 0xFFFFFFFF );
 	grClipWindow( 0, 0, Glide.WindowWidth, Glide.WindowHeight );
 //	grGammaCorrectionValue( 1.6f );
+    grHints(GR_HINT_STWHINT, 0);
 
 #ifdef DONE
 	GlideMsg( "----End of grSstWinOpen()\n" );

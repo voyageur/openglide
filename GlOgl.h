@@ -131,6 +131,7 @@ struct GlideState
 	FxU32					ClipMinY;
 	FxU32					ClipMaxY;
 	GrColorFormat_t			ColorFormat;
+    FxU32                   STWHint;
 };
 
 struct GlideStruct

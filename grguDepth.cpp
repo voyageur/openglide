@@ -21,18 +21,27 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
 
 	Glide.State.DepthBufferMode = mode;
 
+   /*
+    * In AddTriangle etc.  Use of z or w for
+    * depth buffering is determined by the
+    * value of OpenGL.DepthBufferType.  So
+    * I set it here.
+    */
 	switch ( mode )
 	{
 	case GR_DEPTHBUFFER_DISABLE:
+        OpenGL.DepthBufferType = 0;
 		glDisable( GL_DEPTH_TEST );
 		return;
 	case GR_DEPTHBUFFER_ZBUFFER:
 	case GR_DEPTHBUFFER_ZBUFFER_COMPARE_TO_BIAS:
+        OpenGL.DepthBufferType = 1;
 		OpenGL.ZNear = ZBUFFERNEAR;
 		OpenGL.ZFar = ZBUFFERFAR;
 		break;
 	case GR_DEPTHBUFFER_WBUFFER:
 	case GR_DEPTHBUFFER_WBUFFER_COMPARE_TO_BIAS:
+        OpenGL.DepthBufferType = 0;
 		OpenGL.ZNear = WBUFFERNEAR;
 		OpenGL.ZFar = WBUFFERFAR;
 		break;

@@ -1032,6 +1032,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 	static TTextureStruct *pTS;
 	static TFogStruct *pF;
 	static void *pt1, *pt2, *pt3;
+    float  atmuoow;
+    float  btmuoow;
+    float  ctmuoow;
 
 	ProfileBegin( "RenderAddTriangle" );
 
@@ -1045,6 +1048,19 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 	// Color Stuff, need to optimize it
 	ZeroMemory( pC2, sizeof( TColorStruct ) );
 	SecondPass	= false;
+
+    if((Glide.State.STWHint & GR_STWHINT_W_DIFF_TMU0) == 0)
+    {
+        atmuoow = a->oow;
+        btmuoow = b->oow;
+        ctmuoow = c->oow;
+    }
+    else
+    {
+        atmuoow = a->tmuvtx[0].oow;
+        btmuoow = b->tmuvtx[0].oow;
+        ctmuoow = c->tmuvtx[0].oow;
+    }
 
 	if ( Glide.ALocal )
 	{
@@ -1235,10 +1251,16 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 		}
 	}
 	
-	static float w, aoow, boow, coow,
-			* vetor= new float[ 4 ];
-	// Z-Buffering
-	if ( OpenGL.DepthBufferType )
+	static float w, aoow, boow, coow;
+
+    // Z-Buffering
+    if(Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE || Glide.State.DepthFunction == GR_CMP_ALWAYS)
+    {
+		pV->az = 0.0f;
+		pV->bz = 0.0f;
+		pV->cz = 0.0f;
+    }
+	else if ( OpenGL.DepthBufferType )
 	{
 		pV->az = a->ooz * D1OVER65536;
 		pV->bz = b->ooz * D1OVER65536;
@@ -1258,70 +1280,12 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
         }
 		else if ( InternalConfig.PrecisionFixEnable )
 		{
-			if ( 0 ) // Will be 3dnow
-			{
-				aoow = a->oow;
-				boow = b->oow;
-				coow = c->oow;
-				__asm
-				{
-					femms
-					mov			ebx, vetor
-					mov			edx, ConstantForSubtract
-					mov			eax, ConstantForAnd
-
-					movd        mm0,[ aoow ]
-					pfrcp       (mm0,mm0)
-					movd        mm1,[ boow ]
-					pfrcp       (mm1,mm1)
-					movd        mm2,[ coow ]
-					pfrcp       (mm2,mm2)
-					
-					movd		[ebx], mm0
-					movd		[ebx+4], mm1
-					movd		[ebx+8], mm2
-
-					movq		mm0, [ebx]
-					psrld		mm0, 11
-					pand		mm0, [eax]
-
-					movq		mm1, [ebx+8]
-					psrld		mm1, 11
-					pand		mm1, [eax]
-
-					pi2fd		(mm2, mm0)
-					pi2fd		(mm3, mm1)
-
-					mov			eax, ConstantForMultiply
-					movq		mm0, [eax]
-
-					pfmul		(mm2, mm0)
-					pfmul		(mm3, mm0)
-
-					movq		mm0, [edx]
-					movq		mm1, mm0
-					pfsub		(mm0, mm2)
-					pfsub		(mm1, mm3)
-
-					movq		[ebx], mm0
-					movq		[ebx+8], mm1
-
-					femms
-				}
-				pV->az = vetor[ 0 ];
-				pV->bz = vetor[ 1 ];
-				pV->cz = vetor[ 2 ];
-
-			}
-			else
-			{
-				w = 1.0f / a->oow;
-				pV->az = 8.9375f - ((float)( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
-				w = 1.0f / b->oow;
-				pV->bz = 8.9375f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) * D1OVER65536) );
-				w = 1.0f / c->oow;
-				pV->cz = 8.9375f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) * D1OVER65536) );
-			}
+			w = 1.0f / a->oow;
+			pV->az = 8.9375f - ((float)( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
+			w = 1.0f / b->oow;
+			pV->bz = 8.9375f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) * D1OVER65536) );
+			w = 1.0f / c->oow;
+			pV->cz = 8.9375f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) * D1OVER65536) );
 		}
 		else
 		{
@@ -1352,7 +1316,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 
 	if (OpenGL.Texture)
 	{
-        float maxoow = max(a->oow, max(b->oow, c->oow));
+        float maxoow = max(atmuoow, max(btmuoow, ctmuoow));
         float hAspect, wAspect;
 
         Textures->GetAspect(&hAspect, &wAspect);
@@ -1365,9 +1329,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 		pTS->ct = c->tmuvtx[0].tow * hAspect / maxoow;
 
 		pTS->aq = pTS->bq = pTS->cq = 0.0f;
-		pTS->aoow = a->oow / maxoow;
-		pTS->boow = b->oow / maxoow;
-		pTS->coow = c->oow / maxoow;
+		pTS->aoow = atmuoow / maxoow;
+		pTS->boow = btmuoow / maxoow;
+		pTS->coow = ctmuoow / maxoow;
 	}
 
 	if( InternalConfig.FogEnable )
@@ -1488,6 +1452,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 	static TTextureStruct *pTS;
 	static TFogStruct *pF;
 	static void *pt1, *pt2, *pt3;
+    float  atmuoow;
+    float  btmuoow;
 
 	ProfileBegin( "RenderAddLine" );
 
@@ -1500,6 +1466,17 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 	// Color Stuff, need to optimize it
 	ZeroMemory( pC2, sizeof( TColorStruct ) );
 	SecondPass	= false;
+
+    if((Glide.State.STWHint & GR_STWHINT_W_DIFF_TMU0) == 0)
+    {
+        atmuoow = a->oow;
+        btmuoow = b->oow;
+    }
+    else
+    {
+        atmuoow = a->tmuvtx[0].oow;
+        btmuoow = b->tmuvtx[0].oow;
+    }
 
 	if ( Glide.ALocal )
 	{
@@ -1798,7 +1775,12 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 	
 	static float w;
 	// Z-Buffering
-	if ( OpenGL.DepthBufferType )
+    if(Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE || Glide.State.DepthBufferMode == GR_CMP_ALWAYS)
+    {
+		pV->az = 0.0f;
+		pV->bz = 0.0f;
+    }
+	else if ( OpenGL.DepthBufferType )
 	{
 		pV->az = a->ooz * D1OVER65536;
 		pV->bz = b->ooz * D1OVER65536;
@@ -1856,8 +1838,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 		pTS->bt = b->tmuvtx[0].tow * hAspect;// / b->oow;
 
 		pTS->aq = pTS->bq = 0.0f;
-		pTS->aoow = a->oow;
-		pTS->boow = b->oow;
+		pTS->aoow = atmuoow;
+		pTS->boow = btmuoow;
 	}
 
 	if( InternalConfig.FogEnable )
@@ -2241,7 +2223,11 @@ void RenderAddPoint( const GrVertex *a )
 	
 	static float w;
 	// Z-Buffering
-	if ( OpenGL.DepthBufferType )
+    if(Glide.State.DepthBufferMode == GR_DEPTHBUFFER_DISABLE || Glide.State.DepthBufferMode == GR_CMP_ALWAYS)
+    {
+		pV->az = 0.0f;
+    }
+	else if ( OpenGL.DepthBufferType )
 	{
 		pV->az = a->ooz * D1OVER65536;
 	}
