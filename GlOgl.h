@@ -152,7 +152,7 @@ struct GlideStruct
 	bool					ALocal, AOther;
 	GlideState				State;
 	BufferStruct			SrcBuffer;
-//	BufferStruct			DstBuffer;
+	BufferStruct			DstBuffer;
 	DWORD					TextureMemory;
 };
 
