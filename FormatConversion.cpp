@@ -14,18 +14,10 @@ void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 	}
 }
 
-/*void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels )
-{
-	while ( Pixels )
-	{
-		*Buffer2++ = ((*Buffer1) & 0xFFC0) |
-					(((*Buffer1++) & 0x001F) << 1) |
-					0x0001;
-		Pixels--;
-	}
-}
-*/
-void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
+// This functions processes 2 pixels at a time, there is no problem in
+// passing odd numbers or a number less than 2 for the pixels, but
+// the buffers should be large enough
+void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, int Pixels )
 {
 	while ( Pixels > 0 )
 	{
@@ -33,7 +25,6 @@ void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, DWORD Pixels )
 					 ( ( (*Buffer1++) & 0x001F001F ) << 1 ) |
                      0x00010001;
 		Pixels -= 2;
-//        ++Buffer1;
 	}
 }
 
@@ -41,7 +32,10 @@ unsigned __int64 Mask565_5551_1 = 0xFFC0FFC0FFC0FFC0;
 unsigned __int64 Mask565_5551_2 = 0x001F001F001F001F;
 unsigned __int64 Mask565_5551_3 = 0x0001000100010001;
 
-void MMXConvert565to5551( void *Src, void *Dst, DWORD NumberOfPixels )
+// This functions processes 4 pixels at a time, there is no problem in
+// passing odd numbers or a number less than 4 for the pixels, but
+// the buffers should be large enough
+void MMXConvert565to5551( void *Src, void *Dst, int NumberOfPixels )
 {
 	__asm
 	{
@@ -49,7 +43,6 @@ void MMXConvert565to5551( void *Src, void *Dst, DWORD NumberOfPixels )
 		MOVQ MM6, [Mask565_5551_3]
 		mov EAX, Src
 		MOVQ MM5, [Mask565_5551_2]
-		shr ECX, 2
 		MOVQ MM4, [Mask565_5551_1]
 		mov EDX, Dst
     align 16
@@ -69,8 +62,8 @@ copying:
 		// Storing Unpacked 
 		MOVQ [EDX], MM0
 		add EDX, 8
-		sub ECX, 1
-		jnz copying
+		sub ECX, 4
+		jg copying
 		EMMS
 	}
 }
@@ -91,7 +84,6 @@ void MMXConvert565to8888( void *Src, void *Dst, DWORD NumberOfPixels )
 		MOVQ MM6, [Mask565B]
 		mov EAX, Src
 		MOVQ MM5, [Mask565G]
-		shr ECX, 2
 		MOVQ MM4, [Mask565R]
 		mov EDX, Dst
 copying:
@@ -123,8 +115,8 @@ copying:
 		MOVQ [EDX], MM2
 		add EDX, 16
 		MOVQ [EDX-8], MM0
-		dec ECX
-		jnz copying
+		sub ECX, 4
+		jg copying
 		EMMS
 	}
 }

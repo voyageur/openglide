@@ -5,9 +5,8 @@
 #include "glogl.h"
 
 void Convert565to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels );
-//void Convert565to5551( WORD *Buffer1, WORD *Buffer2, DWORD Pixels );
-void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, DWORD Pixels );
-void MMXConvert565to5551( void *Src, void *Dst, DWORD NumberOfPixels );
+void Convert565to5551( DWORD *Buffer1, DWORD *Buffer2, int Pixels );
+void MMXConvert565to5551( void *Src, void *Dst, int NumberOfPixels );
 void MMXConvert565to8888( void *Src, void *Dst, DWORD NumberOfPixels );
 void ConvertA8toAP88( BYTE *Buffer1, WORD *Buffer2, DWORD Pixels );
 void Convert8332to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels );

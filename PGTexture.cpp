@@ -336,13 +336,13 @@ bool PGTexture::MakeReady( void )
         {
         case GR_TEXFMT_RGB_565:
             // This is a special case for OpenGL versions less than 2
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( false && InternalConfig.OGLVersion > 1 )
             {
                 OGL_LOAD_CREATE_TEXTURE( 3, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
             }
             else
             {
-				if ( InternalConfig.Wrap565Enable && ( texVals.nPixels > 3 ) )
+				if ( InternalConfig.Wrap565Enable )
 				{
                     if ( InternalConfig.MMXEnable )
                     {
@@ -356,7 +356,7 @@ bool PGTexture::MakeReady( void )
 				}
 				else
 				{
-                    if ( InternalConfig.MMXEnable && ( texVals.nPixels > 3 ) )
+                    if ( InternalConfig.MMXEnable )
 					{
 						MMXConvert565to8888( data, m_tex_temp, texVals.nPixels );
 					}
