@@ -192,6 +192,12 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
     mode_changed = (UserConfig.InitFullScreen ? SetScreenMode(hwnd, width, height)
                                                   : false);
 
+    if(hwnd == NULL)
+    {
+        MessageBox(NULL, "NULL window specified", "Error", MB_OK);
+        exit(1);
+    }
+
     hWND = hwnd;
 
 	hDC = GetDC( hwnd );
@@ -459,7 +465,7 @@ void GetOptions()
 	UserConfig.InitFullScreen			= false;
 	UserConfig.PrecisionFixEnable		= true;
 	UserConfig.CreateWindow				= false;
-	UserConfig.BuildMipMaps				= true;
+	UserConfig.BuildMipMaps				= false;
 
 	UserConfig.Wrap565Enable			= false;
 
@@ -472,10 +478,10 @@ void GetOptions()
 	UserConfig.FogCoordEXTEnable		= true;
 
 	UserConfig.PalettePrecision			= 32;
-	UserConfig.TextureMemorySize		= 8;
-	UserConfig.FrameBufferMemorySize	= 2;
+	UserConfig.TextureMemorySize		= 16;
+	UserConfig.FrameBufferMemorySize	= 8;
 
-	UserConfig.Priority					= 0;
+	UserConfig.Priority					= 2;
 	UserConfig.MMXEnable				= false;
 	UserConfig.TDnowEnable				= false;
 
@@ -519,7 +525,7 @@ void GetOptions()
 		fprintf( IniFile, "PalettePrecision=%d\n", UserConfig.PalettePrecision );
 		fprintf( IniFile, "TextureMemorySize=%d\n", UserConfig.TextureMemorySize );
 		fprintf( IniFile, "WrapperPriority=%d\n", UserConfig.Priority );
-//		fprintf( IniFile, "FrameBufferMemorySize=%d\n", UserConfig.FrameBufferMemorySize );
+		fprintf( IniFile, "FrameBufferMemorySize=%d\n", UserConfig.FrameBufferMemorySize );
 		fclose( IniFile );
 	}
 	else
@@ -563,8 +569,8 @@ void GetOptions()
 			UserConfig.TextureMemorySize = atoi( Pointer );
 			Pointer = FindConfig( Path, "WrapperPriority" );
 			UserConfig.Priority = atoi( Pointer );
-//			Pointer = FindConfig( Path, "FrameBufferMemorySize" );
-//			UserConfig.FrameBufferMemorySize = atoi( Pointer );
+			Pointer = FindConfig( Path, "FrameBufferMemorySize" );
+			UserConfig.FrameBufferMemorySize = atoi( Pointer );
 		}
 		else
 		{

@@ -249,7 +249,7 @@ grTexFilterMode(GrChipID_t tmu,
 			OpenGL.MinFilterMode = GL_NEAREST;
 		break;
 	case GR_TEXTUREFILTER_BILINEAR:
-		if (( Glide.State.MipMapMode != GR_MIPMAP_DISABLE ) && ( InternalConfig.BuildMipMaps ) )
+		if (InternalConfig.BuildMipMaps)
 		{
 			if (Glide.State.LodBlend)
 			{

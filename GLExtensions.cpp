@@ -97,8 +97,8 @@ void ValidateUserConfig()
 	InternalConfig.FogCoordEXTEnable		= false;
 
 	InternalConfig.PalettePrecision			= 8;
-	InternalConfig.TextureMemorySize		= 4;
-	InternalConfig.FrameBufferMemorySize	= 2;
+	InternalConfig.TextureMemorySize		= 16;
+	InternalConfig.FrameBufferMemorySize	= 8;
 
 	InternalConfig.MMXEnable				= false;
 	InternalConfig.TDnowEnable				= false;
@@ -123,10 +123,6 @@ void ValidateUserConfig()
 
 	InternalConfig.OGLVersion = glGetString( GL_VERSION )[ 2 ] - '0';
 	GlideMsg( "Using OpenGL version = %d\n", InternalConfig.OGLVersion );
-	if ( InternalConfig.OGLVersion >= 2 )
-	{
-		InternalConfig.BuildMipMaps				= false;
-	}
 
 	if ( UserConfig.MultiTextureEXTEnable )
 	{
@@ -136,11 +132,11 @@ void ValidateUserConfig()
 		}
 	}
 
-//	if ( UserConfig.PaletteEXTEnable )
+	if ( UserConfig.PaletteEXTEnable )
 	{
 		if ( isExtensionSupported( "GL_EXT_shared_texture_palette" ) )
 		{
-			InternalConfig.PaletteEXTEnable			= false;
+			InternalConfig.PaletteEXTEnable			= true;
 		}
 	}
 

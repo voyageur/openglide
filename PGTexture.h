@@ -23,8 +23,6 @@ class PGTexture
     };
 
 public:
-    enum {TEX_MEMORY = 8 * 1024 * 1024};
-
 private:
 	FxU32 m_palette_hash;
 	void ApplyKeyToPalette(FxU32 *pal);
@@ -37,13 +35,14 @@ private:
 
 	FxU32 m_tex_temp[256*256];
 	bool m_valid;
-    FxU8 m_memory[TEX_MEMORY];
+    FxU8 *m_memory;
     FxU32 m_startAddress;
     FxU32 m_evenOdd;
     GrTexInfo m_info;
     FxU32 m_palette[256];
 
 public:
+    FxU32 m_tex_memory_size;
 	static FxU32 MipMapMemRequired(GrLOD_t lod, GrAspectRatio_t aspectRatio, GrTextureFormat_t format);
 	void ChromakeyMode(GrChromakeyMode_t mode);
 	void ChromakeyValue(GrColor_t value);
@@ -54,7 +53,7 @@ public:
 	void DownloadTable(GrTexTable_t type, void *data);
 	void Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info);
 	void DownloadMipMap(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info);
-	PGTexture();
+	PGTexture(int mem_size);
 	virtual ~PGTexture();
 };
 

@@ -348,13 +348,11 @@ grGlideInit( void )
 
 	Glide.TextureMemory = UserConfig.TextureMemorySize * 1024 * 1024;
 
-	//Textures = new WTexture( Glide.TextureMemory );
-	Textures = new PGTexture();
+	Textures = new PGTexture(Glide.TextureMemory);
 	if ( Textures == NULL )
 		Error( "Cannot allocate enough memory for Texture Buffer in User setting, using default" );
 
 	Glide.TexMemoryMaxPosition	= (FxU32)Glide.TextureMemory;
-	UserConfig.TextureMemorySize = Glide.TextureMemory / (1024*1024);
 }
 
 //*************************************************
@@ -724,7 +722,7 @@ grSstQueryHardware( GrHwConfiguration *hwconfig )
 	hwconfig->num_sst = 1;
 	hwconfig->SSTs[0].type = GR_SSTTYPE_VOODOO;
 //	hwconfig->SSTs[0].type = GR_SSTTYPE_Voodoo2;
-	hwconfig->SSTs[0].sstBoard.VoodooConfig.fbRam = 2;
+	hwconfig->SSTs[0].sstBoard.VoodooConfig.fbRam = UserConfig.FrameBufferMemorySize;
 	hwconfig->SSTs[0].sstBoard.VoodooConfig.fbiRev = 2;
 	hwconfig->SSTs[0].sstBoard.VoodooConfig.nTexelfx = 1;
 //	hwconfig->SSTs[0].sstBoard.VoodooConfig.nTexelfx = 2;

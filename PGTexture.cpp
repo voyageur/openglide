@@ -190,22 +190,24 @@ inline void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWOR
 	}
 }
 
-PGTexture::PGTexture()
+PGTexture::PGTexture(int mem_size)
 {
     m_valid = false;
     m_chromakey_mode = GR_CHROMAKEY_DISABLE;
+    m_tex_memory_size = mem_size;
+    m_memory = new FxU8[mem_size];
 }
 
 PGTexture::~PGTexture()
 {
-
+    delete [] m_memory;
 }
 
 void PGTexture::DownloadMipMap(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
 {
     int size = TextureMemRequired(evenOdd, info);
 
-    if(startAddress + size <= TEX_MEMORY)
+    if(startAddress + size <= m_tex_memory_size)
         memcpy(m_memory + startAddress, info->data, size);
 
     /* Any texture based on memory crossing this range
@@ -239,7 +241,7 @@ void PGTexture::Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
                         break;
 	}
 
-    m_valid = (startAddress + size <= TEX_MEMORY);
+    m_valid = (startAddress + size <= m_tex_memory_size);
 }
 
 void PGTexture::DownloadTable(GrTexTable_t type, void *data)
