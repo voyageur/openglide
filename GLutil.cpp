@@ -10,6 +10,7 @@
 //**************************************************************
 
 #include <stdio.h>
+#include <time.h>
 #include <io.h>
 
 #include "GlOgl.h"
@@ -23,7 +24,6 @@ ConfigStruct    InternalConfig;
 
 // Extern prototypes
 extern unsigned long    NumberOfErrors;
-extern BOOL             GenerateErrorFile();
 
 HDC hDC;
 static HGLRC hRC;
@@ -64,11 +64,11 @@ void __cdecl Error( char *szString, ... )
 
     if ( NumberOfErrors == 0 )
     {
-        GenerateErrorFile();
+        GenerateErrorFile( );
     }
 
-    FILE *fHandle = fopen( ERRORFILE, "at");
-    if ( !fHandle )
+    FILE *fHandle = fopen( ERRORFILE, "at" );
+    if ( ! fHandle )
     {
         return;
     }
@@ -533,6 +533,78 @@ void GetOptions( void )
             GetOptions( );
         }
     }
+}
+
+bool ClearAndGenerateLogFile( void )
+{
+    FILE    * GlideFile;
+    char    tmpbuf[ 128 ];
+
+    remove( ERRORFILE );
+    GlideFile = fopen( GLIDEFILE, "w" );
+    if ( ! GlideFile )
+    {
+        return false;
+    }
+    fclose( GlideFile );
+
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( "OpenGLide Log File\n" );
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( "***** OpenGLide %s *****\n", OpenGLideVersion );
+    GlideMsg( OGL_LOG_SEPARATE );
+    _strdate( tmpbuf );
+    GlideMsg( "Date: %s\n", tmpbuf );
+    _strtime( tmpbuf );
+    GlideMsg( "Time: %s\n", tmpbuf );
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( OGL_LOG_SEPARATE );
+    ClockFreq = ClockFrequency( );
+    GlideMsg( "Clock Frequency: %-4.2f Mhz\n", ClockFreq / 1000000.0f );
+    GlideMsg( OGL_LOG_SEPARATE );
+    GlideMsg( OGL_LOG_SEPARATE );
+
+    return true;
+}
+
+void CloseLogFile( void )
+{
+    char tmpbuf[ 128 ];
+    GlideMsg( OGL_LOG_SEPARATE );
+    _strtime( tmpbuf );
+    GlideMsg( "Time: %s\n", tmpbuf );
+    GlideMsg( OGL_LOG_SEPARATE );
+
+#ifdef OGL_DEBUG
+    Fps = (float) Frame * ClockFreq / FpsAux;
+    GlideMsg( "FPS = %f\n", Fps );
+    GlideMsg( OGL_LOG_SEPARATE );
+#endif
+}
+
+bool GenerateErrorFile( void )
+{
+    char    tmpbuf[ 128 ];
+    FILE    * ErrorFile;
+
+    ErrorFile = fopen( ERRORFILE, "w");
+    if( !ErrorFile )
+    {
+        return false;
+    }
+    fclose( ErrorFile );
+
+    Error(  OGL_LOG_SEPARATE );
+    Error(  "OpenGLide Error File\n");
+    Error(  OGL_LOG_SEPARATE );
+    _strdate( tmpbuf );
+    Error(  "Date: %s\n", tmpbuf );
+    _strtime( tmpbuf );
+    Error(  "Time: %s\n", tmpbuf );
+    Error(  OGL_LOG_SEPARATE );
+    Error(  OGL_LOG_SEPARATE );
+
+    return true;
 }
 
 // Detect if Processor has MMX Instructions

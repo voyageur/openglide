@@ -245,6 +245,9 @@
 				RelativePath=".\grguMisc.cpp">
 			</File>
 			<File
+				RelativePath="grguSstGlide.cpp">
+			</File>
+			<File
 				RelativePath=".\grguTex.cpp">
 			</File>
 		</Filter>

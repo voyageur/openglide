@@ -13,10 +13,6 @@
 #include "GLRender.h"
 
 
-// Error Function variable
-extern void (*ExternErrorFunction)(const char *string, FxBool fatal);
-
-
 //*************************************************
 //* Sets the External Error Function to call if
 //* Glides Generates and Error

@@ -77,6 +77,8 @@
 
 // Class declarations
 
+typedef void (*GLIDEERRORFUNCTION)( const char *string, FxBool fatal );
+
 struct BufferStruct
 {
     bool                    Lock;
@@ -261,10 +263,13 @@ struct ConfigStruct
 };
 
 // Extern variables
-extern GlideStruct      Glide;                  // Glide Internal
-extern OpenGLStruct     OpenGL;                 // OpenGL equivalents
-extern ConfigStruct     UserConfig;
-extern ConfigStruct     InternalConfig;
+extern char *               OpenGLideVersion;
+extern double               ClockFreq;
+extern GlideStruct          Glide;                  // Glide Internal
+extern OpenGLStruct         OpenGL;                 // OpenGL equivalents
+extern ConfigStruct         UserConfig;
+extern ConfigStruct         InternalConfig;
+extern GLIDEERRORFUNCTION   ExternErrorFunction;
 
 // Genral Prototypes
 void __cdecl GlideMsg( char *szString, ... );
@@ -274,6 +279,15 @@ void ConvertColor4B( GrColor_t GlideColor, DWORD &C );
 void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
 GrColor_t ConvertConstantColor( float R, float G, float B, float A );
+bool GenerateErrorFile( void );
+bool ClearAndGenerateLogFile( void );
+void CloseLogFile( void );
+bool InitWindow( HWND hwnd );
+void InitOpenGL( void );
+void GetOptions( void );
+void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height );
+void FinaliseOpenGLWindow( void );
+
 void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes );
 
 int DetectMMX();
