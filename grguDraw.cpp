@@ -18,6 +18,12 @@ grDrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c )
 #endif
 
 	RenderAddTriangle( a, b, c );
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 //*************************************************
@@ -33,6 +39,12 @@ grDrawPlanarPolygonVertexList(int nVertices, const GrVertex vlist[])
 	static int i;
 	for( i = 2; i < nVertices; i++ )
 		RenderAddTriangle(&vlist[0], &vlist[i-1], &vlist[i]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 //*************************************************
@@ -80,6 +92,12 @@ grDrawPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 	static int i;
 	for( i = 2; i < nverts; i++ )
 		RenderAddTriangle(&vlist[ilist[0]], &vlist[ilist[i-1]], &vlist[ilist[i]]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 //*************************************************
@@ -95,6 +113,12 @@ grDrawPlanarPolygon( int nverts, const int ilist[], const GrVertex vlist[] )
 	static int i;
 	for( i = 2; i < nverts; i++ )
 		RenderAddTriangle(&vlist[ilist[0]], &vlist[ilist[i-1]], &vlist[ilist[i]]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 //*************************************************
@@ -110,6 +134,12 @@ grDrawPolygonVertexList(int nVertices, const GrVertex vlist[] )
 	static int i;
 	for( i = 2; i < nVertices; i++ )
 		RenderAddTriangle(&vlist[0], &vlist[i-1], &vlist[i]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 DLLEXPORT void __stdcall
@@ -121,6 +151,12 @@ guAADrawTriangleWithClip( const GrVertex *a, const GrVertex *b,
 #endif
 
 	RenderAddTriangle( a, b, c );
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 DLLEXPORT void __stdcall
@@ -133,6 +169,12 @@ guDrawTriangleWithClip( const GrVertex *a,
 #endif
 
 	RenderAddTriangle( a, b, c );
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 DLLEXPORT void __stdcall
@@ -145,6 +187,12 @@ guDrawPolygonVertexListWithClip( int nverts, const GrVertex vlist[] )
 	static int i;
 	for( i = 2; i < nverts; i++ )
 		RenderAddTriangle(&vlist[0], &vlist[i-1], &vlist[i]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 DLLEXPORT void __stdcall
@@ -177,6 +225,12 @@ grAADrawPolygon(const int nverts, const int ilist[], const GrVertex vlist[])
 	static int i;
 	for( i = 2; i < nverts; i++ )
 		RenderAddTriangle(&vlist[ilist[0]], &vlist[ilist[i-1]], &vlist[ilist[i]]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 DLLEXPORT void __stdcall
@@ -189,6 +243,12 @@ grAADrawPolygonVertexList(const int nverts, const GrVertex vlist[])
 	static int i;
 	for( i = 2; i < nverts; i++ )
 		RenderAddTriangle(&vlist[0], &vlist[i-1], &vlist[i]);
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
 DLLEXPORT void __stdcall
@@ -201,5 +261,11 @@ grAADrawTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
 #endif
 
 	RenderAddTriangle( a, b, c );
+
+    if(Glide.State.RenderBuffer == GR_BUFFER_FRONTBUFFER)
+    {
+        RenderDrawTriangles();
+        glFlush();
+    }
 }
 
