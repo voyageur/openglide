@@ -46,7 +46,7 @@ public:
         };
     };
 	GLuint Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash);
-	void WipeRange(FxU32 startAddress, FxU32 endAddress);
+	void WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash);
 	bool Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum);
 	TexDB();
 	virtual ~TexDB();

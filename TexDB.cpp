@@ -44,9 +44,6 @@ bool TexDB::Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
     if(sect >= TEX_SECTIONS)
         sect = TEX_SECTIONS - 1;
 
-    if(info->format != GR_TEXFMT_P_8 && info->format != GR_TEXFMT_AP_88)
-        hash = 0;
-
     for(r = m_first[sect]; r != NULL; r = r->next)
     {
         if(r->Match(startAddress, info, hash))
@@ -66,7 +63,7 @@ bool TexDB::Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
     return false;
 }
 
-void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress)
+void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
 {
     Record **p;
     FxU32 stt_sect;
@@ -88,7 +85,9 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress)
         {
             Record *r = *p;
             
-            if(startAddress < r->endAddress && r->startAddress < endAddress)
+            if(startAddress < r->endAddress
+                && r->startAddress < endAddress
+                && (hash == 0 || r->hash == hash))
             {
                 *p = r->next;
 #ifdef UTEX
@@ -112,9 +111,6 @@ GLuint TexDB::Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 h
     sect = startAddress / (32*1024);
     if(sect >= TEX_SECTIONS)
         sect = TEX_SECTIONS - 1;
-
-    if(info->format != GR_TEXFMT_P_8 && info->format != GR_TEXFMT_AP_88)
-        hash = 0;
 
     r->startAddress = startAddress;
     r->endAddress = endAddress;

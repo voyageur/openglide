@@ -213,7 +213,7 @@ void PGTexture::DownloadMipMap(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *inf
 
     /* Any texture based on memory crossing this range
      * is now out of date */
-    m_db.WipeRange(startAddress, startAddress + size);
+    m_db.WipeRange(startAddress, startAddress + size, 0);
 }
 
 void PGTexture::Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
@@ -272,6 +272,7 @@ void PGTexture::MakeReady()
     TexValues texVals;
     GLuint texNum;
     FxU32 size;
+    FxU32 hash = 0;;
 
     if(!m_valid)
         return;
@@ -287,10 +288,11 @@ void PGTexture::MakeReady()
     case GR_TEXFMT_P_8:
     case GR_TEXFMT_AP_88:
         ApplyKeyToPalette();
+        hash = m_palette_hash;
     }
 
     /* See if we already have an OpenGL texture to match this */
-    if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, m_palette_hash, &texNum))
+    if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, hash, &texNum))
     {
         ::glBindTexture(GL_TEXTURE_2D, texNum);
     }
@@ -299,10 +301,10 @@ void PGTexture::MakeReady()
         /* Any existing textures crossing this memory range
          * is unlikely to be used, so remove the OpenGL version
          * of them */
-        m_db.WipeRange(m_startAddress, m_startAddress + size);
+        m_db.WipeRange(m_startAddress, m_startAddress + size, hash);
 
         /* Add this new texture to the data base */
-        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, m_palette_hash);
+        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, hash);
 
         ::glBindTexture(GL_TEXTURE_2D, texNum);
         ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -575,10 +577,12 @@ void PGTexture::ApplyKeyToPalette()
                 m_palette[i] |= 0xff000000;
             
             hash = ((hash << 5) | (hash >> 26));
-            hash += m_palette[i];
+            hash += (InternalConfig.IgnorePaletteChange
+                              ? (m_palette[i] & 0xff000000)
+                              : m_palette[i]);
         }
         
-        m_palette_hash = (InternalConfig.IgnorePaletteChange ? 0 : hash);
+        m_palette_hash = hash;
         m_palette_dirty = false;
     }
 }
