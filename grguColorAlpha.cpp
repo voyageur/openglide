@@ -17,12 +17,6 @@
 #include "PGTexture.h"
 
 
-// extern functions
-void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
-void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
-GrColor_t ConvertConstantColor( float R, float G, float B, float A );
-
-
 //*************************************************
 //* Sets the Dithering Mode 24->16 bits
 //*************************************************
@@ -106,24 +100,11 @@ grColorMask( FxBool rgb, FxBool a )
 
     glColorMask( rgb, rgb, rgb, a );
 
-//  if (Glide.DepthBufferMode == GR_DEPTHBUFFER_DISABLE)
-//  {
-//      if (a)
-//          OpenGL.AlphaBuffer = true;
-//      else
-//          OpenGL.AlphaBuffer = false;
-//      glColorMask( rgb, rgb, rgb, a );
-//  }
-//  else
-//  {
-//      glColorMask( rgb, rgb, rgb, GL_TRUE );
-//  }
-
 #ifdef OPENGL_DEBUG
     GLErro( "grColorMask" );
 #endif
 }
-//grColorCombine( GR_COMBINE_FUNCTION_SCALE_OTHER, GR_COMBINE_FACTOR_ONE, GR_COMBINE_LOCAL_CONSTANT, GR_COMBINE_OTHER_TEXTURE, FXFALSE )
+
 DLLEXPORT void __stdcall
 grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
@@ -577,13 +558,14 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
     }
 
 //    if ( ! InternalConfig.BlendFuncSeparateEXTEnable )
-    {
+//    {
         glBlendFunc( OpenGL.SrcBlend, OpenGL.DstBlend );
-    }
+//    }
 //    else
-    {
-//        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
-    }
+//    {
+//        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
+//                                OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
+//    }
 
     OpenGL.Blend = !(( rgb_sf == GR_BLEND_ONE ) && ( rgb_df == GR_BLEND_ZERO ));
 
@@ -699,6 +681,7 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
 //      OpenGL.TextureMode = GL_REPLACE;
 //      OpenGL.TextureMode = GL_MODULATE;
 //      OpenGL.TextureMode = GL_BLEND;
+//      OpenGL.TextureMode = GL_ADD;
 }
 
 //----------------------------------------------------------------
@@ -779,18 +762,13 @@ grChromakeyMode( GrChromakeyMode_t mode )
 
     Glide.State.ChromaKeyMode = mode;
 
-    switch ( mode )
+    if ( mode == GR_CHROMAKEY_ENABLE )
     {
-    case GR_CHROMAKEY_DISABLE:
-        OpenGL.ChromaKey = false;
-        break;
-
-    case GR_CHROMAKEY_ENABLE:
-        #ifdef OGL_PARTDONE
-            GlideMsg( "Chromakey Enabled\n" );
-        #endif
         OpenGL.ChromaKey = true;
-        break;
+    }
+    else
+    {
+        OpenGL.ChromaKey = false;
     }
 }
 

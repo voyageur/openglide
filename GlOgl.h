@@ -241,6 +241,9 @@ extern ConfigStruct     UserConfig,
 void __cdecl GlideMsg(char *szString, ...);
 void __cdecl Error(char *szString, ...);
 void GLErro( char *Funcao );
+void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A );
+void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
+GrColor_t ConvertConstantColor( float R, float G, float B, float A );
 
 int DetectMMX();
 
