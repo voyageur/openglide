@@ -341,6 +341,7 @@ void GetOptions()
 	UserConfig.MMXEnable				= false;
 	UserConfig.TDnowEnable				= false;
 
+    /*
 	if ( GetWindowsDirectory( Path, MAX_PATH ) == 0 )
 	{
 		Error( "Could not get the Windows Directory\nExiting...\n" );
@@ -349,6 +350,9 @@ void GetOptions()
 
 	strcat( Path, "\\" );
 	strcat( Path, INIFILE );
+    */
+
+    strcpy( Path, INIFILE );
 
 	GlideMsg("Configuration file is %s\n", Path );
 	
