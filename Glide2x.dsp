@@ -223,10 +223,6 @@ SOURCE=.\grguTex.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Otimizaceos.txt
-# End Source File
-# Begin Source File
-
 SOURCE=.\PGTexture.cpp
 # End Source File
 # Begin Source File
