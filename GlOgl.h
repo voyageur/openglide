@@ -76,6 +76,7 @@ struct BufferStruct
     GrLock_t                Type;
     GrLfbWriteMode_t        WriteMode;
     GrBuffer_t              Buffer;
+    FxBool                  PixelPipeline;
     WORD                    *Address;
 };
 

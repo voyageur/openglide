@@ -36,7 +36,21 @@ grLfbLock( GrLock_t dwType,
     RenderDrawTriangles( );
 
     static int numPixels = Glide.WindowWidth * Glide.WindowHeight;
-    if ( ( dwType & 1 ) == 0 )
+    if ( dwType & 1 )
+    {
+        for ( int i = numPixels - 1; i >= 0; --i )
+        {
+            Glide.DstBuffer.Address[ i ] = BLUE_SCREEN;
+        }
+        Glide.DstBuffer.Lock            = true;
+        Glide.DstBuffer.Type            = dwType;
+        Glide.DstBuffer.Buffer          = dwBuffer;
+        Glide.DstBuffer.WriteMode       = dwWriteMode;
+        Glide.DstBuffer.PixelPipeline   = bPixelPipeline;
+
+        lfbInfo->lfbPtr = Glide.DstBuffer.Address;
+    }
+    else
     {
         int j;
 
@@ -64,25 +78,13 @@ grLfbLock( GrLock_t dwType,
                         (void *)Glide.SrcBuffer.Address );
         }
     
-        Glide.SrcBuffer.Lock = true;
-        Glide.SrcBuffer.Type = dwType;
-        Glide.SrcBuffer.Buffer = dwBuffer;
-        Glide.SrcBuffer.WriteMode = dwWriteMode;
+        Glide.SrcBuffer.Lock            = true;
+        Glide.SrcBuffer.Type            = dwType;
+        Glide.SrcBuffer.Buffer          = dwBuffer;
+        Glide.SrcBuffer.WriteMode       = dwWriteMode;
+        Glide.SrcBuffer.PixelPipeline   = bPixelPipeline;
 
         lfbInfo->lfbPtr = Glide.SrcBuffer.Address;
-    }
-    else
-    {
-        for ( int i = numPixels - 1; i >= 0; --i )
-        {
-            Glide.DstBuffer.Address[ i ] = BLUE_SCREEN;
-        }
-        Glide.DstBuffer.Lock = true;
-        Glide.DstBuffer.Type = dwType;
-        Glide.DstBuffer.Buffer = dwBuffer;
-        Glide.DstBuffer.WriteMode = dwWriteMode;
-
-        lfbInfo->lfbPtr = Glide.DstBuffer.Address;
     }
 
     lfbInfo->writeMode = GR_LFBWRITEMODE_565;
@@ -99,18 +101,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif
     
-    if ( ( dwType & 1 ) == 0 )
-    {
-        if ( ! Glide.SrcBuffer.Lock )
-        {
-            return FXFALSE;
-        }
-        
-        Glide.SrcBuffer.Lock = false;
-        
-        return FXTRUE; 
-    }
-    else
+    if ( dwType & 1 )
     {
         int x,
             y,
@@ -174,8 +165,16 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 
             glRasterPos2i( minx,  miny + ysize );
 
-            glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-
+            if ( ! Glide.DstBuffer.PixelPipeline )
+            {
+                glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+            }
+            else
+            {
+      		    glEnable( GL_SCISSOR_TEST );
+                glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
+                glDisable( GL_SCISSOR_TEST );
+            }
             glDrawBuffer( OpenGL.RenderBuffer );
 
             /* PHBG: don't think this resetting of blend state is needed */
@@ -193,6 +192,17 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
         Glide.DstBuffer.Lock = false;
 
         return FXTRUE;
+    }
+    else
+    {
+        if ( ! Glide.SrcBuffer.Lock )
+        {
+            return FXFALSE;
+        }
+        
+        Glide.SrcBuffer.Lock = false;
+        
+        return FXTRUE; 
     }
 }
 

@@ -25,7 +25,7 @@ DLLEXPORT FxU32 __stdcall
 grTexMinAddress( GrChipID_t tmu )
 {
 #ifdef OGL_DONE
-    GlideMsg( "grTexMinAddress( %d )\n", tmu );
+    GlideMsg( "grTexMinAddress( %d ) = 0\n", tmu );
 #endif
 
     return (FxU32) 0;

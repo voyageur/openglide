@@ -53,7 +53,7 @@ DLLEXPORT void __stdcall
 grConstantColorValue( GrColor_t value )
 {
 #ifdef OGL_DONE
-    GlideMsg( "grConstantColorValue( %x )\n", value );
+    GlideMsg( "grConstantColorValue( 0x%X )\n", value );
 #endif
 
     Glide.State.ConstantColorValue = value;
@@ -89,7 +89,8 @@ DLLEXPORT void __stdcall
 grColorMask( FxBool rgb, FxBool a )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg( "grColorMask( %d, %d )\n", rgb, a );
+    GlideMsg( "grColorMask( %s, %s )\n", 
+        rgb ? "TRUE" : "FALSE", a  ? "TRUE" : "FALSE" );
 #endif
 
     RenderDrawTriangles( );
@@ -111,8 +112,8 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 FxBool invert )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
-    GlideMsg( "grColorCombine( %d, %d, %d, %d, %d )\n",
-        function, factor, local, other, invert );
+    GlideMsg( "grColorCombine( %d, %d, %d, %d, %s )\n",
+        function, factor, local, other, invert ? "TRUE" : "FALSE" );
 #endif
 
     RenderDrawTriangles( );
@@ -476,8 +477,8 @@ grAlphaTestFunction( GrCmpFnc_t function )
 
 //----------------------------------------------------------------
 DLLEXPORT void __stdcall
-grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
-                     GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df )
+grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
+                      GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df )
 {
 #ifdef OGL_PARTDONE
     GlideMsg( "grAlphaBlendFunction( %d, %d, %d, %d )\n",
@@ -579,13 +580,13 @@ grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 //----------------------------------------------------------------
 //grAlphaCombine( 3, 8, 1, 2, 0 ) from Unreal
 DLLEXPORT void __stdcall
-grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
-               GrCombineLocal_t local, GrCombineOther_t other,
-               FxBool invert )
+grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
+                GrCombineLocal_t local, GrCombineOther_t other,
+                FxBool invert )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
-    GlideMsg( "grAlphaCombine( %d, %d, %d, %d, %d )\n",
-        function, factor, local, other, invert );
+    GlideMsg( "grAlphaCombine( %d, %d, %d, %d, %s )\n",
+        function, factor, local, other, invert ? "TRUE" : "FALSE" );
 #endif
 
     RenderDrawTriangles( );
@@ -689,7 +690,7 @@ DLLEXPORT void __stdcall
 grAlphaControlsITRGBLighting( FxBool enable )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg("grAlphaControlsTGBALighting( %d )\n", enable );
+    GlideMsg("grAlphaControlsTGBALighting( %s )\n", enable ? "TRUE" : "FALSE" );
 #endif
 }
 
@@ -732,7 +733,7 @@ DLLEXPORT void __stdcall
 grChromakeyValue( GrColor_t value )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg( "grChromakeyValue( %d )\n", value );
+    GlideMsg( "grChromakeyValue( 0x%X )\n", value );
 #endif
 
     RenderDrawTriangles( );
@@ -754,8 +755,9 @@ DLLEXPORT void __stdcall
 grChromakeyMode( GrChromakeyMode_t mode )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg( "grChromakeyMode( %d )\n", mode );
+    GlideMsg( "grChromakeyMode( %s )\n", mode ? "TRUE" : "FALSE" );
 #endif
+
     RenderDrawTriangles( );
 
     Textures->ChromakeyMode( mode );
