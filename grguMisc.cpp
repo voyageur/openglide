@@ -275,3 +275,28 @@ guEndianSwapBytes( FxU16 value )
 
     return ( value << 8 ) | ( value >> 8 );
 }
+
+DLLEXPORT void __stdcall
+guMovieStart( void )
+{
+#ifdef OGL_NOTDONE
+    GlideMsg( "guMovieStart( ) - Not Supported\n" );
+#endif
+}
+
+DLLEXPORT void __stdcall
+guMovieStop( void )
+{
+#ifdef OGL_NOTDONE
+    GlideMsg( "guMovieStop( ) - Not Supported\n" );
+#endif
+}
+
+DLLEXPORT void __stdcall
+guMovieSetName( const char *name )
+{
+#ifdef OGL_NOTDONE
+    GlideMsg( "guMovieSetName( ) - Not Supported\n" );
+#endif
+}
+

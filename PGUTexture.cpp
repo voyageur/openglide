@@ -61,7 +61,7 @@ GrMipMapId_t PGUTexture::AllocateMemory( GrChipID_t tmu, FxU8 odd_even_mask,
 #endif
 
     if ( ( m_free_id >= MAX_MM ) || 
-         ( ( m_free_mem + size ) >= Textures->m_tex_memory_size ) )
+         ( ( m_free_mem + size ) >= Textures->GetMemorySize( ) ) )
     {
 #ifdef OGL_UTEX
         GlideMsg("Allocation failed\n");
@@ -201,5 +201,5 @@ GrMipMapId_t PGUTexture::GetCurrentMipMap( GrChipID_t tmu )
 
 FxU32 PGUTexture::MemQueryAvail( GrChipID_t tmu )
 {
-    return Textures->m_tex_memory_size - m_free_mem;
+    return Textures->GetMemorySize( ) - m_free_mem;
 }

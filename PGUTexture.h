@@ -16,13 +16,6 @@
 
 class PGUTexture  
 {
-    enum { MAX_MM = 1024 };
-    GrMipMapInfo mm_info[ MAX_MM ];
-    FxU32 mm_start[ MAX_MM ];
-    FxU32 m_free_mem;
-    GrMipMapId_t m_free_id;
-    GrMipMapId_t m_current_id;
-
 public:
     FxU32 MemQueryAvail( GrChipID_t tmu );
     GrMipMapId_t GetCurrentMipMap( GrChipID_t tmu );
@@ -46,8 +39,20 @@ public:
                                  GrTextureFilterMode_t minfilter_mode, 
                                  GrTextureFilterMode_t magfilter_mode, 
                                  float lod_bias, FxBool trilinear );
+
     PGUTexture( void );
     virtual ~PGUTexture( void );
+
+
+private:
+
+    enum { MAX_MM = 1024 };
+
+    GrMipMapInfo    mm_info[ MAX_MM ];
+    FxU32           mm_start[ MAX_MM ];
+    FxU32           m_free_mem;
+    GrMipMapId_t    m_free_id;
+    GrMipMapId_t    m_current_id;
 };
 
 extern PGUTexture UTextures;

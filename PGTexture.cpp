@@ -606,3 +606,8 @@ void PGTexture::NCCTable( GrNCCTable_t tab )
         m_ncc_select = tab;
     }
 }
+
+FxU32 PGTexture::GetMemorySize( void )
+{
+    return m_tex_memory_size;
+}
