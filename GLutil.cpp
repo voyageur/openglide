@@ -563,7 +563,7 @@ void GetOptions( void )
         fprintf( IniFile, "EnableFog=%d\n", UserConfig.FogEnable );
         fprintf( IniFile, "EnablePrecisionFix=%d\n", UserConfig.PrecisionFixEnable );
         fprintf( IniFile, "EnableWrap565=%d\n", UserConfig.Wrap565Enable );
-//      fprintf( IniFile, "EnableMultiTextureEXT=%d\n", UserConfig.MultiTextureEXTEnable );
+        fprintf( IniFile, "EnableMultiTextureEXT=%d\n", UserConfig.MultiTextureEXTEnable );
         fprintf( IniFile, "EnablePaletteEXT=%d\n", UserConfig.PaletteEXTEnable );
         fprintf( IniFile, "EnablePackedPixelsEXT=%d\n", UserConfig.PackedPixelsEXTEnable );
         fprintf( IniFile, "EnableVertexArrayEXT=%d\n", UserConfig.VertexArrayEXTEnable );
@@ -598,8 +598,8 @@ void GetOptions( void )
             UserConfig.PrecisionFixEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnableWrap565" );
             UserConfig.Wrap565Enable = atoi( Pointer );
-//          Pointer = FindConfig( Path, "EnableMultiTextureEXT" );
-//          UserConfig.MultiTextureEXTEnable = atoi( Pointer );
+            Pointer = FindConfig( Path, "EnableMultiTextureEXT" );
+            UserConfig.MultiTextureEXTEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnablePaletteEXT" );
             UserConfig.PaletteEXTEnable = atoi( Pointer );
             Pointer = FindConfig( Path, "EnablePackedPixelsEXT" );

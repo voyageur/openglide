@@ -18,6 +18,7 @@ void ValidateUserConfig();
 
 // Extensions Functions Declarations
 extern PFNGLMULTITEXCOORD4FARBPROC              glMultiTexCoord4fARB;
+extern PFNGLMULTITEXCOORD4FVARBPROC             glMultiTexCoord4fvARB;
 extern PFNGLACTIVETEXTUREARBPROC                glActiveTextureARB;
 extern PFNGLSECONDARYCOLOR3UBVEXTPROC           glSecondaryColor3ubvEXT;
 extern PFNGLSECONDARYCOLOR3UBEXTPROC            glSecondaryColor3ubEXT;

@@ -28,16 +28,31 @@ public:
         GrTexInfo info;
         FxU32 hash;
         GLuint texNum;
+        GLuint tex2Num;
         Record *next;
 
-        Record( void )
+        Record( bool two_tex )
         {
             glGenTextures( 1, &texNum );
+
+            if ( two_tex )
+            {
+                glGenTextures( 1, &tex2Num );
+            }
+            else
+            {
+                tex2Num = 0;
+            }
         };
 
         ~Record( void )
         {
             glDeleteTextures( 1, &texNum );
+
+            if ( tex2Num != 0 )
+            {
+                glDeleteTextures( 1, &texNum );
+            }
         };
 
         bool Match( FxU32 stt, GrTexInfo *inf, FxU32 h )
@@ -49,10 +64,10 @@ public:
                 && (hash == h || h == 0));
         };
     };
-    GLuint Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash );
+    void Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num );
     void WipeRange( FxU32 startAddress, FxU32 endAddress, FxU32 hash );
     bool Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
-               GLuint *pTexNum, bool *pal_change );
+               GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change );
     TexDB( void );
     virtual ~TexDB( void );
 

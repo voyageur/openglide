@@ -247,7 +247,7 @@ bool InitWindow( HWND hwnd )
     GlideMsg( "Fog = %s\n", InternalConfig.FogEnable ? "true" : "false" );
     GlideMsg( "Precision Fix = %s\n", InternalConfig.PrecisionFixEnable ? "true" : "false" );
     GlideMsg( "565 Wrap = %s\n", InternalConfig.Wrap565Enable ? "true" : "false" );
-//  GlideMsg( "MultiTexture = %s\n", InternalConfig.MultiTextureEXTEnable ? "true" : "false" );
+    GlideMsg( "MultiTexture = %s\n", InternalConfig.MultiTextureEXTEnable ? "true" : "false" );
     GlideMsg( "Palette Extension = %s\n", InternalConfig.PaletteEXTEnable ? "true" : "false" );
     GlideMsg( "Packed Pixels Extension = %s\n", InternalConfig.PackedPixelsEXTEnable ? "true" : "false" );
 //  GlideMsg( "Texture Env Extension = %s\n", InternalConfig.TextureEnvEXTEnable ? "true" : "false" );

@@ -42,7 +42,7 @@ TexDB::~TexDB( void )
 }
 
 bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
-                  GLuint *pTexNum, bool *pal_change )
+                  GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change )
 {
     Record  * r;
     FxU32   sect = startAddress / ( 32 * 1024 );
@@ -57,6 +57,11 @@ bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
         if ( r->Match( startAddress, info, ( pal_change == NULL ) ? hash : 0 ) )
         {
             *pTexNum = r->texNum;
+
+            if ( pTex2Num )
+            {
+                *pTex2Num = r->tex2Num;
+            }
 
             if ( ( pal_change != NULL ) && ( r->hash != hash ) )
             {
@@ -123,9 +128,9 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
     }
 }
 
-GLuint TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash )
+void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num )
 {
-    Record  *r = new Record;
+    Record  *r = new Record( pTex2Num != NULL );
     FxU32   sect;
 
     sect = startAddress / ( 32 * 1024 );
@@ -146,7 +151,12 @@ GLuint TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 
     GlideMsg( "Add tex %d\n", r->texNum );
 #endif
 
-    return r->texNum;
+    *pTexNum = r->texNum;
+
+    if ( pTex2Num )
+    {
+        *pTex2Num = r->tex2Num;
+    }
 }
 
 

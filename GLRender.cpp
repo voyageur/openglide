@@ -126,6 +126,7 @@ void RenderDrawTriangles( void )
     static BYTE     * Buffer1,
                     * Buffer2;
     static GLuint   TNumber;
+    bool            use_two_tex = false;
 
     if ( ! OGLRender.NumberOfTriangles )
     {
@@ -136,7 +137,16 @@ void RenderDrawTriangles( void )
     {
         glEnable( GL_TEXTURE_2D );
 
-        Textures->MakeReady();
+        use_two_tex = Textures->MakeReady();
+
+        if( use_two_tex )
+        {
+            glActiveTextureARB( GL_TEXTURE1_ARB );
+
+            glEnable( GL_TEXTURE_2D );
+
+            glActiveTextureARB( GL_TEXTURE0_ARB );
+        }
     }
     else
     {
@@ -210,22 +220,43 @@ void RenderDrawTriangles( void )
                 glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
                 glFogCoordfEXT( OGLRender.TFog[ i ].af );
                 glTexCoord4fv( &OGLRender.TTexture[ i ].as );
+                if ( use_two_tex )
+                {
+                    glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].as );
+                }
                 glVertex3fv( &OGLRender.TVertex[ i ].ax );
                 
                 glColor4fv( &OGLRender.TColor[ i ].br );
                 glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].br );
                 glFogCoordfEXT( OGLRender.TFog[ i ].bf );
                 glTexCoord4fv( &OGLRender.TTexture[ i ].bs );
+                if ( use_two_tex )
+                {
+                    glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].bs );
+                }
                 glVertex3fv( &OGLRender.TVertex[ i ].bx );
                 
                 glColor4fv( &OGLRender.TColor[ i ].cr );
                 glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].cr );
                 glFogCoordfEXT( OGLRender.TFog[ i ].cf );
                 glTexCoord4fv( &OGLRender.TTexture[ i ].cs );
+                if ( use_two_tex )
+                {
+                    glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].cs );
+                }
                 glVertex3fv( &OGLRender.TVertex[ i ].cx );
             }
             glEnd( );
         }
+    }
+
+    if ( use_two_tex )
+    {
+        glActiveTextureARB( GL_TEXTURE1_ARB );
+
+        glDisable( GL_TEXTURE_2D );
+
+        glActiveTextureARB( GL_TEXTURE0_ARB );
     }
 
 

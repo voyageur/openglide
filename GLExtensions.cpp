@@ -16,6 +16,7 @@
 
 //Functions
 PFNGLMULTITEXCOORD4FARBPROC             glMultiTexCoord4fARB = NULL;
+PFNGLMULTITEXCOORD4FVARBPROC            glMultiTexCoord4fvARB = NULL;
 PFNGLACTIVETEXTUREARBPROC               glActiveTextureARB = NULL;
 
 PFNGLSECONDARYCOLOR3UBVEXTPROC          glSecondaryColor3ubvEXT = NULL;
@@ -234,8 +235,10 @@ void GLExtensions( void )
         OpenGL.MultiTextureTMUs     = NumberOfTMUs;
         glActiveTextureARB          = (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress( "glActiveTextureARB" );
         glMultiTexCoord4fARB        = (PFNGLMULTITEXCOORD4FARBPROC) wglGetProcAddress( "glMultiTexCoord4fARB" );
+        glMultiTexCoord4fvARB       = (PFNGLMULTITEXCOORD4FVARBPROC) wglGetProcAddress( "glMultiTexCoord4fvARB" );
 
-        if ( ( glActiveTextureARB == NULL ) || ( glMultiTexCoord4fARB == NULL ) )
+        if ( ( glActiveTextureARB == NULL ) || ( glMultiTexCoord4fARB == NULL )
+                                            || ( glMultiTexCoord4fvARB == NULL ) )
         {
             Error( "Could not get the address of MultiTexture functions!\n" );
             InternalConfig.MultiTextureEXTEnable = false;

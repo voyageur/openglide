@@ -248,6 +248,16 @@ inline void ConvertAP88to8888( WORD *Buffer1, DWORD *Buffer2, DWORD Pixels, DWOR
     }
 }
 
+inline void SplitAP88( WORD *ap88, BYTE *index, BYTE *alpha, DWORD pixels )
+{
+    for ( DWORD i = pixels; i > 0; i-- )
+    {
+        *alpha++ = ( *ap88 >> 8 );
+        *index++ = ( *ap88++ & 0xff );
+    }
+}
+
+
 PGTexture::PGTexture( int mem_size )
 {
     m_palette_dirty = true;
@@ -329,28 +339,33 @@ void PGTexture::DownloadTable( GrTexTable_t type, void *data, int first, int cou
     }
 }
 
-void PGTexture::MakeReady( void )
+bool PGTexture::MakeReady( void )
 {
     FxU8        * data;
     TexValues   texVals;
     GLuint      texNum;
+    GLuint      tex2Num;
     FxU32       size;
     FxU32       test_hash;
     FxU32       wipe_hash;
     bool        palette_changed;
     bool        * pal_change_ptr;
     bool        use_mipmap_ext;
+    bool        use_mipmap_ext2;
+    bool        use_two_textures;
 
     if( !m_valid )
     {
-        return;
+        return false;
     }
 
-    test_hash       = 0;
-    wipe_hash       = 0;
-    palette_changed = false;
-    use_mipmap_ext  = (InternalConfig.EnableMipMaps && !InternalConfig.BuildMipMaps);
-    pal_change_ptr  = NULL;
+    test_hash        = 0;
+    wipe_hash        = 0;
+    palette_changed  = false;
+    use_mipmap_ext   = (InternalConfig.EnableMipMaps && !InternalConfig.BuildMipMaps);
+    use_mipmap_ext2  = use_mipmap_ext;
+    use_two_textures = false;
+    pal_change_ptr   = NULL;
     
     data = m_memory + m_startAddress;
 
@@ -381,18 +396,36 @@ void PGTexture::MakeReady( void )
 
     case GR_TEXFMT_AP_88:
         ApplyKeyToPalette( );
+        if ( InternalConfig.PaletteEXTEnable && InternalConfig.MultiTextureEXTEnable )
+        {
+            use_mipmap_ext   = false;
+            pal_change_ptr   = &palette_changed;
+            use_two_textures = true;
+        }
+
         test_hash = m_palette_hash;
         break;
     }
 
     /* See if we already have an OpenGL texture to match this */
-    if ( m_db.Find( m_startAddress, &m_info, test_hash, &texNum, pal_change_ptr ) )
+    if ( m_db.Find( m_startAddress, &m_info, test_hash,
+                    &texNum, use_two_textures ? &tex2Num : NULL,
+                    pal_change_ptr ) )
     {
         ::glBindTexture( GL_TEXTURE_2D, texNum );
 
         if ( palette_changed )
         {
             glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette);
+        }
+
+        if ( use_two_textures )
+        {
+            glActiveTextureARB( GL_TEXTURE1_ARB );
+
+            glBindTexture( GL_TEXTURE_2D, tex2Num );
+
+            glActiveTextureARB( GL_TEXTURE0_ARB );
         }
     }
     else
@@ -403,7 +436,8 @@ void PGTexture::MakeReady( void )
         m_db.WipeRange( m_startAddress, m_startAddress + size, wipe_hash );
 
         /* Add this new texture to the data base */
-        texNum = m_db.Add( m_startAddress, m_startAddress + size, &m_info, test_hash );
+        m_db.Add( m_startAddress, m_startAddress + size, &m_info, test_hash,
+            &texNum, use_two_textures ? &tex2Num : NULL );
 
         glBindTexture( GL_TEXTURE_2D, texNum);
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -412,6 +446,22 @@ void PGTexture::MakeReady( void )
         if( use_mipmap_ext )
         {
             glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true );
+        }
+
+        if ( use_two_textures )
+        {
+            glActiveTextureARB( GL_TEXTURE1_ARB );
+
+            glBindTexture( GL_TEXTURE_2D, tex2Num );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+            if( use_mipmap_ext2 )
+            {
+                glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true );
+            }
+            
+            glActiveTextureARB( GL_TEXTURE0_ARB );
         }
 
         switch ( m_info.format )
@@ -466,11 +516,38 @@ void PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_AP_88:
-            ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
-            if ( InternalConfig.BuildMipMaps )
+            if ( use_two_textures )
             {
-                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                FxU32 *tex_temp2 = m_tex_temp + 256*128;
+
+                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, m_palette);
+
+                SplitAP88( (WORD *)data, (BYTE *)m_tex_temp, (BYTE *)tex_temp2, texVals.nPixels );
+                
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, texVals.width, texVals.height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.EnableMipMaps )
+                {
+                    genPaletteMipmaps(texVals.width, texVals.height, (BYTE *)m_tex_temp);
+                }
+
+                glActiveTextureARB( GL_TEXTURE1_ARB );
+
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_ALPHA, texVals.width, texVals.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex_temp2);
+                if ( InternalConfig.BuildMipMaps )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_ALPHA, texVals.width, texVals.height, GL_ALPHA, GL_UNSIGNED_BYTE, tex_temp2);
+                }
+
+                glActiveTextureARB( GL_TEXTURE0_ARB );
+            }
+            else
+            {
+                ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.BuildMipMaps )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             break;
             
@@ -540,9 +617,24 @@ void PGTexture::MakeReady( void )
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
-
+    
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
+    
+    if ( use_two_textures )
+    {
+        glActiveTextureARB( GL_TEXTURE1_ARB );
+        
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
+        
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
+        
+        glActiveTextureARB( GL_TEXTURE0_ARB );
+    }
+
+    return use_two_textures;
 }
 
 FxU32 PGTexture::TextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
