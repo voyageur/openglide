@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-char *OpenGLideVersion = "Version0.08";
+char *OpenGLideVersion = "Version0.09a2";
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -249,6 +249,7 @@ bool InitWindow( HWND hwnd )
     GlideMsg( "Init Full Screen = %s\n", InternalConfig.InitFullScreen ? "true" : "false" );
     GlideMsg( "Fog = %s\n", InternalConfig.FogEnable ? "true" : "false" );
     GlideMsg( "Precision Fix = %s\n", InternalConfig.PrecisionFixEnable ? "true" : "false" );
+    GlideMsg( "Wrap 565 to 5551 = %s\n", InternalConfig.Wrap565Enable ? "true" : "false" );
     GlideMsg( "MultiTexture = %s\n", InternalConfig.MultiTextureEXTEnable ? "true" : "false" );
     GlideMsg( "Palette Extension = %s\n", InternalConfig.PaletteEXTEnable ? "true" : "false" );
     GlideMsg( "Vertex Array Extension = %s\n", InternalConfig.VertexArrayEXTEnable ? "true" : "false" );

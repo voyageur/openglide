@@ -109,6 +109,7 @@ void ValidateUserConfig( void )
     InternalConfig.EnableMipMaps                = UserConfig.EnableMipMaps;
     InternalConfig.BuildMipMaps                 = false;
     InternalConfig.IgnorePaletteChange          = UserConfig.IgnorePaletteChange;
+    InternalConfig.Wrap565Enable                = UserConfig.Wrap565Enable;
 
     InternalConfig.MultiTextureEXTEnable        = false;
     InternalConfig.PaletteEXTEnable             = false;

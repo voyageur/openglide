@@ -448,6 +448,7 @@ void GetOptions( void )
     UserConfig.VertexArrayEXTEnable         = FALSE;
     UserConfig.FogCoordEXTEnable            = TRUE;
     UserConfig.BlendFuncSeparateEXTEnable   = FALSE;
+    UserConfig.Wrap565Enable                = FALSE;
 
     UserConfig.TextureMemorySize            = 16;
     UserConfig.FrameBufferMemorySize        = 8;
@@ -468,6 +469,7 @@ void GetOptions( void )
         fprintf( IniFile, "InitFullScreen=%d\n", UserConfig.InitFullScreen );
         fprintf( IniFile, "EnableMipMaps=%d\n", UserConfig.EnableMipMaps );
         fprintf( IniFile, "IgnorePaletteChange=%d\n", UserConfig.IgnorePaletteChange );
+        fprintf( IniFile, "Wrap565to5551=%d\n", UserConfig.Wrap565Enable );
         fprintf( IniFile, "EnableFog=%d\n", UserConfig.FogEnable );
         fprintf( IniFile, "EnablePrecisionFix=%d\n", UserConfig.PrecisionFixEnable );
         fprintf( IniFile, "EnableMultiTextureEXT=%d\n", UserConfig.MultiTextureEXTEnable );
@@ -508,6 +510,8 @@ void GetOptions( void )
             UserConfig.TextureMemorySize = atoi( Pointer );
             Pointer = FindConfig( Path, "WrapperPriority" );
             UserConfig.Priority = atoi( Pointer );
+            Pointer = FindConfig( Path, "Wrap565to5551" );
+            UserConfig.Wrap565Enable = atoi( Pointer );
             Pointer = FindConfig( Path, "FrameBufferMemorySize" );
             UserConfig.FrameBufferMemorySize = atoi( Pointer );
         }

@@ -216,6 +216,7 @@ struct ConfigStruct
     int     EnableMipMaps;
     int     BuildMipMaps;
     int     IgnorePaletteChange;
+    int     Wrap565Enable;
 
     int     MultiTextureEXTEnable;
     int     PaletteEXTEnable;

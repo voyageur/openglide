@@ -139,6 +139,9 @@
 			Name="Header"
 			Filter=".h">
 			<File
+				RelativePath="FormatConversion.h">
+			</File>
+			<File
 				RelativePath=".\GLRender.h">
 			</File>
 			<File
@@ -178,6 +181,9 @@
 		<Filter
 			Name="Source"
 			Filter=".c .cpp">
+			<File
+				RelativePath="FormatConversion.cpp">
+			</File>
 			<File
 				RelativePath=".\GLExtensions.cpp">
 			</File>
