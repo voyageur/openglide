@@ -92,9 +92,9 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 
                 glBegin( GL_TRIANGLE_STRIP );
                     glVertex3f( 0.0f,                      0.0f,                       depth * D1OVER65536 );
+                    glVertex3f( 0.0f,                      (float) Glide.WindowHeight, depth * D1OVER65536 );
                     glVertex3f( (float) Glide.WindowWidth, 0.0f,                       depth * D1OVER65536 );
                     glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, depth * D1OVER65536 );
-                    glVertex3f( 0.0f,                      (float) Glide.WindowHeight, depth * D1OVER65536 );
                 glEnd( );
 
             glEndList( );
