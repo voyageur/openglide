@@ -514,7 +514,7 @@ void GetOptions()
 	UserConfig.FogEnable				= false;
 	UserConfig.InitFullScreen			= false;
 	UserConfig.PrecisionFixEnable		= true;
-	UserConfig.CreateWindow				= true;
+	UserConfig.CreateWindow				= false;
 	UserConfig.BuildMipMaps				= true;
 
 	UserConfig.Wrap565Enable			= false;
@@ -523,16 +523,16 @@ void GetOptions()
 	UserConfig.PaletteEXTEnable			= false;
 	UserConfig.PackedPixelsEXTEnable	= false;
 	UserConfig.TextureEnvEXTEnable		= false;
-	UserConfig.VertexArrayEXTEnable		= true;
-	UserConfig.SecondaryColorEXTEnable	= true;
-	UserConfig.FogCoordEXTEnable		= true;
+	UserConfig.VertexArrayEXTEnable		= false;
+	UserConfig.SecondaryColorEXTEnable	= false;
+	UserConfig.FogCoordEXTEnable		= false;
 
 	UserConfig.PalettePrecision			= 32;
 	UserConfig.TextureMemorySize		= 8;
 	UserConfig.FrameBufferMemorySize	= 2;
 
 	UserConfig.Priority					= 0;
-	UserConfig.MMXEnable				= true;
+	UserConfig.MMXEnable				= false;
 	UserConfig.TDnowEnable				= false;
 
 	if ( GetWindowsDirectory( Path, MAX_PATH ) == 0 )
@@ -620,7 +620,7 @@ void GetOptions()
 		}
 		else
 		{
-			remove( INIFILE );
+			remove( Path );
 			GetOptions();
 		}
 	}
