@@ -351,16 +351,23 @@ PGTexture::~PGTexture( void )
 
 void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
 {
-    int size = TextureMemRequired( evenOdd, info );
+//    int size = TextureMemRequired( evenOdd, info );
+    int mip_size = MipMapMemRequired( info->smallLod, 
+                                      info->aspectRatio, 
+                                      info->format );
+    int tex_size = TextureMemRequired( evenOdd, info );
 
-    if ( startAddress + size <= m_tex_memory_size )
+//    if ( startAddress + size <= m_tex_memory_size )
+    if ( startAddress + tex_size <= m_tex_memory_size )
     {
-        memcpy( m_memory + startAddress, info->data, size );
+//        memcpy( m_memory + startAddress, info->data, size );
+        memcpy( m_memory + startAddress + tex_size - mip_size, info->data, mip_size );
     }
 
     /* Any texture based on memory crossing this range
      * is now out of date */
-    m_db->WipeRange( startAddress, startAddress + size, 0 );
+//    m_db->WipeRange( startAddress, startAddress + size, 0 );
+    m_db->WipeRange( startAddress, startAddress + tex_size, 0 );
 }
 
 void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
@@ -520,7 +527,7 @@ bool PGTexture::MakeReady( void )
                     &texNum, use_two_textures ? &tex2Num : NULL,
                     pal_change_ptr ) )
     {
-        ::glBindTexture( GL_TEXTURE_2D, texNum );
+        glBindTexture( GL_TEXTURE_2D, texNum );
 
         if ( palette_changed )
         {
@@ -575,29 +582,71 @@ bool PGTexture::MakeReady( void )
         switch ( m_info.format )
         {
         case GR_TEXFMT_RGB_565:
-            Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 3, texVals.width, texVals.height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
+            }
+            else
+            {
+                Convert565to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             if ( InternalConfig.BuildMipMaps )
             {
-                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.OGLVersion > 1 )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 3, texVals.width, texVals.height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
+                }
+                else
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             break;
             
         case GR_TEXFMT_ARGB_4444:
-            Convert4444to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data );
+            }
+            else
+            {
+                Convert4444to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             if ( InternalConfig.BuildMipMaps )
             {
-                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.OGLVersion > 1 )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data );
+                }
+                else
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             break;
             
         case GR_TEXFMT_ARGB_1555:
-            Convert1555to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            if ( InternalConfig.OGLVersion > 1 )
+            {
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
+            }
+            else
+            {
+                Convert1555to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             if ( InternalConfig.BuildMipMaps )
             {
-                gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                if ( InternalConfig.OGLVersion > 1 )
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
+                }
+                else
+                {
+                    gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+                }
             }
             break;
             
@@ -666,8 +715,6 @@ bool PGTexture::MakeReady( void )
             {
                 gluBuild2DMipmaps( GL_TEXTURE_2D, 4, texVals.width, texVals.height, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
             }
-            //ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
-            //glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
             break;
             
         case GR_TEXFMT_ALPHA_INTENSITY_88:
@@ -680,8 +727,10 @@ bool PGTexture::MakeReady( void )
             
         case GR_TEXFMT_INTENSITY_8:
             glTexImage2D( GL_TEXTURE_2D, texVals.lod, 1, texVals.width, texVals.height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data );
-            if(InternalConfig.BuildMipMaps)
+            if ( InternalConfig.BuildMipMaps )
+            {
                 gluBuild2DMipmaps( GL_TEXTURE_2D, 1, texVals.width, texVals.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, data );
+            }
             break;
             
         case GR_TEXFMT_ALPHA_INTENSITY_44:
