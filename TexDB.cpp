@@ -9,7 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
-#include "glogl.h"
+#include "GlOgl.h"
 #include "TexDB.h"
 
 //////////////////////////////////////////////////////////////////////
