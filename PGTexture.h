@@ -7,6 +7,7 @@
 
 #include "Glide.h"	// Added by ClassView
 #include "TexDB.h"	// Added by ClassView
+#include "3dfx.h"	// Added by ClassView
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -22,6 +23,8 @@ class PGTexture
     };
 
 private:
+	FxU32 m_palette_hash;
+	void ApplyKeyToPalette(FxU32 *pal);
 	TexDB m_db;
 	GrChromakeyMode_t m_chromakey_mode;
 	GrColor_t m_chromakey_value;

@@ -257,7 +257,21 @@ void PGTexture::Source(FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
 void PGTexture::DownloadTable(GrTexTable_t type, void *data)
 {
     if(type == GR_TEXTABLE_PALETTE)
+    {
+        FxU32 hash;
+        int i;
+
         memcpy(m_palette, data, sizeof(m_palette));
+
+        hash = 0;
+        for(i = 0; i < 256; i++)
+        {
+            hash = ((hash << 5) | (hash >> 26));
+            hash += m_palette[i];
+        }
+
+        m_palette_hash = hash;
+    }
 }
 
 void PGTexture::MakeReady()
@@ -266,7 +280,6 @@ void PGTexture::MakeReady()
     TexValues texVals;
     GLuint texNum;
     FxU32 size;
-    int i;
 
     if(!m_valid)
         return;
@@ -274,19 +287,11 @@ void PGTexture::MakeReady()
     data = m_memory + m_startAddress;
 
     GetTexValues(&texVals);
-
-    for(i = 0; i < 256; i++)
-    {
-        if(m_chromakey_mode && (m_palette[i] & 0x00ffffff) == m_chromakey_value)
-            m_palette[i] &= 0x00ffffff;
-        else
-            m_palette[i] |= 0xff000000;
-    }
-
+    
     size = TextureMemRequired(m_evenOdd, &m_info);
 
     /* See if we already have an OpenGL texture to match this */
-    if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, m_palette, &texNum))
+    if(m_db.Find(m_startAddress, m_startAddress + size, &m_info, m_palette_hash, &texNum))
     {
         ::glBindTexture(GL_TEXTURE_2D, texNum);
     }
@@ -298,11 +303,12 @@ void PGTexture::MakeReady()
         m_db.WipeRange(m_startAddress, m_startAddress + size);
 
         /* Add this new texture to the data base */
-        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, m_palette);
+        texNum = m_db.Add(m_startAddress, m_startAddress + size, &m_info, m_palette_hash);
 
         ::glBindTexture(GL_TEXTURE_2D, texNum);
         ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         ::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
         switch(m_info.format)
         {
@@ -322,13 +328,21 @@ void PGTexture::MakeReady()
             break;
             
         case GR_TEXFMT_P_8:
-            ConvertP8to8888( data, m_tex_temp, texVals.nPixels, m_palette );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            {
+                FxU32 pal[256];
+                ApplyKeyToPalette(pal);
+                ConvertP8to8888( data, m_tex_temp, texVals.nPixels, pal );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             break;
             
         case GR_TEXFMT_AP_88:
-            ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
-            glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            {
+                FxU32 pal[256];
+                ApplyKeyToPalette(pal);
+                ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, pal );
+                glTexImage2D( GL_TEXTURE_2D, texVals.lod, 4, texVals.width, texVals.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
+            }
             break;
             
         case GR_TEXFMT_ALPHA_8:
@@ -511,4 +525,17 @@ void PGTexture::ChromakeyValue(GrColor_t value)
 void PGTexture::ChromakeyMode(GrChromakeyMode_t mode)
 {
     m_chromakey_mode = mode;
+}
+
+void PGTexture::ApplyKeyToPalette(FxU32 *pal)
+{
+    int i;
+    
+    for(i = 0; i < 256; i++)
+    {
+        if(m_chromakey_mode && (m_palette[i] & 0x00ffffff) == m_chromakey_value)
+            pal[i] = (m_palette[i] & 0x00ffffff);
+        else
+            pal[i] = (m_palette[i] |= 0xff000000);
+    }
 }

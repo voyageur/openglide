@@ -17,7 +17,7 @@ public:
         FxU32 startAddress;
         FxU32 endAddress;
         GrTexInfo info;
-        FxU32 palette[256];
+        FxU32 hash;
         GLuint texNum;
         Record *next;
 
@@ -31,24 +31,23 @@ public:
             glDeleteTextures(1, &texNum);
         };
 
-        bool Match(FxU32 stt, GrTexInfo *inf, FxU32 *pal)
+        bool Match(FxU32 stt, GrTexInfo *inf, FxU32 h)
         {
-            return startAddress == stt
+            return (startAddress == stt
                 && inf->largeLod == info.largeLod
                 && inf->aspectRatio == info.aspectRatio
                 && inf->format == info.format
-                && ((inf->format == GR_TEXFMT_P_8 || inf->format == GR_TEXFMT_AP_88)
-                                  ? memcmp(palette, pal, sizeof(palette)) == 0
-                                  : true);
+                && hash == h);
         };
     };
-	GLuint Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 *palette);
+	GLuint Add(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash);
 	void WipeRange(FxU32 startAddress, FxU32 endAddress);
-	bool Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 *palette, GLuint *pTexNum);
+	bool Find(FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum);
 	TexDB();
 	virtual ~TexDB();
 private:
-    Record *m_first;
+    enum {TEX_SECTIONS = 256};
+    Record *m_first[TEX_SECTIONS];
 };
 
 #endif // !defined(AFX_TEXDB_H__4D8DBC18_A31F_4E9E_9863_E0DC9635872E__INCLUDED_)
