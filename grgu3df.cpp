@@ -12,7 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "glogl.h"
+#include "GlOgl.h"
 
 // extern variables and functions
 DWORD GetTexSize( const int Lod, const int aspectRatio, const int format );
