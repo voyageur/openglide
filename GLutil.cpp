@@ -189,13 +189,19 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 	int						PixFormat;
 	unsigned int			BitsPerPixel;
 
-    mode_changed = (UserConfig.InitFullScreen ? SetScreenMode(hwnd, width, height)
-                                                  : false);
-
     if(hwnd == NULL)
     {
         MessageBox(NULL, "NULL window specified", "Error", MB_OK);
         exit(1);
+    }
+
+    mode_changed = false;
+
+    if(UserConfig.InitFullScreen)
+    {
+        SetWindowLong(hwnd, GWL_STYLE, WS_POPUP|WS_VISIBLE|WS_CLIPCHILDREN|WS_CLIPSIBLINGS);
+        MoveWindow(hwnd, 0, 0, width, height, false);
+        mode_changed = SetScreenMode(hwnd, width, height);
     }
 
     hWND = hwnd;
