@@ -214,6 +214,10 @@ SOURCE=.\grguMisc.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\grguSstGlide.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\grguTex.cpp
 # End Source File
 # Begin Source File
@@ -231,10 +235,6 @@ SOURCE=.\OGLMiscTables.cpp
 # Begin Source File
 
 SOURCE=.\OGLTextureTables.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\OGLWindow.cpp
 # End Source File
 # Begin Source File
 
