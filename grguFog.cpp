@@ -37,7 +37,7 @@ grFogTable( const GrFog_t *ft )
                     e_i,
                     s, 
                     e,
-                    forth_root[ 4 ] = { 0x10000, 0x1306f, 0x16a09, 0x1ae89 };
+                    forth_root[ 4 ] = { 0x10000, 0x1306F, 0x16A09, 0x1AE89 };
 
     if ( InternalConfig.FogEnable )
     {
@@ -128,6 +128,7 @@ grFogMode( GrFogMode_t mode )
     }
     
     Glide.State.FogMode = modeSource;
+//    Glide.State.FogMode = mode;
 }
 
 //----------------------------------------------------------------

@@ -110,7 +110,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
                 FxBool invert )
 {
-#ifdef OGL_PARTDONE
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "grColorCombine( %d, %d, %d, %d, %d )\n",
         function, factor, local, other, invert );
 #endif
@@ -339,7 +339,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 DLLEXPORT void __stdcall
 guColorCombineFunction( GrColorCombineFnc_t fnc )
 {
-#ifdef OGL_PARTDONE
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "guColorCombineFunction( %d )\n", fnc );
 #endif
 
@@ -583,7 +583,7 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
                GrCombineLocal_t local, GrCombineOther_t other,
                FxBool invert )
 {
-#ifdef OGL_PARTDONE
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "grAlphaCombine( %d, %d, %d, %d, %d )\n",
         function, factor, local, other, invert );
 #endif
@@ -697,8 +697,8 @@ grAlphaControlsITRGBLighting( FxBool enable )
 DLLEXPORT void __stdcall
 guAlphaSource( GrAlphaSource_t dwMode )
 {
-#ifdef OGL_DONE
-    GlideMsg( "guAlphaSource(%d)\n", dwMode );
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
+    GlideMsg( "guAlphaSource( %d )\n", dwMode );
 #endif
 
     switch ( dwMode )

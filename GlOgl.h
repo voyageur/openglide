@@ -17,11 +17,12 @@
 //#define OGL_ALL
 //#define OGL_PARTDONE
 //#define OGL_NOTDONE
-#define OGL_DEBUG
+//#define OGL_DEBUG
 //#define OGL_CRITICAL
-#define OPENGL_DEBUG
+//#define OPENGL_DEBUG
 //#define OGL_PROFILING
 //#define OGL_UTEX
+//#define OGL_COMBINE
 
 #ifdef OGL_ALL
  #define OGL_DONE
@@ -32,6 +33,7 @@
  #define OPENGL_DEBUG
  #define OGL_PROFILING
  #define OGL_UTEX
+ #define OGL_COMBINE
 #endif
 
 #include <windows.h>

@@ -398,7 +398,14 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_OTHER_TEXTURE:
-            Other.aa = Other.ba = Other.ca = 1.0f;
+            if ( OpenGL.Texture )
+            {
+                Other.aa = Other.ba = Other.ca = 1.0f;
+            }
+            else
+            {
+                Other.aa = Other.ba = Other.ca = 0.0f;
+            }
             break;
         }
     }
@@ -450,19 +457,23 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             break;
 
         case GR_COMBINE_OTHER_TEXTURE:
-            Other.ar = Other.ag = Other.ab = 1.0f;
-            Other.br = Other.bg = Other.bb = 1.0f;
-            Other.cr = Other.cg = Other.cb = 1.0f;
+            if ( OpenGL.Texture )
+            {
+                Other.ar = Other.ag = Other.ab = 1.0f;
+                Other.br = Other.bg = Other.bb = 1.0f;
+                Other.cr = Other.cg = Other.cb = 1.0f;
+            }
+            else
+            {
+                Other.ar = Other.ag = Other.ab = 0.0f;
+                Other.br = Other.bg = Other.bb = 0.0f;
+                Other.cr = Other.cg = Other.cb = 0.0f;
+            }
             break;
         }
     }
 
     ColorFunctionFunc( pC, pC2, &Local, &Other );
-
-// ???? Why is this here as we are zeroing the pC2 struct in the beggining ???????
-//    pC2->aa = 0.0f;
-//    pC2->ba = 0.0f;
-//    pC2->ca = 0.0f;
 
     switch ( Glide.State.AlphaFunction )
     {
@@ -629,6 +640,7 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
     {
         pF = &OGLRender.TFog[ OGLRender.NumberOfTriangles ];
         if ( Glide.State.FogMode == GR_FOG_WITH_TABLE )
+//        if ( Glide.State.FogMode & GR_FOG_WITH_TABLE )
         {
             pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
             pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
@@ -640,6 +652,13 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             pF->bf = b->a * D1OVER255;
             pF->cf = c->a * D1OVER255;
         }
+//        if ( Glide.State.FogMode & GR_FOG_ADD2 )
+//        {
+//            pF->af = 1.0f - pF->af;
+//            pF->bf = 1.0f - pF->bf;
+//            pF->cf = 1.0f - pF->cf;
+//        }
+        
     #ifdef OGL_DEBUG
        DEBUG_MIN_MAX( pF->af, OGLRender.MaxF, OGLRender.MinF );
        DEBUG_MIN_MAX( pF->bf, OGLRender.MaxF, OGLRender.MinF );

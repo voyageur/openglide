@@ -408,16 +408,17 @@ grTexCombine( GrChipID_t tmu,
               FxBool rgb_invert,
               FxBool alpha_invert )
 {
-#ifdef OGL_PARTDONE
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "grTexCombine( %d, %d, %d, %d, %d, %d, %d )\n",
         tmu, rgb_function, rgb_factor, alpha_function, alpha_factor, 
         rgb_invert, alpha_invert );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 
     RenderDrawTriangles( );
 
@@ -624,10 +625,13 @@ grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
     GlideMsg( "grTexNCCTable( %d, %u )\n", tmu, NCCTable );
 #endif
 
-    if ( tmu == GR_TMU0 )
-    {
-        Textures->NCCTable( NCCTable );
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
+
+	Textures->NCCTable( NCCTable );
 }
 
 //----------------------------------------------------------------
@@ -651,8 +655,11 @@ grTexMultibase( GrChipID_t tmu,
 #ifdef OGL_NOTDONE
     GlideMsg( "grTexMultibase( %d, %d )\n", tmu, enable );
 #endif
-    if (tmu != GR_TMU0)
-        return;
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 }
 
 //----------------------------------------------------------------
@@ -673,16 +680,17 @@ grTexMultibaseAddress( GrChipID_t       tmu,
 DLLEXPORT void __stdcall
 grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
-#ifdef OGL_PARTDONE
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "grTexCombineFunction( %d, %d )\n", tmu, func );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 
-    switch ( func )
+	switch ( func )
     {
     case GR_TEXTURECOMBINE_ZERO:            // 0x00 per component
         grTexCombine( tmu, GR_COMBINE_FUNCTION_ZERO, GR_COMBINE_FACTOR_ZERO,
@@ -734,13 +742,14 @@ DLLEXPORT FxU32 __stdcall
 guTexMemQueryAvail( GrChipID_t tmu )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg( "guTexMemQueryAvail( %d )\n", tmu );
+    GlideMsg( "guTexMemQueryAvail( %d ) = %u\n", tmu, UTextures.MemQueryAvail( tmu ) );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return 0;
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return 0;
+//    }
 
     return UTextures.MemQueryAvail( tmu );
 }
@@ -749,14 +758,15 @@ guTexMemQueryAvail( GrChipID_t tmu )
 DLLEXPORT void __stdcall
 guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
-#ifdef OGL_PARTDONE
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "guTexCombineFunction( %d, %d )\n", tmu, func );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 
     switch ( func )
     {
@@ -808,13 +818,14 @@ DLLEXPORT GrMipMapId_t __stdcall
 guTexGetCurrentMipMap( GrChipID_t tmu )
 {
 #ifdef OGL_DONE
-    GlideMsg( "guTexGetCurrentMipMap( %d )\n", tmu );
+    GlideMsg( "guTexGetCurrentMipMap( %d ) = %d\n", tmu, UTextures.GetCurrentMipMap( tmu ) );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return GR_NULL_MIPMAP_HANDLE;
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return GR_NULL_MIPMAP_HANDLE;
+//    }
 
     return UTextures.GetCurrentMipMap( tmu );
 }
@@ -848,7 +859,7 @@ DLLEXPORT GrMipMapInfo * __stdcall
 guTexGetMipMapInfo( GrMipMapId_t mmid )
 {
 #ifdef OGL_DONE
-    GlideMsg( "guTexGetMipMapInfo( )\n" );
+    GlideMsg( "guTexGetMipMapInfo( ) = 0x%p\n" );
 #endif
 
     return UTextures.GetMipMapInfo( mmid );
@@ -871,7 +882,7 @@ DLLEXPORT void __stdcall
 guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 {
 #ifdef OGL_DONE
-    GlideMsg( "guTexDownloadMipMapLevel( %d, %d, --- )\n", mmid, lod );
+    GlideMsg( "guTexDownloadMipMapLevel( %d, %d, 0x%p )\n", mmid, lod, src );
 #endif
 
     UTextures.DownloadMipMapLevel( mmid, lod, src );
@@ -882,7 +893,7 @@ DLLEXPORT void __stdcall
 guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table )
 {
 #ifdef OGL_DONE
-    GlideMsg( "guTexDownloadMipMap\n" );
+    GlideMsg( "guTexDownloadMipMap( %d, 0x%p, 0x%p )\n", mmid, src, table );
 #endif
 
     UTextures.DownloadMipMap( mmid, src, table );
@@ -910,14 +921,15 @@ guTexAllocateMemory( GrChipID_t tmu,
         s_clamp_mode, t_clamp_mode, minfilter_mode, magfilter_mode, lod_bias, trilinear );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return GR_NULL_MIPMAP_HANDLE;
-    }
+	// Ignoring TMU as we are only emulating Glide and assuming a well behaviored program
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return GR_NULL_MIPMAP_HANDLE;
+//    }
 
     return UTextures.AllocateMemory( tmu, odd_even_mask, width, height, fmt, mm_mode,
         smallest_lod, largest_lod, aspect, s_clamp_mode, t_clamp_mode,
-        minfilter_mode, magfilter_mode, lod_bias, trilinear);
+        minfilter_mode, magfilter_mode, lod_bias, trilinear );
 }
 
 //----------------------------------------------------------------
@@ -938,9 +950,9 @@ DLLEXPORT FxU16 * __stdcall
 guTexCreateColorMipMap( void )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg( "guTexCreateColorMipMap( )\n" );
+    GlideMsg( "guTexCreateColorMipMap( ) = NULL\n" );
 #endif
 
-    return 0;
+    return NULL;
 }
 

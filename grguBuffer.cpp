@@ -34,9 +34,10 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 DLLEXPORT void __stdcall
 grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 {
-#ifdef OGL_CRITICAL
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
 #endif
+
     static GrColor_t    old_color = 0;
     static float        BR = 0.0f, 
                         BG = 0.0f, 
@@ -87,7 +88,7 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 DLLEXPORT void __stdcall
 grBufferSwap( int swap_interval )
 {
-#ifdef OGL_CRITICAL
+#if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
     GlideMsg( "grBufferSwap( %d )\n", swap_interval );
 #endif
 
