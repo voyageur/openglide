@@ -537,14 +537,29 @@ inline void ColorFunction( TColorStruct * pC, TColorStruct * pC2, TColorStruct L
 
 void ConvertPalette( BYTE *Dst, BYTE *Src, DWORD Pixels )
 {
-	while (Pixels)
-	{
-		*(Dst++) = OpenGL.PTable[*Src][2];
-		*(Dst++) = OpenGL.PTable[*Src][1];
-		*(Dst++) = OpenGL.PTable[*Src++][0];
-		*(Dst++) = 0xFF;
-		Pixels--;
-	}
+    if(Glide.State.ChromaKeyMode)
+    {
+        while (Pixels)
+        {
+            int index = *Src++;
+            *(Dst++) = OpenGL.PTable[index][2];
+            *(Dst++) = OpenGL.PTable[index][1];
+            *(Dst++) = OpenGL.PTable[index][0];
+            *(Dst++) = index ? 0xff : 0;
+            Pixels--;
+        }
+    }
+    else
+    {
+        while (Pixels)
+        {
+            *(Dst++) = OpenGL.PTable[*Src][2];
+            *(Dst++) = OpenGL.PTable[*Src][1];
+            *(Dst++) = OpenGL.PTable[*Src++][0];
+            *(Dst++) = 0xff;
+            Pixels--;
+        }
+    }
 }
 
 void MMXConvertPalette( void *Dst, void *Src, DWORD NumberOfPixels )
@@ -859,7 +874,7 @@ void RenderDrawTriangles()
 
 					if ( OpenGL.CurrentTexture->Format == GR_TEXFMT_P_8 )
 					{
-						if ( InternalConfig.MMXEnable )
+						if ( 0 && InternalConfig.MMXEnable )
 						{
 							MMXConvertPalette( TexTemp, OpenGL.CurrentTexture->Data, OpenGL.CurrentTexture->NPixels );
 						}
@@ -935,7 +950,7 @@ void RenderDrawTriangles()
 		glDisable( GL_TEXTURE_2D );
 	}
 
-	if ( OpenGL.Blend )
+	if (OpenGL.Blend )
 	{
 		glEnable( GL_BLEND );
 	}
@@ -957,35 +972,69 @@ void RenderDrawTriangles()
 		}
 	}
 	
-	if ( InternalConfig.VertexArrayEXTEnable )
-	{
-		glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
-	}
-	else
-	{
-		glBegin( GL_TRIANGLES );
-		for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
-		{
-			glColor4fv( &OGLRender.TColor[i].ar );
-			glSecondaryColor3fvEXT( &OGLRender.TColor2[i].ar );
-			glFogCoordfEXT( OGLRender.TFog[i].af );
-			glTexCoord4fv( &OGLRender.TTexture[i].as );
-			glVertex3fv( &OGLRender.TVertex[i].ax );
+    if(Glide.State.ChromaKeyMode)
+    {
+        glAlphaFunc(GL_GREATER, 0.0);
+        glEnable(GL_ALPHA_TEST);
+        
+        glBegin( GL_TRIANGLES );
+        for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+        {
+            glColor3fv( &OGLRender.TColor[i].ar );
+            glSecondaryColor3fvEXT( &OGLRender.TColor2[i].ar );
+            glFogCoordfEXT( OGLRender.TFog[i].af );
+            glTexCoord4fv( &OGLRender.TTexture[i].as );
+            glVertex3fv( &OGLRender.TVertex[i].ax );
+            
+            glColor3fv( &OGLRender.TColor[i].br );
+            glSecondaryColor3fvEXT( &OGLRender.TColor2[i].br );
+            glFogCoordfEXT( OGLRender.TFog[i].bf );
+            glTexCoord4fv( &OGLRender.TTexture[i].bs );
+            glVertex3fv( &OGLRender.TVertex[i].bx );
+            
+            glColor3fv( &OGLRender.TColor[i].cr );
+            glSecondaryColor3fvEXT( &OGLRender.TColor2[i].cr );
+            glFogCoordfEXT( OGLRender.TFog[i].cf );
+            glTexCoord4fv( &OGLRender.TTexture[i].cs );
+            glVertex3fv( &OGLRender.TVertex[i].cx );
+        }
+        glEnd();
+        
+        glDisable(GL_ALPHA_TEST);
+    }
+    else
+    {
+        if (InternalConfig.VertexArrayEXTEnable )
+        {
+            glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
+        }
+        else
+        {
+            glBegin( GL_TRIANGLES );
+            for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+            {
+                glColor4fv( &OGLRender.TColor[i].ar );
+                glSecondaryColor3fvEXT( &OGLRender.TColor2[i].ar );
+                glFogCoordfEXT( OGLRender.TFog[i].af );
+                glTexCoord4fv( &OGLRender.TTexture[i].as );
+                glVertex3fv( &OGLRender.TVertex[i].ax );
+                
+                glColor4fv( &OGLRender.TColor[i].br );
+                glSecondaryColor3fvEXT( &OGLRender.TColor2[i].br );
+                glFogCoordfEXT( OGLRender.TFog[i].bf );
+                glTexCoord4fv( &OGLRender.TTexture[i].bs );
+                glVertex3fv( &OGLRender.TVertex[i].bx );
+                
+                glColor4fv( &OGLRender.TColor[i].cr );
+                glSecondaryColor3fvEXT( &OGLRender.TColor2[i].cr );
+                glFogCoordfEXT( OGLRender.TFog[i].cf );
+                glTexCoord4fv( &OGLRender.TTexture[i].cs );
+                glVertex3fv( &OGLRender.TVertex[i].cx );
+            }
+            glEnd();
+        }
+    }
 
-			glColor4fv( &OGLRender.TColor[i].br );
-			glSecondaryColor3fvEXT( &OGLRender.TColor2[i].br );
-			glFogCoordfEXT( OGLRender.TFog[i].bf );
-			glTexCoord4fv( &OGLRender.TTexture[i].bs );
-			glVertex3fv( &OGLRender.TVertex[i].bx );
-
-			glColor4fv( &OGLRender.TColor[i].cr );
-			glSecondaryColor3fvEXT( &OGLRender.TColor2[i].cr );
-			glFogCoordfEXT( OGLRender.TFog[i].cf );
-			glTexCoord4fv( &OGLRender.TTexture[i].cs );
-			glVertex3fv( &OGLRender.TVertex[i].cx );
-		}
-		glEnd();
-	}
 
 	if ( ( SecondPass ) && ( !InternalConfig.SecondaryColorEXTEnable ) )
 	{
@@ -1004,7 +1053,7 @@ void RenderDrawTriangles()
 
 		glEnable( GL_POLYGON_OFFSET_FILL );
 
-		if ( InternalConfig.VertexArrayEXTEnable )
+		if (0 &&  InternalConfig.VertexArrayEXTEnable )
 		{
 			glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor2 );
 			glDrawArrays( GL_TRIANGLES, 0, OGLRender.NumberOfTriangles * 3 );
