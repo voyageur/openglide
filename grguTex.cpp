@@ -204,6 +204,8 @@ grTexClampMode(GrChipID_t tmu,
 	case GR_TEXTURECLAMP_WRAP:		OpenGL.TClampMode = GL_REPEAT;	break;
 	}
 
+    Textures->MakeReady();
+
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
 
@@ -270,6 +272,8 @@ grTexFilterMode(GrChipID_t tmu,
 	case GR_TEXTUREFILTER_POINT_SAMPLED:	OpenGL.MagFilterMode = GL_NEAREST;		break;
 	case GR_TEXTUREFILTER_BILINEAR:			OpenGL.MagFilterMode = GL_LINEAR;		break;
 	}
+
+    Textures->MakeReady();
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
