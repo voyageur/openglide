@@ -826,15 +826,6 @@ grSstOrigin( GrOriginLocation_t  origin )
         glOrtho( 0, Glide.WindowWidth, 0, Glide.WindowHeight, OpenGL.ZNear, OpenGL.ZFar );
         glViewport( 0, 0, OpenGL.WindowWidth, OpenGL.WindowHeight );
         glMatrixMode( GL_MODELVIEW );
-
-        if ( Glide.State.CullMode == GR_CULL_POSITIVE )
-        {
-            glFrontFace( GL_CCW );
-        }
-        else
-        {
-            glFrontFace( GL_CW );
-        }
         break;
 
     case GR_ORIGIN_UPPER_LEFT:
@@ -843,17 +834,9 @@ grSstOrigin( GrOriginLocation_t  origin )
         glOrtho( 0, Glide.WindowWidth, Glide.WindowHeight, 0, OpenGL.ZNear, OpenGL.ZFar );
         glViewport( 0, 0, OpenGL.WindowWidth, OpenGL.WindowHeight );
         glMatrixMode( GL_MODELVIEW );
-
-        if ( Glide.State.CullMode == GR_CULL_POSITIVE )
-        {
-            glFrontFace( GL_CW );
-        }
-        else
-        {
-            glFrontFace( GL_CCW );
-        }
         break;
     }
+    grCullMode( Glide.State.CullMode );
 
 #ifdef OPENGL_DEBUG
     GLErro( "grSstOrigin" );
