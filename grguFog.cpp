@@ -24,7 +24,10 @@ grFogTable( GrFog_t *ft )
 #ifdef DONE
 	GlideMsg( "grFogTable( --- )\n" );
 #endif
-	static int i, j, Steps;
+	DWORD i, j;
+    DWORD s_i, e_i;
+    DWORD s, e;
+    DWORD forth_root[4] = {0x10000, 0x1306f, 0x16a09, 0x1ae89};
 
 	if ( InternalConfig.FogEnable )
 	{
@@ -36,16 +39,17 @@ grFogTable( GrFog_t *ft )
 		{
 			CopyMemory( Glide.FogTable, ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
 		}
-		Glide.FogTable[GR_FOG_TABLE_SIZE] = 255;
-/*		Steps = OPENGLFOGTABLESIZE / GR_FOG_TABLE_SIZE;
-		for( i = 0; i < GR_FOG_TABLE_SIZE; i++ )
-		{
-			Glide.FogTable[i] = ft[i];
-//			for( j = 0; j < Steps; j++ )
-//			{
-//				OpenGL.FogTable[(i*Steps)+j] = (BYTE)(Glide.FogTable[i] + ((Glide.FogTable[i+1]-Glide.FogTable[i])/Steps) * j);
-//			}
-		}*/
+
+        for(i = 0; i < GR_FOG_TABLE_SIZE; i++)
+        {
+            s_i = (forth_root[i&3] >> (16 - (i>>2)));
+            e_i = (forth_root[(i+1)&3] >> (16 - ((i+1)>>2)));
+            s = ft[i];
+            e = (i+1 < GR_FOG_TABLE_SIZE) ? ft[i+1] : 255;
+
+            for(j = s_i; j < e_i; j++)
+                OpenGL.FogTable[j] = (BYTE)(s + (e - s) * (j - s_i) / (e_i - s_i));
+        }
 	}
 }
 

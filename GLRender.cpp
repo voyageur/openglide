@@ -1381,18 +1381,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c 
 		pF = &OGLRender.TFog[OGLRender.NumberOfTriangles];
 		if ( Glide.State.FogMode == GR_FOG_WITH_TABLE )
 		{
-			if ( OpenGL.DepthBufferType )
-			{
-				pF->af = (float)Glide.FogTable[ (WORD)(pV->az * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-				pF->bf = (float)Glide.FogTable[ (WORD)(pV->bz * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-				pF->cf = (float)Glide.FogTable[ (WORD)(pV->cz * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-			}
-			else
-			{
-				pF->af = (float)Glide.FogTable[ (WORD)((1.0f - pV->az) * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-				pF->bf = (float)Glide.FogTable[ (WORD)((1.0f - pV->bz) * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-				pF->cf = (float)Glide.FogTable[ (WORD)((1.0f - pV->cz) * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-			}
+            pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
+			pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
+			pF->cf = (float)OpenGL.FogTable[ (WORD)(1.0f / c->oow) ] * D1OVER255;
 		}
 		else
 		{
@@ -1877,16 +1868,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b )
 
 	if( InternalConfig.FogEnable )
 	{
-		if ( OpenGL.DepthBufferType )
-		{
-			pF->af = (float)Glide.FogTable[ (WORD)(pV->az * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-			pF->bf = (float)Glide.FogTable[ (WORD)(pV->bz * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-		}
-		else
-		{
-			pF->af = (float)Glide.FogTable[ (WORD)((1.0f - pV->az) * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-			pF->bf = (float)Glide.FogTable[ (WORD)((1.0f - pV->bz) * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-		}
+		pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
+		pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
 	#ifdef DEBUG
 			if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
 			if ( pF->bf > OGLRender.MaxF ) OGLRender.MaxF = pF->bf;
@@ -2307,14 +2290,7 @@ void RenderAddPoint( const GrVertex *a )
 
 	if( InternalConfig.FogEnable )
 	{
-		if ( OpenGL.DepthBufferType )
-		{
-			pF->af = (float)Glide.FogTable[ (WORD)(pV->az * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-		}
-		else
-		{
-			pF->af = (float)Glide.FogTable[ (WORD)((1.0f - pV->az) * (GR_FOG_TABLE_SIZE-1)) ] * D1OVER255;
-		}
+		pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
 	#ifdef DEBUG
 			if ( pF->af > OGLRender.MaxF ) OGLRender.MaxF = pF->af;
 			if ( pF->af < OGLRender.MinF ) OGLRender.MinF = pF->af;

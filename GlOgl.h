@@ -48,7 +48,7 @@
 
 #define OPENGLBUFFERMEMORY		OpenGL.WindowWidth * OpenGL.WindowHeight
 
-#define OPENGLFOGTABLESIZE		2048
+#define OPENGLFOGTABLESIZE		64*1024
 
 #define D1OVER255				0.003921568627451f		// 1 / 255
 #define D1OVER65536				0.0000152587890625f		// 1 / 65536
@@ -137,7 +137,7 @@ struct GlideStruct
 	int						NumBuffers,
 							AuxBuffers;
 	// States and Constants
-	FxU8					FogTable[GR_FOG_TABLE_SIZE+1];
+	FxU8					FogTable[GR_FOG_TABLE_SIZE];
 //	GuTexPalette			ColorPalette;
 	FxU32					TexMemoryMaxPosition;
 	bool					CLocal, COther;
