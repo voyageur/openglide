@@ -16,9 +16,12 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-TexDB::TexDB( void )
+TexDB::TexDB( unsigned int MemorySize )
 {
-    for ( int i = 0; i < TEX_SECTIONS; i++ )
+    numberOfTexSections = MemorySize / ( 32 * 1024 );
+    m_first = new Record *[ numberOfTexSections ];
+
+    for ( unsigned int i = 0; i < numberOfTexSections; i++ )
     {
         m_first[ i ] = NULL;
     }
@@ -28,13 +31,13 @@ TexDB::~TexDB( void )
 {
     Record * r;
 
-    for ( int i = 0; i < TEX_SECTIONS; i++ )
+    for ( unsigned int i = 0; i < numberOfTexSections; i++ )
     {
         r = m_first[ i ];
         
         while ( r != NULL )
         {
-            Record *tmp = r;
+            Record * tmp = r;
             r = r->next;
             delete tmp;
         }
@@ -47,9 +50,9 @@ bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
     Record  * r;
     FxU32   sect = startAddress / ( 32 * 1024 );
 
-    if ( sect >= TEX_SECTIONS )
+    if ( sect >= numberOfTexSections )
     {
-        sect = TEX_SECTIONS - 1;
+        sect = numberOfTexSections - 1;
     }
 
     for ( r = m_first[ sect ]; r != NULL; r = r->next )
@@ -86,8 +89,8 @@ bool TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
 void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
 {
     Record  ** p;
-    FxI32   stt_sect;
-    FxI32   end_sect;
+    FxU32   stt_sect;
+    FxU32   end_sect;
 
     stt_sect = startAddress / ( 32 * 1024 );
 
@@ -102,19 +105,19 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
         stt_sect = 0;
     }
  
-    if ( stt_sect >= TEX_SECTIONS )
+    if ( stt_sect >= numberOfTexSections )
     {
-        stt_sect = TEX_SECTIONS - 1;
+        stt_sect = numberOfTexSections - 1;
     }
 
     end_sect = endAddress / ( 32 * 1024 );
 
-    if ( end_sect >= TEX_SECTIONS )
+    if ( end_sect >= numberOfTexSections )
     {
-        end_sect = TEX_SECTIONS - 1;
+        end_sect = numberOfTexSections - 1;
     }
 
-    for ( FxI32 i = stt_sect; i <= end_sect; i++ )
+    for ( FxU32 i = stt_sect; i <= end_sect; i++ )
     {
         p = &( m_first[ i ] );
         while ( *p != NULL )
@@ -145,9 +148,9 @@ void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
     FxU32   sect;
 
     sect = startAddress / ( 32 * 1024 );
-    if ( sect >= TEX_SECTIONS )
+    if ( sect >= numberOfTexSections )
     {
-        sect = TEX_SECTIONS - 1;
+        sect = numberOfTexSections - 1;
     }
 
     r->startAddress = startAddress;
@@ -175,7 +178,7 @@ void TexDB::Clear( void )
 {
     Record  * r;
 
-    for ( int i = 0; i < TEX_SECTIONS; i++ )
+    for ( unsigned int i = 0; i < numberOfTexSections; i++ )
     {
         r = m_first[ i ];
         
@@ -188,4 +191,39 @@ void TexDB::Clear( void )
 
         m_first[ i ] = NULL;
     }
+}
+
+// TexDB::Record Class implementation
+
+TexDB::Record::Record( bool two_tex )
+{
+   glGenTextures( 1, &texNum );
+
+   if ( two_tex )
+   {
+         glGenTextures( 1, &tex2Num );
+   }
+   else
+   {
+         tex2Num = 0;
+   }
+}
+
+TexDB::Record::~Record( void )
+{
+   glDeleteTextures( 1, &texNum );
+
+   if ( tex2Num != 0 )
+   {
+         glDeleteTextures( 1, &tex2Num );
+   }
+}
+
+bool TexDB::Record::Match( FxU32 stt, GrTexInfo *inf, FxU32 h )
+{
+   return (startAddress == stt
+         && inf->largeLod == info.largeLod
+         && inf->aspectRatio == info.aspectRatio
+         && inf->format == info.format
+         && (hash == h || h == 0));
 }

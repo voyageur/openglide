@@ -31,49 +31,21 @@ public:
         GLuint tex2Num;
         Record *next;
 
-        Record( bool two_tex )
-        {
-            glGenTextures( 1, &texNum );
-
-            if ( two_tex )
-            {
-                glGenTextures( 1, &tex2Num );
-            }
-            else
-            {
-                tex2Num = 0;
-            }
-        };
-
-        ~Record( void )
-        {
-            glDeleteTextures( 1, &texNum );
-
-            if ( tex2Num != 0 )
-            {
-                glDeleteTextures( 1, &tex2Num );
-            }
-        };
-
-        bool Match( FxU32 stt, GrTexInfo *inf, FxU32 h )
-        {
-            return (startAddress == stt
-                && inf->largeLod == info.largeLod
-                && inf->aspectRatio == info.aspectRatio
-                && inf->format == info.format
-                && (hash == h || h == 0));
-        };
+        Record( bool two_tex );
+        ~Record( void );
+        bool Match( FxU32 stt, GrTexInfo *inf, FxU32 h );
     };
+
     void Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num );
     void WipeRange( FxU32 startAddress, FxU32 endAddress, FxU32 hash );
     bool Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
                GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change );
-    TexDB( void );
+    TexDB( unsigned int MemorySize );
     virtual ~TexDB( void );
 
 private:
-    enum { TEX_SECTIONS = 256 };
-    Record *m_first[ TEX_SECTIONS ];
+    unsigned int numberOfTexSections;
+    Record ** m_first;
 };
 
 #endif

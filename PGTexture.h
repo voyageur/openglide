@@ -29,7 +29,7 @@ private:
     bool m_palette_dirty;
     FxU32 m_palette_hash;
     void ApplyKeyToPalette( void );
-    TexDB m_db;
+    TexDB * m_db;
     GrChromakeyMode_t m_chromakey_mode;
     GrColor_t m_chromakey_value;
     float m_wAspect;

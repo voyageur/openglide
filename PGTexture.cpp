@@ -334,6 +334,7 @@ inline void SplitAP88( WORD *ap88, BYTE *index, BYTE *alpha, DWORD pixels )
 
 PGTexture::PGTexture( int mem_size )
 {
+    m_db = new TexDB( mem_size );
     m_palette_dirty = true;
     m_valid = false;
     m_chromakey_mode = GR_CHROMAKEY_DISABLE;
@@ -345,6 +346,7 @@ PGTexture::PGTexture( int mem_size )
 PGTexture::~PGTexture( void )
 {
     delete[] m_memory;
+    delete m_db;
 }
 
 void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
@@ -358,7 +360,7 @@ void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *in
 
     /* Any texture based on memory crossing this range
      * is now out of date */
-    m_db.WipeRange( startAddress, startAddress + size, 0 );
+    m_db->WipeRange( startAddress, startAddress + size, 0 );
 }
 
 void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
@@ -514,7 +516,7 @@ bool PGTexture::MakeReady( void )
     }
 
     /* See if we already have an OpenGL texture to match this */
-    if ( m_db.Find( m_startAddress, &m_info, test_hash,
+    if ( m_db->Find( m_startAddress, &m_info, test_hash,
                     &texNum, use_two_textures ? &tex2Num : NULL,
                     pal_change_ptr ) )
     {
@@ -539,10 +541,10 @@ bool PGTexture::MakeReady( void )
         /* Any existing textures crossing this memory range
          * is unlikely to be used, so remove the OpenGL version
          * of them */
-        m_db.WipeRange( m_startAddress, m_startAddress + size, wipe_hash );
+        m_db->WipeRange( m_startAddress, m_startAddress + size, wipe_hash );
 
         /* Add this new texture to the data base */
-        m_db.Add( m_startAddress, m_startAddress + size, &m_info, test_hash,
+        m_db->Add( m_startAddress, m_startAddress + size, &m_info, test_hash,
             &texNum, use_two_textures ? &tex2Num : NULL );
 
         glBindTexture( GL_TEXTURE_2D, texNum);
@@ -607,7 +609,7 @@ bool PGTexture::MakeReady( void )
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, texVals.width, texVals.height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, data );
                 if ( InternalConfig.EnableMipMaps )
                 {
-                    genPaletteMipmaps(texVals.width, texVals.height, data);
+                    genPaletteMipmaps( texVals.width, texVals.height, data );
                 }
             }
             else
@@ -883,7 +885,7 @@ void PGTexture::GetTexValues( TexValues *tval )
 
 void PGTexture::Clear( void )
 {
-    m_db.Clear( );
+    m_db->Clear( );
 }
 
 void PGTexture::GetAspect( float *hAspect, float *wAspect )
