@@ -545,6 +545,7 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
                GrCombineLocal_t local, GrCombineOther_t other,
                FxBool invert )
 {
+    int i;
 #ifdef PARTDONE
 	GlideMsg( "grAlphaCombine( %d, %d, %d, %d, %d )\n",
 		function, factor, local, other, invert );
@@ -557,6 +558,8 @@ grAlphaCombine(GrCombineFunction_t function, GrCombineFactor_t factor,
 	Glide.State.AlphaLocal = local;
 	Glide.State.AlphaOther = other;
 	Glide.State.AlphaInvert = invert;
+    for(i = 0; i < 4; i++)
+        OpenGL.AlphaColor[i] = OpenGL.ConstantColor[i];
 
 	Glide.ALocal = false;
 	Glide.AOther = false;

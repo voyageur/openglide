@@ -172,6 +172,7 @@ struct OpenGLStruct
 	GLuint					Refresh;
 	GLboolean				ColorMask;
 	GLfloat					ConstantColor[4];
+    GLfloat                 AlphaColor[4];
 	GLfloat					ZNear, ZFar;
 	GLfloat					FogColor[4];
 	BYTE					FogTable[OPENGLFOGTABLESIZE];
