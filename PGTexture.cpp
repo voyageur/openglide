@@ -27,13 +27,13 @@ void genPaletteMipmaps( FxU32 width, FxU32 height, FxU8 *data )
     lod = 0;
     skip = 1;
 
-    while ( ( mmwidth > 1 ) && ( mmheight > 1 ) )
+    while ( ( mmwidth > 1 ) || ( mmheight > 1 ) )
     {
         FxU32   x, 
                 y;
 
-        mmwidth /= 2;
-        mmheight /= 2;
+		mmwidth = mmwidth > 1 ? mmwidth / 2 : 1;
+		mmheight = mmheight > 1 ? mmheight / 2 : 1;
         lod += 1;
         skip *= 2;
 
