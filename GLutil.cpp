@@ -213,6 +213,9 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
     PIXELFORMATDESCRIPTOR   pfd;
     int                     PixFormat;
     unsigned int            BitsPerPixel;
+    
+    if( hwnd == NULL )
+        hwnd = GetActiveWindow();
 
     if ( hwnd == NULL )
     {
