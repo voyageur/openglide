@@ -132,6 +132,7 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
                     Glide.State.ClipMaxX - Glide.State.ClipMinX, 
                     Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
     }
+    // Used for the buffer clearing
 	glScissor( Glide.State.ClipMinX, Glide.State.ClipMinY,
 			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
 			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
@@ -144,7 +145,7 @@ DLLEXPORT void __stdcall
 grDisableAllEffects( void )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("grDisableAllEffects()\n");
+    GlideMsg( "grDisableAllEffects( )\n" );
 #endif
 
     grAlphaBlendFunction( GR_BLEND_ONE, GR_BLEND_ZERO, GR_BLEND_ONE, GR_BLEND_ZERO );
@@ -159,7 +160,7 @@ DLLEXPORT void __stdcall
 grResetTriStats( void )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg("grResetTriStats\n");
+    GlideMsg( "grResetTriStats( )\n" );
 #endif
 }
 
@@ -168,7 +169,7 @@ DLLEXPORT void __stdcall
 grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg("grTriStats\n");
+    GlideMsg( "grTriStats( )\n" );
 #endif
 }
 
@@ -177,7 +178,7 @@ DLLEXPORT void __stdcall
 grHints( GrHint_t hintType, FxU32 hintMask )
 {
 #ifdef OGL_PARTDONE
-    GlideMsg("grHints( %d, %d )\n", hintType, hintMask );
+    GlideMsg( "grHints( %d, %d )\n", hintType, hintMask );
 #endif
 
     switch( hintType )
@@ -193,7 +194,7 @@ DLLEXPORT void __stdcall
 grSplash( float x, float y, float width, float height, FxU32 frame )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg("grSplash( %-4.2f, %-4.2f, %-4.2f, %-4.2f, %lu )\n",
+    GlideMsg( "grSplash( %-4.2f, %-4.2f, %-4.2f, %-4.2f, %lu )\n",
         x, y, width, height, frame );
 #endif
 }
@@ -251,7 +252,7 @@ guEncodeRLE16( void *dst,
                FxU32 height )
 {
 #ifdef OGL_NOTDONE
-    GlideMsg("guEncodeRLE16( ---, ---, %lu, %lu )\n", width, height ); 
+    GlideMsg( "guEncodeRLE16( ---, ---, %lu, %lu ) = 1\n", width, height ); 
 #endif
 
     return 1; 
@@ -261,7 +262,7 @@ guEncodeRLE16( void *dst,
 DLLEXPORT FxU32 __stdcall
 guEndianSwapWords( FxU32 value )
 {
-#ifdef OGL_PARTDONE
+#ifdef OGL_DONE
     GlideMsg( "guEndianSwapWords( %lu )\n", value );
 #endif
 
@@ -272,8 +273,9 @@ guEndianSwapWords( FxU32 value )
 DLLEXPORT FxU16 __stdcall
 guEndianSwapBytes( FxU16 value )
 {
-#ifdef OGL_PARTDONE
+#ifdef OGL_DONE
     GlideMsg( "guEndianSwapBytes( %u )\n", value );
 #endif
+
     return ( value << 8 ) | ( value >> 8 );
 }

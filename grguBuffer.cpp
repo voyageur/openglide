@@ -34,113 +34,48 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 DLLEXPORT void __stdcall
 grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 {
-//#ifdef OGL_CRITICAL
+#ifdef OGL_CRITICAL
     GlideMsg( "grBufferClear( %d, %d, %d )\n", color, alpha, depth );
-//#endif
+#endif
     static GrColor_t    old_color = 0;
     static float        BR = 0.0f, 
                         BG = 0.0f, 
                         BB = 0.0f, 
                         BA = 0.0f;
-
-//    if ( ! OpenGL.Clipping )
+    static unsigned int Bits;
+    
+    Bits = 0;
+    
+    RenderDrawTriangles( );
+    
+    if ( OpenGL.ColorMask )
     {
-        static unsigned int Bits;
-        
-        Bits = 0;
-        
-        RenderDrawTriangles( );
-        
-        if ( OpenGL.ColorMask )
-        {
-            Bits = GL_COLOR_BUFFER_BIT;
-            if ( color != old_color )
-            {
-                old_color = color;
-                ConvertColorF( color, BR, BG, BB, BA );
-            }
-            glClearColor( BR, BG, BB, BA );
-        }
-        
-        if ( Glide.State.DepthBufferWritting )
-        {
-            glClearDepth( depth * D1OVER65535 );
-            Bits |= GL_DEPTH_BUFFER_BIT;
-        }
-
-		if ( ! OpenGL.Clipping )
-		{
-	        glClear( Bits );
-		}
-		else
-		{
-			glEnable( GL_SCISSOR_TEST );
-			glClear( Bits );
-			glDisable( GL_SCISSOR_TEST );
-		}
-    }
-	/*
-    else
-    {
-        static GLboolean    alpha_test;
-        static FxU32        oldDepth = 0x10000;
-        static GLuint       clearList = glGenLists( 1 );  
-
+        Bits = GL_COLOR_BUFFER_BIT;
         if ( color != old_color )
         {
             old_color = color;
             ConvertColorF( color, BR, BG, BB, BA );
         }
-
-        //
-        // Remember alpha-test state because it is
-        // unclear how it relates to the stored
-        // Glide state
-        //
-        alpha_test = glIsEnabled( GL_ALPHA_TEST );
-
-        glColor3f( BR, BG, BB );
-
-//        if ( depth != oldDepth )
-        {
-            oldDepth = depth;
-
-            glNewList( clearList, GL_COMPILE_AND_EXECUTE );
-
-                glDisable( GL_TEXTURE_2D );
-                glDisable( GL_ALPHA_TEST );
-                glDisable( GL_BLEND );
-                glDisable( GL_DEPTH_TEST );
-                glDisable( GL_CULL_FACE );
-
-                float gldepth = (float)depth * D1OVER65535;
-
-                glBegin( GL_TRIANGLE_STRIP );
-                    glVertex3f( 0.0f,                      0.0f,                       gldepth );
-                    glVertex3f( 0.0f,                      (float) Glide.WindowHeight, gldepth );
-                    glVertex3f( (float) Glide.WindowWidth, 0.0f,                       gldepth );
-                    glVertex3f( (float) Glide.WindowWidth, (float) Glide.WindowHeight, gldepth );
-                glEnd( );
-
-            glEndList( );
-        }
-
-//        glCallList( clearList );
-
-        if ( alpha_test )
-        {
-            glEnable( GL_ALPHA_TEST );
-        }
-        if ( Glide.State.DepthBufferMode != GR_DEPTHBUFFER_DISABLE )
-        {
-            glEnable( GL_DEPTH_TEST );
-        }
-        if ( Glide.State.CullMode != GR_CULL_DISABLE )
-        {
-            glEnable( GL_CULL_FACE );
-        }
+        glClearColor( BR, BG, BB, BA );
     }
-*/
+    
+    if ( Glide.State.DepthBufferWritting )
+    {
+        glClearDepth( depth * D1OVER65535 );
+        Bits |= GL_DEPTH_BUFFER_BIT;
+    }
+
+	if ( ! OpenGL.Clipping )
+	{
+	    glClear( Bits );
+	}
+	else
+	{
+		glEnable( GL_SCISSOR_TEST );
+		glClear( Bits );
+		glDisable( GL_SCISSOR_TEST );
+	}
+
 #ifdef OPENGL_DEBUG
     GLErro( "grBufferClear" );
 #endif
@@ -192,7 +127,7 @@ DLLEXPORT int __stdcall
 grBufferNumPending( void )
 {
 #ifdef OGL_DONE
-    GlideMsg("grBufferNumPending()\n");
+    GlideMsg( "grBufferNumPending( ) = 0\n" );
 #endif
 
     return 0; 
@@ -202,13 +137,13 @@ grBufferNumPending( void )
 //* Defines the Buffer to Render
 //*************************************************
 DLLEXPORT void __stdcall
-grRenderBuffer(GrBuffer_t dwBuffer)
+grRenderBuffer( GrBuffer_t dwBuffer )
 {
 #ifdef OGL_DONE
-    GlideMsg("grRenderBuffer( %d )\n", dwBuffer);
+    GlideMsg( "grRenderBuffer( %d )\n", dwBuffer );
 #endif
 
-    RenderDrawTriangles();
+    RenderDrawTriangles( );
 
     Glide.State.RenderBuffer = dwBuffer;
 
@@ -221,4 +156,3 @@ grRenderBuffer(GrBuffer_t dwBuffer)
     GLErro( "grRenderBuffer" );
 #endif
 }
-
