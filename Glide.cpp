@@ -152,8 +152,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved)
 
 	switch(dwReason)
 	{
-	case DLL_PROCESS_ATTACH:
 	case DLL_THREAD_ATTACH:
+        break;
+	case DLL_PROCESS_ATTACH:
 		if ( !ClearAndGenerateLogFile() )
 		{
 			return false;
@@ -205,6 +206,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved)
 		}
 		break;
 	case DLL_THREAD_DETACH:
+        break;
 	case DLL_PROCESS_DETACH:
 		grGlideShutdown();
 		CloseLogFile();
@@ -594,8 +596,7 @@ grSstWinOpen(	FxU32 hwnd,
 	// Initializing Glide and OpenGL
 	InitOpenGL();
 
-	Glide.SrcBuffer.Address	= new DWORD[OPENGLBUFFERMEMORY];
-//	Glide.DstBuffer.Address	= new DWORD[OPENGLBUFFERMEMORY];
+	Glide.SrcBuffer.Address	= new WORD[OPENGLBUFFERMEMORY];
 	
 	// Just checking
 	if (( !Glide.SrcBuffer.Address ) )//|| ( !Glide.DstBuffer.Address ))
@@ -604,8 +605,7 @@ grSstWinOpen(	FxU32 hwnd,
 		throw -1;
 	}
 
-	ZeroMemory( Glide.SrcBuffer.Address, OPENGLBUFFERMEMORY * 4 );
-//	ZeroMemory( Glide.DstBuffer.Address, OPENGLBUFFERMEMORY * 4 );
+	ZeroMemory( Glide.SrcBuffer.Address, OPENGLBUFFERMEMORY * 2 );
 
 #ifdef DONE
 	GlideMsg( "----Start of grSstWinOpen()\n" );

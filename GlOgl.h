@@ -16,6 +16,7 @@
 //#define CRITICAL
 #define OPENGL_DEBUG
 //#define PROFILING
+//#define UTEX
 
 #ifdef ALL
  #define DONE
@@ -25,6 +26,7 @@
  #define CRITICAL
  #define OPENGL_DEBUG
  #define PROFILING
+ #define UTEX
 #endif
 
 #include <windows.h>
@@ -68,7 +70,7 @@ struct BufferStruct
 	GrLock_t				Type;
 	GrLfbWriteMode_t		WriteMode;
 	GrBuffer_t				Buffer;
-	DWORD					*Address;
+	WORD					*Address;
 };
 
 struct TexSourceStruct

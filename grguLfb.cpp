@@ -51,10 +51,42 @@ grLfbLock(GrLock_t dwType,
 	Glide.SrcBuffer.Buffer = dwBuffer;
 	Glide.SrcBuffer.WriteMode = dwWriteMode;
 
+    if((dwType & 1) == 0)
+    {
+        FxU32 *buf = new FxU32[640 * 480];
+        int i, j;
+
+        glReadBuffer(dwBuffer == GR_BUFFER_BACKBUFFER
+            ? GL_BACK : GL_FRONT);
+
+        glReadPixels(0, 0, 640, 480, GL_RGBA, GL_UNSIGNED_BYTE, (void *) buf);
+        
+        for(j = 0; j < 480; j++)
+        {
+            WORD *line = Glide.SrcBuffer.Address + (479 - j) * 640;
+            FxU32 *bufl = buf + j * 640;
+
+            for(i = 0; i < 640; i++)
+            {
+                line[i] = (WORD)
+                    (((bufl[i] & 0xf8) << 8)
+                    | ((bufl[i] & 0xfc00) >> 5)
+                    | ((bufl[i] & 0xf80000) >> 19)
+                    );
+            }
+        }
+        
+        delete [] buf;
+    }
+    else
+    {
+        memset(Glide.SrcBuffer.Address, 0, 640 * 480 * 2);
+    }
+
 	lfbInfo->lfbPtr = Glide.SrcBuffer.Address;
 	lfbInfo->strideInBytes = Glide.WindowWidth;
 
-	lfbInfo->writeMode = dwWriteMode;
+	lfbInfo->writeMode = GR_LFBWRITEMODE_565;
 
 	return FXTRUE;
 }
