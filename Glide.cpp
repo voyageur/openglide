@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-char * OpenGLideVersion = "0.09a6";
+char * OpenGLideVersion = "0.09a7";
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,6 @@ char * OpenGLideVersion = "0.09a6";
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
-
 
 // Main Structs
 GlideStruct     Glide;
@@ -49,10 +48,16 @@ OpenGLStruct    OpenGL;
 PGTexture       *Textures;
 PGUTexture       UTextures;
 
-// Profiling variables
-__int64         InitialTick,FinalTick;
-DWORD           Frame;
-double          Fps, FpsAux, ClockFreq;
+#ifdef OGL_DEBUG
+    // Profiling variables
+    __int64         InitialTick;
+    __int64         FinalTick;
+    DWORD           Frame;
+    double          Fps;
+    double          FpsAux;
+#endif
+
+double          ClockFreq;
 
 // Error Function variable
 void (*ExternErrorFunction)( const char *string, FxBool fatal );
@@ -377,8 +382,9 @@ grGlideShutdown( void )
 
     OpenGL.GlideInit = false;
 
+#ifdef OGL_DEBUG
     RDTSC( FinalTick );
-
+#endif
 #ifdef OGL_DONE
     GlideMsg( "grGlideShutdown()\n" );
 #endif
