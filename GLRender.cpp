@@ -577,9 +577,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
             pF->cf = c->a * D1OVER255;
         }
     #ifdef OGL_DEBUG
-       DEBUG_MIN_MAX( pC->af, OGLRender.MaxF, OGLRender.MinF );
-       DEBUG_MIN_MAX( pC->bf, OGLRender.MaxF, OGLRender.MinF );
-       DEBUG_MIN_MAX( pC->bf, OGLRender.MaxF, OGLRender.MinF );
+       DEBUG_MIN_MAX( pF->af, OGLRender.MaxF, OGLRender.MinF );
+       DEBUG_MIN_MAX( pF->bf, OGLRender.MaxF, OGLRender.MinF );
+       DEBUG_MIN_MAX( pF->bf, OGLRender.MaxF, OGLRender.MinF );
     #endif
     }
 
@@ -600,25 +600,25 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
     DEBUG_MIN_MAX( pC->ba, OGLRender.MaxA, OGLRender.MinA );
     DEBUG_MIN_MAX( pC->ca, OGLRender.MaxA, OGLRender.MinA );
 
-    DEBUG_MIN_MAX( pC->az, OGLRender.MaxZ, OGLRender.MinZ );
-    DEBUG_MIN_MAX( pC->bz, OGLRender.MaxZ, OGLRender.MinZ );
-    DEBUG_MIN_MAX( pC->cz, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pV->az, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pV->bz, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pV->cz, OGLRender.MaxZ, OGLRender.MinZ );
 
-    DEBUG_MIN_MAX( pC->ax, OGLRender.MaxX, OGLRender.MinX );
-    DEBUG_MIN_MAX( pC->bx, OGLRender.MaxX, OGLRender.MinX );
-    DEBUG_MIN_MAX( pC->cx, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pV->ax, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pV->bx, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pV->cx, OGLRender.MaxX, OGLRender.MinX );
 
-    DEBUG_MIN_MAX( pC->ay, OGLRender.Maxy, OGLRender.MinY );
-    DEBUG_MIN_MAX( pC->by, OGLRender.MaxY, OGLRender.MinY );
-    DEBUG_MIN_MAX( pC->cy, OGLRender.MaxY, OGLRender.MinY );
+    DEBUG_MIN_MAX( pV->ay, OGLRender.MaxY, OGLRender.MinY );
+    DEBUG_MIN_MAX( pV->by, OGLRender.MaxY, OGLRender.MinY );
+    DEBUG_MIN_MAX( pV->cy, OGLRender.MaxY, OGLRender.MinY );
 
-    DEBUG_MIN_MAX( pC->as, OGLRender.MaxS, OGLRender.MinS );
-    DEBUG_MIN_MAX( pC->bs, OGLRender.MaxS, OGLRender.MinS );
-    DEBUG_MIN_MAX( pC->cs, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pTS->as, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pTS->bs, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pTS->cs, OGLRender.MaxS, OGLRender.MinS );
 
-    DEBUG_MIN_MAX( pC->at, OGLRender.MaxT, OGLRender.MinT );
-    DEBUG_MIN_MAX( pC->bt, OGLRender.MaxT, OGLRender.MinT );
-    DEBUG_MIN_MAX( pC->ct, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pTS->at, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pTS->bt, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pTS->ct, OGLRender.MaxT, OGLRender.MinT );
 
     OGLRender.FrameTriangles++;
 #endif
@@ -1033,8 +1033,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
         pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
 
     #ifdef OGL_DEBUG
-        DEBUG_MIN_MAX( pC->af, OGLRender.MaxF, OGLRender.MinF );
-        DEBUG_MIN_MAX( pC->bf, OGLRender.MaxF, OGLRender.MinF );
+        DEBUG_MIN_MAX( pF->af, OGLRender.MaxF, OGLRender.MinF );
+        DEBUG_MIN_MAX( pF->bf, OGLRender.MaxF, OGLRender.MinF );
     #endif
     }
 
@@ -1051,20 +1051,20 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
     DEBUG_MIN_MAX( pC->aa, OGLRender.MaxA, OGLRender.MinA );
     DEBUG_MIN_MAX( pC->ba, OGLRender.MaxA, OGLRender.MinA );
 
-    DEBUG_MIN_MAX( pC->az, OGLRender.MaxZ, OGLRender.MinZ );
-    DEBUG_MIN_MAX( pC->bz, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pV->az, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pV->bz, OGLRender.MaxZ, OGLRender.MinZ );
 
-    DEBUG_MIN_MAX( pC->ax, OGLRender.MaxX, OGLRender.MinX );
-    DEBUG_MIN_MAX( pC->bx, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pV->ax, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pV->bx, OGLRender.MaxX, OGLRender.MinX );
 
-    DEBUG_MIN_MAX( pC->ay, OGLRender.Maxy, OGLRender.MinY );
-    DEBUG_MIN_MAX( pC->by, OGLRender.MaxY, OGLRender.MinY );
+    DEBUG_MIN_MAX( pV->ay, OGLRender.MaxY, OGLRender.MinY );
+    DEBUG_MIN_MAX( pV->by, OGLRender.MaxY, OGLRender.MinY );
 
-    DEBUG_MIN_MAX( pC->as, OGLRender.MaxS, OGLRender.MinS );
-    DEBUG_MIN_MAX( pC->bs, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pTS->as, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pTS->bs, OGLRender.MaxS, OGLRender.MinS );
 
-    DEBUG_MIN_MAX( pC->at, OGLRender.MaxT, OGLRender.MinT );
-    DEBUG_MIN_MAX( pC->bt, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pTS->at, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pTS->bt, OGLRender.MaxT, OGLRender.MinT );
 #endif
 
     if ( OpenGL.Texture )
@@ -1414,7 +1414,7 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
         pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
 
     #ifdef OGL_DEBUG
-        DEBUG_MIN_MAX( pC->af, OGLRender.MaxF, OGLRender.MinF );
+        DEBUG_MIN_MAX( pF->af, OGLRender.MaxF, OGLRender.MinF );
     #endif
     }
 
@@ -1427,15 +1427,15 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
 
     DEBUG_MIN_MAX( pC->aa, OGLRender.MaxA, OGLRender.MinA );
 
-    DEBUG_MIN_MAX( pC->az, OGLRender.MaxZ, OGLRender.MinZ );
+    DEBUG_MIN_MAX( pV->az, OGLRender.MaxZ, OGLRender.MinZ );
 
-    DEBUG_MIN_MAX( pC->ax, OGLRender.MaxX, OGLRender.MinX );
+    DEBUG_MIN_MAX( pV->ax, OGLRender.MaxX, OGLRender.MinX );
 
-    DEBUG_MIN_MAX( pC->ay, OGLRender.Maxy, OGLRender.MinY );
+    DEBUG_MIN_MAX( pV->ay, OGLRender.MaxY, OGLRender.MinY );
 
-    DEBUG_MIN_MAX( pC->as, OGLRender.MaxS, OGLRender.MinS );
+    DEBUG_MIN_MAX( pTS->as, OGLRender.MaxS, OGLRender.MinS );
 
-    DEBUG_MIN_MAX( pC->at, OGLRender.MaxT, OGLRender.MinT );
+    DEBUG_MIN_MAX( pTS->at, OGLRender.MaxT, OGLRender.MinT );
 #endif
 
     if ( OpenGL.Texture )
