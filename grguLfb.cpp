@@ -185,6 +185,10 @@ grLfbUnlock(GrLock_t dwType, GrBuffer_t dwBuffer )
                 }
             }
 
+            glDisable(GL_BLEND);
+
+            glDisable(GL_TEXTURE_2D);
+
             glDrawBuffer(Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
                                                  ? GL_BACK : GL_FRONT);
 
@@ -193,6 +197,12 @@ grLfbUnlock(GrLock_t dwType, GrBuffer_t dwBuffer )
             glDrawPixels(xsize, ysize, GL_RGBA, GL_UNSIGNED_BYTE, (void *) buf);
 
             glDrawBuffer(OpenGL.RenderBuffer);
+
+            if(OpenGL.Blend)
+                glEnable(GL_BLEND);
+
+            if(Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER)
+                glFlush();
 
             delete [] buf;
         }
