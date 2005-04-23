@@ -11,7 +11,7 @@
 
 #include "GlOgl.h"
 #include "GLRender.h"
-#include "Glextensions.h"
+#include "GLextensions.h"
 #include "PGTexture.h"
 #include "PGUTexture.h"
 
@@ -21,7 +21,7 @@
 //*************************************************
 //* Return the lowest start address for texture downloads
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
+DLLEXPORT FxU32 __stdcall
 grTexMinAddress( GrChipID_t tmu )
 {
 #ifdef OGL_DONE
@@ -34,7 +34,7 @@ grTexMinAddress( GrChipID_t tmu )
 //*************************************************
 //* Return the highest start address for texture downloads
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
+DLLEXPORT FxU32 __stdcall
 grTexMaxAddress( GrChipID_t tmu )
 {
 #ifdef OGL_DONE
@@ -47,7 +47,7 @@ grTexMaxAddress( GrChipID_t tmu )
 //*************************************************
 //* Specify the current texture source for rendering
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexSource( GrChipID_t tmu,
              FxU32      startAddress,
              FxU32      evenOdd,
@@ -73,8 +73,8 @@ grTexSource( GrChipID_t tmu,
 //*************************************************
 //* Return the texture memory consumed by a texture
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
-grTexTextureMemRequired( FxU32 dwEvenOdd, GrTexInfo *texInfo )
+DLLEXPORT FxU32 __stdcall
+grTexTextureMemRequired( DWORD dwEvenOdd, GrTexInfo *texInfo )
 {
 #ifdef OGL_DONE
     GlideMsg( "grTexTextureMemRequired( %u, --- )\n", dwEvenOdd );
@@ -86,7 +86,7 @@ grTexTextureMemRequired( FxU32 dwEvenOdd, GrTexInfo *texInfo )
 //*************************************************
 //* Return the texture memory consumed by a texture
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexDownloadMipMap( GrChipID_t tmu,
                      FxU32      startAddress,
                      FxU32      evenOdd,
@@ -109,7 +109,7 @@ grTexDownloadMipMap( GrChipID_t tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexDownloadMipMapLevel( GrChipID_t        tmu,
                           FxU32             startAddress,
                           GrLOD_t           thisLod,
@@ -142,7 +142,7 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexDownloadMipMapLevelPartial( GrChipID_t        tmu,
                                  FxU32             startAddress,
                                  GrLOD_t           thisLod,
@@ -171,7 +171,7 @@ grTexDownloadMipMapLevelPartial( GrChipID_t        tmu,
 //*************************************************
 //* Set the texture map clamping/wrapping mode
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexClampMode( GrChipID_t tmu,
                 GrTextureClampMode_t s_clampmode,
                 GrTextureClampMode_t t_clampmode )
@@ -210,7 +210,7 @@ grTexClampMode( GrChipID_t tmu,
 //*************************************************
 //* Set the texture Min/Mag Filter
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexFilterMode( GrChipID_t tmu,
                  GrTextureFilterMode_t minfilter_mode,
                  GrTextureFilterMode_t magfilter_mode )
@@ -283,7 +283,7 @@ grTexFilterMode( GrChipID_t tmu,
 //*************************************************
 //* Set the texture MipMap Mode
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexMipMapMode( GrChipID_t     tmu, 
                  GrMipMapMode_t mode,
                  FxBool         lodBlend )
@@ -313,7 +313,7 @@ grTexMipMapMode( GrChipID_t     tmu,
 //*************************************************
 //* Returns the memory occupied by a texture
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
+DLLEXPORT FxU32 __stdcall
 grTexCalcMemRequired( GrLOD_t lodmin, GrLOD_t lodmax,
                       GrAspectRatio_t aspect, GrTextureFormat_t fmt )
 {
@@ -334,7 +334,7 @@ grTexCalcMemRequired( GrLOD_t lodmin, GrLOD_t lodmax,
 //*************************************************
 //* Download a subset of an NCC table or color palette
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexDownloadTablePartial( GrChipID_t   tmu,
                            GrTexTable_t type, 
                            void        *data,
@@ -359,7 +359,7 @@ grTexDownloadTablePartial( GrChipID_t   tmu,
 //*************************************************
 //* download an NCC table or color palette
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexDownloadTable( GrChipID_t   tmu,
                     GrTexTable_t type, 
                     void         *data )
@@ -379,7 +379,7 @@ grTexDownloadTable( GrChipID_t   tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexLodBiasValue( GrChipID_t tmu, float bias )
 {
 #ifdef OGL_NOTDONE
@@ -394,7 +394,7 @@ grTexLodBiasValue( GrChipID_t tmu, float bias )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexCombine( GrChipID_t tmu,
               GrCombineFunction_t rgb_function,
               GrCombineFactor_t rgb_factor, 
@@ -613,7 +613,7 @@ grTexCombine( GrChipID_t tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
 {
 #ifdef OGL_DONE
@@ -630,7 +630,7 @@ grTexNCCTable( GrChipID_t tmu, GrNCCTable_t NCCTable )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grTexDetailControl( GrChipID_t tmu,
                     int lod_bias,
                     FxU8 detail_scale,
@@ -643,7 +643,7 @@ grTexDetailControl( GrChipID_t tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grTexMultibase( GrChipID_t tmu,
                 FxBool     enable )
 {
@@ -658,7 +658,7 @@ grTexMultibase( GrChipID_t tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexMultibaseAddress( GrChipID_t       tmu,
                        GrTexBaseRange_t range,
                        FxU32            startAddress,
@@ -672,7 +672,7 @@ grTexMultibaseAddress( GrChipID_t       tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
@@ -733,7 +733,7 @@ grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 //*************************************************
 //* Return the amount of unallocated texture memory on a Texture Mapping Unit
 //*************************************************
-FX_ENTRY FxU32 FX_CALL 
+DLLEXPORT FxU32 __stdcall 
 guTexMemQueryAvail( GrChipID_t tmu )
 {
 #ifdef OGL_PARTDONE
@@ -750,7 +750,7 @@ guTexMemQueryAvail( GrChipID_t tmu )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
@@ -809,7 +809,7 @@ guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
 }
 
 //*************************************************
-FX_ENTRY GrMipMapId_t FX_CALL 
+DLLEXPORT GrMipMapId_t __stdcall 
 guTexGetCurrentMipMap( GrChipID_t tmu )
 {
 #ifdef OGL_DONE
@@ -826,7 +826,7 @@ guTexGetCurrentMipMap( GrChipID_t tmu )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL 
+DLLEXPORT FxBool __stdcall 
 guTexChangeAttributes( GrMipMapId_t mmid,
                        int width, int height,
                        GrTextureFormat_t fmt,
@@ -850,7 +850,7 @@ guTexChangeAttributes( GrMipMapId_t mmid,
 }
 
 //*************************************************
-FX_ENTRY GrMipMapInfo * FX_CALL 
+DLLEXPORT GrMipMapInfo * __stdcall 
 guTexGetMipMapInfo( GrMipMapId_t mmid )
 {
 #ifdef OGL_DONE
@@ -861,7 +861,7 @@ guTexGetMipMapInfo( GrMipMapId_t mmid )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 guTexMemReset( void )
 {
 #ifdef OGL_PARTDONE
@@ -873,7 +873,7 @@ guTexMemReset( void )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 {
 #ifdef OGL_DONE
@@ -884,7 +884,7 @@ guTexDownloadMipMapLevel( GrMipMapId_t mmid, GrLOD_t lod, const void **src )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table )
 {
 #ifdef OGL_DONE
@@ -895,7 +895,7 @@ guTexDownloadMipMap( GrMipMapId_t mmid, const void *src, const GuNccTable *table
 }
 
 //*************************************************
-FX_ENTRY GrMipMapId_t FX_CALL 
+DLLEXPORT GrMipMapId_t __stdcall 
 guTexAllocateMemory( GrChipID_t tmu,
                      FxU8 odd_even_mask,
                      int width, int height,
@@ -928,7 +928,7 @@ guTexAllocateMemory( GrChipID_t tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 guTexSource( GrMipMapId_t id )
 {
 #ifdef OGL_DONE
@@ -941,7 +941,7 @@ guTexSource( GrMipMapId_t id )
 }
 
 //*************************************************
-FX_ENTRY FxU16 * FX_CALL
+DLLEXPORT FxU16 * __stdcall
 guTexCreateColorMipMap( void )
 {
 #ifdef OGL_NOTDONE

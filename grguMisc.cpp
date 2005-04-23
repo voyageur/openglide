@@ -17,7 +17,7 @@
 //* Sets the External Error Function to call if
 //* Glides Generates and Error
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grErrorSetCallback( void (*function)(const char *string, FxBool fatal) )
 {
 #ifdef OGL_DONE
@@ -30,7 +30,7 @@ grErrorSetCallback( void (*function)(const char *string, FxBool fatal) )
 //*************************************************
 //* Sets the Cull Mode
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grCullMode( GrCullMode_t mode )
 {
 #ifdef OGL_DONE
@@ -81,7 +81,7 @@ grCullMode( GrCullMode_t mode )
 //*************************************************
 //* Set the size and location of the hardware clipping window
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 {
 #ifdef OGL_PARTDONE
@@ -141,7 +141,7 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grDisableAllEffects( void )
 {
 #ifdef OGL_PARTDONE
@@ -156,7 +156,7 @@ grDisableAllEffects( void )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grResetTriStats( void )
 {
 #ifdef OGL_NOTDONE
@@ -165,7 +165,7 @@ grResetTriStats( void )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 {
 #ifdef OGL_NOTDONE
@@ -174,7 +174,7 @@ grTriStats( FxU32 *trisProcessed, FxU32 *trisDrawn )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grHints( GrHint_t hintType, FxU32 hintMask )
 {
 #ifdef OGL_PARTDONE
@@ -190,7 +190,7 @@ grHints( GrHint_t hintType, FxU32 hintMask )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSplash( float x, float y, float width, float height, FxU32 frame )
 {
 #ifdef OGL_NOTDONE
@@ -200,7 +200,7 @@ grSplash( float x, float y, float width, float height, FxU32 frame )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 ConvertAndDownloadRle( GrChipID_t        tmu,
                        FxU32             startAddress,
                        GrLOD_t           thisLod,
@@ -226,7 +226,7 @@ ConvertAndDownloadRle( GrChipID_t        tmu,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grCheckForRoom( FxI32 n )
 {
 #ifdef OGL_NOTDONE
@@ -235,7 +235,7 @@ grCheckForRoom( FxI32 n )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grParameterData( FxU32 param, FxU32 components, FxU32 type, FxI32 offset )
 {
 #ifdef OGL_NOTDONE
@@ -245,7 +245,7 @@ grParameterData( FxU32 param, FxU32 components, FxU32 type, FxI32 offset )
 }
 
 //*************************************************
-FX_ENTRY int FX_CALL
+DLLEXPORT int __stdcall
 guEncodeRLE16( void *dst, 
                void *src, 
                FxU32 width, 
@@ -259,7 +259,7 @@ guEncodeRLE16( void *dst,
 }
 
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
+DLLEXPORT FxU32 __stdcall
 guEndianSwapWords( FxU32 value )
 {
 #ifdef OGL_DONE
@@ -270,7 +270,7 @@ guEndianSwapWords( FxU32 value )
 }
 
 //*************************************************
-FX_ENTRY FxU16 FX_CALL
+DLLEXPORT FxU16 __stdcall
 guEndianSwapBytes( FxU16 value )
 {
 #ifdef OGL_DONE
@@ -280,7 +280,7 @@ guEndianSwapBytes( FxU16 value )
     return ( value << 8 ) | ( value >> 8 );
 }
 
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 guMovieStart( void )
 {
 #ifdef OGL_NOTDONE
@@ -288,7 +288,7 @@ guMovieStart( void )
 #endif
 }
 
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 guMovieStop( void )
 {
 #ifdef OGL_NOTDONE
@@ -296,7 +296,7 @@ guMovieStop( void )
 #endif
 }
 
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 guMovieSetName( const char *name )
 {
 #ifdef OGL_NOTDONE

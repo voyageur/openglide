@@ -21,7 +21,7 @@
 //*************************************************
 //* Sets the Dithering Mode 24->16 bits
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grDitherMode( GrDitherMode_t mode )
 {
 #ifdef OGL_DONE
@@ -50,7 +50,7 @@ grDitherMode( GrDitherMode_t mode )
 //*************************************************
 //* Sets the Constant color
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grConstantColorValue( GrColor_t value )
 {
 #ifdef OGL_DONE
@@ -69,7 +69,7 @@ grConstantColorValue( GrColor_t value )
 //*************************************************
 //* Sets the Constant color
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grConstantColorValue4( float a, float r, float g, float b )
 {
 #ifdef OGL_DONE
@@ -86,7 +86,7 @@ grConstantColorValue4( float a, float r, float g, float b )
 //*************************************************
 //* Sets the Color and Alpha mask
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grColorMask( FxBool rgb, FxBool a )
 {
 #ifdef OGL_DONE
@@ -107,7 +107,7 @@ grColorMask( FxBool rgb, FxBool a )
 #endif
 }
 
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
                 FxBool invert )
@@ -182,7 +182,7 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 guColorCombineFunction( GrColorCombineFnc_t fnc )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
@@ -275,7 +275,7 @@ guColorCombineFunction( GrColorCombineFnc_t fnc )
 //*************************************************
 //* Sets the Alpha Test Reference Value
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grAlphaTestReferenceValue( GrAlpha_t value )
 {
 #ifdef OGL_DONE
@@ -297,7 +297,7 @@ grAlphaTestReferenceValue( GrAlpha_t value )
 //*************************************************
 //* Sets the Alpha Test Function
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grAlphaTestFunction( GrCmpFnc_t function )
 {
 #ifdef OGL_DONE
@@ -321,7 +321,7 @@ grAlphaTestFunction( GrCmpFnc_t function )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
                       GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df )
 {
@@ -409,8 +409,8 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 //    }
 //    else
 //    {
-//        p_glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
-//                                  OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
+//        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
+//                                OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
 //    }
 
     OpenGL.Blend = !(( rgb_sf == GR_BLEND_ONE ) && ( rgb_df == GR_BLEND_ZERO ));
@@ -423,7 +423,7 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other,
                 FxBool invert )
@@ -458,7 +458,7 @@ grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grAlphaControlsITRGBLighting( FxBool enable )
 {
 #ifdef OGL_NOTDONE
@@ -467,7 +467,7 @@ grAlphaControlsITRGBLighting( FxBool enable )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 guAlphaSource( GrAlphaSource_t dwMode )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
@@ -501,7 +501,7 @@ guAlphaSource( GrAlphaSource_t dwMode )
 //*************************************************
 //* Sets the ChromaKey Value for comparision
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grChromakeyValue( GrColor_t value )
 {
 #ifdef OGL_PARTDONE
@@ -510,7 +510,7 @@ grChromakeyValue( GrColor_t value )
 
     RenderDrawTriangles( );
 
-    ConvertColor4B( value, OpenGL.ChromaColor );
+    ConvertColor4B( value, OpenGL.ChromaColor.C );
 
 //    ConvertColorB(  value, 
 //                    OpenGL.ChromaColor.R, 
@@ -519,7 +519,7 @@ grChromakeyValue( GrColor_t value )
 //                    OpenGL.ChromaColor.A );
 
 //    Textures->ChromakeyValue( value );
-    Textures->ChromakeyValue( OpenGL.ChromaColor );
+    Textures->ChromakeyValue( OpenGL.ChromaColor.C );
 
     Glide.State.ChromakeyValue = value;
 }
@@ -527,7 +527,7 @@ grChromakeyValue( GrColor_t value )
 //*************************************************
 //* Sets the ChromaKey Mode
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grChromakeyMode( GrChromakeyMode_t mode )
 {
 #ifdef OGL_PARTDONE
@@ -551,7 +551,7 @@ grChromakeyMode( GrChromakeyMode_t mode )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGammaCorrectionValue( float value )
 {
 #ifdef OGL_PARTDONE
@@ -560,9 +560,6 @@ grGammaCorrectionValue( float value )
     RenderDrawTriangles();
 
     OpenGL.Gamma = value;
-
-// @FIXME@: Whats linux/X11 equivalent?
-#ifdef __WIN32__
     {
         struct
         {
@@ -584,7 +581,6 @@ grGammaCorrectionValue( float value )
 
         ReleaseDC( NULL, pDC );
     }
-#endif
 
 #ifdef OPENGL_DEBUG
     GLErro( "grGammaCorrectionValue" );

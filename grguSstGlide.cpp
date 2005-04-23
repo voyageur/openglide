@@ -1,5 +1,4 @@
 
-#include <stdlib.h>
 #include "GlOgl.h"
 #include "GLRender.h"
 #include "PGTexture.h"
@@ -9,7 +8,7 @@
 //*************************************************
 //* Returns the current Glide Version
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGlideGetVersion( char version[80] )
 {
 #ifdef OGL_DONE
@@ -21,7 +20,7 @@ grGlideGetVersion( char version[80] )
 //*************************************************
 //* Initializes what is needed
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGlideInit( void )
 {
 #ifdef OGL_DONE
@@ -65,7 +64,7 @@ grGlideInit( void )
 //*************************************************
 //* Finishes everything
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGlideShutdown( void )
 {
     if ( !OpenGL.GlideInit )
@@ -91,7 +90,7 @@ grGlideShutdown( void )
 //*************************************************
 //* Sets all Glide State Variables
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGlideSetState( const GrState *state )
 {
 #ifdef OGL_PARTDONE
@@ -113,7 +112,7 @@ grGlideSetState( const GrState *state )
     grChromakeyValue( StateTemp.ChromakeyValue );
     grChromakeyMode( StateTemp.ChromaKeyMode );
     grAlphaTestReferenceValue( StateTemp.AlphaReferenceValue );
-    grAlphaTestFunction( StateTemp.AlphaTestFunction );
+    grAlphaTestFunction( StateTemp.AlphaFunction );
     grColorMask( StateTemp.ColorMask, StateTemp.AlphaMask );
     grConstantColorValue( StateTemp.ConstantColorValue );
     grFogColorValue( StateTemp.FogColorValue );
@@ -137,7 +136,7 @@ grGlideSetState( const GrState *state )
 //*************************************************
 //* Gets all Glide State Variables
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGlideGetState( GrState *state )
 {
 #ifdef OGL_PARTDONE
@@ -148,7 +147,7 @@ grGlideGetState( GrState *state )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grGlideShamelessPlug( const FxBool on )
 {
 #ifdef OGL_NOTDONE
@@ -159,7 +158,7 @@ grGlideShamelessPlug( const FxBool on )
 //*************************************************
 //* Returns the number of Voodoo Boards Instaled
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grSstQueryBoards( GrHwConfiguration *hwConfig )
 {
 #ifdef OGL_DONE
@@ -173,7 +172,7 @@ grSstQueryBoards( GrHwConfiguration *hwConfig )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grSstWinOpen(   FxU32 hwnd,
                 GrScreenResolution_t res,
                 GrScreenRefresh_t ref,
@@ -210,10 +209,10 @@ grSstWinOpen(   FxU32 hwnd,
 
     Glide.Refresh = ref;
     OpenGL.Refresh = windowRefresh[ Glide.Refresh ];
-    OpenGL.WaitSignal = (int)( 1000 / OpenGL.Refresh );
+    OpenGL.WaitSignal = (DWORD)( 1000 / OpenGL.Refresh );
 
     // Initing OpenGL Window
-    if ( !InitWindow( hwnd ) )
+    if ( !InitWindow( (HWND)hwnd ) )
     {
         return FXFALSE;
     }
@@ -230,8 +229,8 @@ grSstWinOpen(   FxU32 hwnd,
     // Initializing Glide and OpenGL
     InitOpenGL( );
 
-    Glide.SrcBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
-    Glide.DstBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
+    Glide.SrcBuffer.Address = new WORD[ OPENGLBUFFERMEMORY * 2 ];
+    Glide.DstBuffer.Address = new WORD[ OPENGLBUFFERMEMORY * 2 ];
     
     // Just checking
     if ( ( !Glide.SrcBuffer.Address ) || ( !Glide.DstBuffer.Address ) )
@@ -307,7 +306,7 @@ grSstWinOpen(   FxU32 hwnd,
 //*************************************************
 //* Close the graphics display device
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSstWinClose( void )
 {
 #ifdef OGL_DONE
@@ -367,7 +366,7 @@ grSstWinClose( void )
 //*************************************************
 //* Returns the Hardware Configuration
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grSstQueryHardware( GrHwConfiguration *hwconfig )
 {
 #ifdef OGL_DONE
@@ -391,7 +390,7 @@ grSstQueryHardware( GrHwConfiguration *hwconfig )
 //*************************************************
 //* Selects which Voodoo Board is Active
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSstSelect( int which_sst )
 {
 #ifdef OGL_DONE
@@ -404,7 +403,7 @@ grSstSelect( int which_sst )
 //*************************************************
 //* Returns the Screen Height
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
+DLLEXPORT FxU32 __stdcall
 grSstScreenHeight( void )
 {
 #ifdef OGL_DONE
@@ -417,7 +416,7 @@ grSstScreenHeight( void )
 //*************************************************
 //* Returns the Screen Width
 //*************************************************
-FX_ENTRY FxU32 FX_CALL
+DLLEXPORT FxU32 __stdcall
 grSstScreenWidth( void )
 {
 #ifdef OGL_DONE
@@ -430,7 +429,7 @@ grSstScreenWidth( void )
 //*************************************************
 //* Sets the Y Origin
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSstOrigin( GrOriginLocation_t  origin )
 {
 #ifdef OGL_DONE
@@ -467,7 +466,7 @@ grSstOrigin( GrOriginLocation_t  origin )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSstPerfStats( GrSstPerfStats_t * pStats )
 {
 #ifdef OGL_NOTDONE
@@ -476,7 +475,7 @@ grSstPerfStats( GrSstPerfStats_t * pStats )
 }
 
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSstResetPerfStats( void )
 {
 #ifdef OGL_NOTDONE
@@ -485,7 +484,7 @@ grSstResetPerfStats( void )
 }
 
 //*************************************************
-FX_ENTRY FxU32 FX_CALL 
+DLLEXPORT FxU32 __stdcall 
 grSstVideoLine( void )
 {
 #ifdef OGL_NOTDONE
@@ -496,7 +495,7 @@ grSstVideoLine( void )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL 
+DLLEXPORT FxBool __stdcall 
 grSstVRetraceOn( void )
 {
 #ifdef OGL_NOTDONE
@@ -507,7 +506,7 @@ grSstVRetraceOn( void )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL 
+DLLEXPORT FxBool __stdcall 
 grSstIsBusy( void )
 { 
 #ifdef OGL_NOTDONE
@@ -518,7 +517,7 @@ grSstIsBusy( void )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grSstControl( FxU32 code )
 { 
 #ifdef OGL_NOTDONE
@@ -529,7 +528,7 @@ grSstControl( FxU32 code )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grSstControlMode( GrControl_t mode )
 { 
 #ifdef OGL_NOTDONE
@@ -553,7 +552,7 @@ grSstControlMode( GrControl_t mode )
 //*************************************************
 //* Return the Value of the graphics status register
 //*************************************************
-FX_ENTRY FxU32 FX_CALL 
+DLLEXPORT FxU32 __stdcall 
 grSstStatus( void )
 {
 #ifdef OGL_PARTDONE
@@ -582,7 +581,7 @@ grSstStatus( void )
 //*************************************************
 //* Returns when Glides is Idle
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grSstIdle( void )
 {
 #ifdef OGL_DONE

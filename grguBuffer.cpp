@@ -11,19 +11,17 @@
 
 #include <stdio.h>
 
-#include "GlOgl.h"
+#include "glogl.h"
 #include "GLRender.h"
 
 // extern variables
 extern __int64          InitialTick,
                         FinalTick;
-extern int              Frame;
+extern DWORD            Frame;
 extern double           Fps, 
                         FpsAux, 
                         ClockFreq;
-#ifdef __WIN32__
 extern HDC              hDC;
-#endif
 
 
 // extern functions
@@ -33,7 +31,7 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 //*************************************************
 //* Clear all the Buffers
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
@@ -87,7 +85,7 @@ grBufferClear( GrColor_t color, GrAlpha_t alpha, FxU16 depth )
 //*************************************************
 //* Swaps Front and Back Buffers
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grBufferSwap( int swap_interval )
 {
 #if defined( OGL_PARTDONE ) || defined( OGL_COMBINE )
@@ -107,13 +105,7 @@ grBufferSwap( int swap_interval )
     OGLRender.FrameTriangles = 0;
 #endif
 
-#ifdef __WIN32__
     SwapBuffers( hDC );
-#endif
-
-#ifdef __unix__
-    SwapBuffers( );
-#endif
 
 #ifdef OGL_DEBUG
     RDTSC( FinalTick );
@@ -132,7 +124,7 @@ grBufferSwap( int swap_interval )
 //* Return the number of queued buffer swap requests
 //* Always 0, never pending
 //*************************************************
-FX_ENTRY int FX_CALL
+DLLEXPORT int __stdcall
 grBufferNumPending( void )
 {
 #ifdef OGL_DONE
@@ -145,7 +137,7 @@ grBufferNumPending( void )
 //*************************************************
 //* Defines the Buffer to Render
 //*************************************************
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grRenderBuffer( GrBuffer_t dwBuffer )
 {
 #ifdef OGL_DONE

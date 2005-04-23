@@ -22,7 +22,7 @@ static FxU32 tempBuf[ 2048 * 2048 ];
 
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grLfbLock( GrLock_t dwType, 
            GrBuffer_t dwBuffer, 
            GrLfbWriteMode_t dwWriteMode,
@@ -118,7 +118,7 @@ grLfbLock( GrLock_t dwType,
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 { 
 #ifdef OGL_CRITICAL
@@ -196,9 +196,9 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 
             for ( y = 0; y < ysize; y++ )
             {
-                FxU16   * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
+                WORD    * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
                                     Glide.WindowWidth + minx;
-                FxU16   * bufl = (FxU16*)tempBuf + y * xsize;
+                WORD    * bufl = (WORD*)tempBuf + y * xsize;
 
                 for ( x = 0; x < xsize; x++ )
                 {
@@ -280,7 +280,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grLfbReadRegion( GrBuffer_t src_buffer,
                  FxU32 src_x, FxU32 src_y,
                  FxU32 src_width, FxU32 src_height,
@@ -290,6 +290,11 @@ grLfbReadRegion( GrBuffer_t src_buffer,
     GlideMsg("grLfbReadRegion( %d, %d, %d, %d, %d, %d, --- )\n",
         src_buffer, src_x, src_y, src_width, src_height, dst_stride );
 #endif
+
+    static WORD *Buffer1;
+    static DWORD *Buffer2;
+    static DWORD PixelsX, PixelsY;
+    static DWORD Stride;
 
     RenderDrawTriangles( );
 
@@ -312,7 +317,7 @@ grLfbReadRegion( GrBuffer_t src_buffer,
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 grLfbWriteRegion( GrBuffer_t dst_buffer,
                   FxU32 dst_x, FxU32 dst_y,
                   GrLfbSrcFmt_t src_format,
@@ -323,6 +328,10 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
     GlideMsg("grLfbWriteRegion( %d, %d, %d, %d, %d, %d, %d, --- )\n",
         dst_buffer, dst_x, dst_y, src_format, src_width, src_height, src_stride );
 #endif
+
+    static WORD *Buffer1;
+    static DWORD *Buffer2;
+    static DWORD Pixels;
 
     RenderDrawTriangles( );
 
@@ -371,7 +380,7 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
     return FXTRUE; 
 }
 
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grLfbConstantAlpha( GrAlpha_t alpha )
 {
 #ifdef OGL_CRITICAL
@@ -379,7 +388,7 @@ grLfbConstantAlpha( GrAlpha_t alpha )
 #endif
 }
 
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grLfbConstantDepth( FxU16 depth )
 {
 #ifdef OGL_CRITICAL
@@ -387,7 +396,7 @@ grLfbConstantDepth( FxU16 depth )
 #endif
 }
 
-FX_ENTRY void FX_CALL 
+DLLEXPORT void __stdcall 
 grLfbWriteColorSwizzle( FxBool swizzleBytes, FxBool swapWords )
 {
 #ifdef OGL_CRITICAL
@@ -396,7 +405,7 @@ grLfbWriteColorSwizzle( FxBool swizzleBytes, FxBool swapWords )
 #endif
 }
 
-FX_ENTRY void FX_CALL
+DLLEXPORT void __stdcall
 grLfbWriteColorFormat( GrColorFormat_t colorFormat )
 {
 #ifdef OGL_CRITICAL

@@ -12,16 +12,16 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "GlOgl.h"
+#include "glogl.h"
 
 // extern variables and functions
-FxU32 GetTexSize( const int Lod, const int aspectRatio, const int format );
+DWORD GetTexSize( const int Lod, const int aspectRatio, const int format );
 
 // prototypes
 int Read3dfHeader( const char *filename, Gu3dfInfo *data );
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 gu3dfGetInfo( const char *filename, Gu3dfInfo *info )
 {
 #ifdef OGL_PARTDONE
@@ -76,7 +76,7 @@ static FxU32 ReadDataShort( FILE *fp )
 }
 
 //*************************************************
-FX_ENTRY FxBool FX_CALL
+DLLEXPORT FxBool __stdcall
 gu3dfLoad( const char *filename, Gu3dfInfo *data )
 {
 #ifdef OGL_PARTDONE
@@ -188,7 +188,7 @@ gu3dfLoad( const char *filename, Gu3dfInfo *data )
         break;
         
     default:
-        fread( data->data, sizeof( FxU8 ), data->mem_required, file3df );
+        fread( data->data, sizeof( BYTE ), data->mem_required, file3df );
         break;
     }
 

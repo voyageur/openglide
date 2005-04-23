@@ -12,33 +12,30 @@
 #ifndef __GLEXTENSIONS__
 #define __GLEXTENSIONS__
 
-#include "glext.h"
+#include "Glext.h"
 
 void ValidateUserConfig();
 
 // Extensions Functions Declarations
-// This cannot have the same name as the prototype functions
-// in glext.h, else compiler compiains about object being
-// redeclared as different type of symbol (func->variable).
-extern PFNGLCLIENTACTIVETEXTUREPROC             p_glClientActiveTexture;
-extern PFNGLMULTITEXCOORD4FARBPROC              p_glMultiTexCoord4fARB;
-extern PFNGLMULTITEXCOORD4FVARBPROC             p_glMultiTexCoord4fvARB;
-extern PFNGLACTIVETEXTUREARBPROC                p_glActiveTextureARB;
-extern PFNGLSECONDARYCOLOR3UBVEXTPROC           p_glSecondaryColor3ubvEXT;
-extern PFNGLSECONDARYCOLOR3UBEXTPROC            p_glSecondaryColor3ubEXT;
-extern PFNGLSECONDARYCOLORPOINTEREXTPROC        p_glSecondaryColorPointerEXT;
-extern PFNGLFOGCOORDFEXTPROC                    p_glFogCoordfEXT;
-extern PFNGLFOGCOORDPOINTEREXTPROC              p_glFogCoordPointerEXT;
-extern PFNGLSECONDARYCOLOR3FVEXTPROC            p_glSecondaryColor3fvEXT;
-extern PFNGLSECONDARYCOLOR3FEXTPROC             p_glSecondaryColor3fEXT;
+extern PFNGLCLIENTACTIVETEXTUREPROC             glClientActiveTexture;
+extern PFNGLMULTITEXCOORD4FARBPROC              glMultiTexCoord4fARB;
+extern PFNGLMULTITEXCOORD4FVARBPROC             glMultiTexCoord4fvARB;
+extern PFNGLACTIVETEXTUREARBPROC                glActiveTextureARB;
+extern PFNGLSECONDARYCOLOR3UBVEXTPROC           glSecondaryColor3ubvEXT;
+extern PFNGLSECONDARYCOLOR3UBEXTPROC            glSecondaryColor3ubEXT;
+extern PFNGLSECONDARYCOLORPOINTEREXTPROC        glSecondaryColorPointerEXT;
+extern PFNGLFOGCOORDFEXTPROC                    glFogCoordfEXT;
+extern PFNGLFOGCOORDPOINTEREXTPROC              glFogCoordPointerEXT;
+extern PFNGLSECONDARYCOLOR3FVEXTPROC            glSecondaryColor3fvEXT;
+extern PFNGLSECONDARYCOLOR3FEXTPROC             glSecondaryColor3fEXT;
 
-extern PFNGLCOLORTABLEEXTPROC                   p_glColorTableEXT;
-extern PFNGLCOLORSUBTABLEEXTPROC                p_glColorSubTableEXT;
-extern PFNGLGETCOLORTABLEEXTPROC                p_glGetColorTableEXT;
-extern PFNGLGETCOLORTABLEPARAMETERIVEXTPROC     p_glGetColorTableParameterivEXT;
-extern PFNGLGETCOLORTABLEPARAMETERFVEXTPROC     p_glGetColorTableParameterfvEXT;
+extern PFNGLCOLORTABLEEXTPROC                   glColorTableEXT;
+extern PFNGLCOLORSUBTABLEEXTPROC                glColorSubTableEXT;
+extern PFNGLGETCOLORTABLEEXTPROC                glGetColorTableEXT;
+extern PFNGLGETCOLORTABLEPARAMETERIVEXTPROC     glGetColorTableParameterivEXT;
+extern PFNGLGETCOLORTABLEPARAMETERFVEXTPROC     glGetColorTableParameterfvEXT;
 
-extern PFNGLBLENDFUNCSEPARATEEXTPROC            p_glBlendFuncSeparateEXT;
+extern PFNGLBLENDFUNCSEPARATEEXTPROC            glBlendFuncSeparateEXT;
 
 
 void APIENTRY DummyV( const void *a );
