@@ -9,11 +9,10 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
-#include "GlOGl.h"
+#include "GlOgl.h"
 #include "GLRender.h"
-#include "GLextensions.h"
+#include "Glextensions.h"
 #include "PGTexture.h"
-
 
 //**************************************************************
 // Defines
@@ -134,12 +133,7 @@ void RenderUpdateArrays( void )
 // Draw the current saved triangles
 void RenderDrawTriangles( void )
 {
-    static int      i;
-    static DWORD    Pixels;
-    static BYTE     * Buffer1,
-                    * Buffer2;
-    static GLuint   TNumber;
-    bool            use_two_tex = false;
+    bool use_two_tex = false;
 
     if ( ! OGLRender.NumberOfTriangles )
     {
@@ -194,7 +188,7 @@ void RenderDrawTriangles( void )
         glEnable( GL_ALPHA_TEST );
         
         glBegin( GL_TRIANGLES );
-        for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+        for ( int i = 0; i < OGLRender.NumberOfTriangles; i++ )
         {
             glColor3fv( &OGLRender.TColor[ i ].ar );
             glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
@@ -227,7 +221,7 @@ void RenderDrawTriangles( void )
         else
         {
             glBegin( GL_TRIANGLES );
-            for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+            for ( int i = 0; i < OGLRender.NumberOfTriangles; i++ )
             {
                 glColor4fv( &OGLRender.TColor[ i ].ar );
                 glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
@@ -289,7 +283,7 @@ void RenderDrawTriangles( void )
         else
         {
             glBegin( GL_TRIANGLES );
-            for ( i = 0; i < OGLRender.NumberOfTriangles; i++ )
+            for ( int i = 0; i < OGLRender.NumberOfTriangles; i++ )
             {
                 glColor4fv( &OGLRender.TColor2[ i ].ar );
                 glVertex3fv( &OGLRender.TVertex[ i ].ax );
@@ -583,11 +577,11 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
         if ( InternalConfig.PrecisionFix )
         {
             w = 1.0f / a->oow;
-            pV->az = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
+            pV->az = 8.9375f - (float( ( (*(FxU32 *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
             w = 1.0f / b->oow;
-            pV->bz = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
+            pV->bz = 8.9375f - (float( ( (*(FxU32 *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
             w = 1.0f / c->oow;
-            pV->cz = 8.9375f - (float( ( (*(DWORD *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
+            pV->cz = 8.9375f - (float( ( (*(FxU32 *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
         }
         else
         {
@@ -642,9 +636,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
         if ( Glide.State.FogMode == GR_FOG_WITH_TABLE )
 //        if ( Glide.State.FogMode & GR_FOG_WITH_TABLE )
         {
-            pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
-            pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
-            pF->cf = (float)OpenGL.FogTable[ (WORD)(1.0f / c->oow) ] * D1OVER255;
+            pF->af = (float)OpenGL.FogTable[ (FxU16)(1.0f / a->oow) ] * D1OVER255;
+            pF->bf = (float)OpenGL.FogTable[ (FxU16)(1.0f / b->oow) ] * D1OVER255;
+            pF->cf = (float)OpenGL.FogTable[ (FxU16)(1.0f / c->oow) ] * D1OVER255;
         }
         else
         {
@@ -1069,9 +1063,9 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
         if ( InternalConfig.PrecisionFix )
         {
             w = 1.0f / a->oow;
-            pV->az = 1.0f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
+            pV->az = 1.0f - (float(((*(FxU32 *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
             w = 1.0f / b->oow;
-            pV->bz = 1.0f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
+            pV->bz = 1.0f - (float(((*(FxU32 *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
         }
         else
         {
@@ -1112,8 +1106,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
 
     if ( InternalConfig.FogEnable )
     {
-        pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
-        pF->bf = (float)OpenGL.FogTable[ (WORD)(1.0f / b->oow) ] * D1OVER255;
+        pF->af = (float)OpenGL.FogTable[ (FxU16)(1.0f / a->oow) ] * D1OVER255;
+        pF->bf = (float)OpenGL.FogTable[ (FxU16)(1.0f / b->oow) ] * D1OVER255;
 
     #ifdef OGL_DEBUG
         DEBUG_MIN_MAX( pF->af, OGLRender.MaxF, OGLRender.MinF );
@@ -1461,7 +1455,7 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
         if ( InternalConfig.PrecisionFix )
         {
             w = 1.0f / a->oow;
-            pV->az = 1.0f - (float(((*(DWORD *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
+            pV->az = 1.0f - (float(((*(FxU32 *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
         }
         else
         {
@@ -1494,7 +1488,7 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
 
     if( InternalConfig.FogEnable )
     {
-        pF->af = (float)OpenGL.FogTable[ (WORD)(1.0f / a->oow) ] * D1OVER255;
+        pF->af = (float)OpenGL.FogTable[ (FxU16)(1.0f / a->oow) ] * D1OVER255;
 
     #ifdef OGL_DEBUG
         DEBUG_MIN_MAX( pF->af, OGLRender.MaxF, OGLRender.MinF );

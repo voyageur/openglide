@@ -20,7 +20,7 @@
 //* download a fog table
 //* Fog is applied after color combining and before alpha blending.
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grFogTable( const GrFog_t *ft )
 {
 #ifdef OGL_DONE
@@ -33,11 +33,11 @@ grFogTable( const GrFog_t *ft )
 //        CopyMemory( Glide.FogTable, ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
         Glide.FogTable[ GR_FOG_TABLE_SIZE ] = 255;
 
-        for ( DWORD i = 0; i < GR_FOG_TABLE_SIZE; i++ )
+        for ( int i = 0; i < GR_FOG_TABLE_SIZE; i++ )
         {
-            for ( DWORD j = intStartEnd[ i ]; j < intStartEnd[ i + 1 ]; j++ )
+            for ( unsigned int j = intStartEnd[ i ]; j < intStartEnd[ i + 1 ]; j++ )
             {
-                OpenGL.FogTable[ j ] = (BYTE)( Glide.FogTable[ i ] + 
+                OpenGL.FogTable[ j ] = (FxU8)( Glide.FogTable[ i ] + 
                     ( Glide.FogTable[ i + 1 ] - Glide.FogTable[ i ] ) * ( j - intStartEnd[ i ] ) / 
                     intEndMinusStart[ i ] );
             }
@@ -46,7 +46,7 @@ grFogTable( const GrFog_t *ft )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grFogColorValue( GrColor_t fogcolor )
 {
 #ifdef OGL_PARTDONE
@@ -65,7 +65,7 @@ grFogColorValue( GrColor_t fogcolor )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 grFogMode( GrFogMode_t mode )
 {
 #ifdef OGL_PARTDONE
@@ -112,7 +112,7 @@ grFogMode( GrFogMode_t mode )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guFogGenerateExp( GrFog_t *fogtable, float density )
 {
 #ifdef OGL_PARTDONE
@@ -145,7 +145,7 @@ guFogGenerateExp( GrFog_t *fogtable, float density )
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guFogGenerateExp2( GrFog_t *fogtable, float density )
 {
 #ifdef OGL_PARTDONE
@@ -158,12 +158,12 @@ guFogGenerateExp2( GrFog_t *fogtable, float density )
     {
         Temp = ( 1.0f - (float) exp( ( -density)  * guFogTableIndexToW( i ) ) * 
                (float)exp( (-density)  * guFogTableIndexToW( i ) ) )  * 255.0f;
-        fogtable[ i ] = (BYTE) Temp;
+        fogtable[ i ] = (FxU8) Temp;
     }
 }
 
 //*************************************************
-DLLEXPORT void __stdcall
+FX_ENTRY void FX_CALL
 guFogGenerateLinear( GrFog_t *fogtable,
                      float nearZ, float farZ )
 {
@@ -193,7 +193,7 @@ guFogGenerateLinear( GrFog_t *fogtable,
     ZeroMemory( fogtable, GR_FOG_TABLE_SIZE );
     for( i = Start; i <= End; i++ )
     {
-        fogtable[ i ] = (BYTE)((float)( End - Start ) / 255.0f * (float)( i - Start ));
+        fogtable[ i ] = (FxU8)((float)( End - Start ) / 255.0f * (float)( i - Start ));
     }
 
     for( i = End; i < GR_FOG_TABLE_SIZE; i++ )
@@ -205,7 +205,7 @@ guFogGenerateLinear( GrFog_t *fogtable,
 //*************************************************
 //* convert a fog table index to a floating point eye-space w value
 //*************************************************
-DLLEXPORT float __stdcall
+FX_ENTRY float FX_CALL
 guFogTableIndexToW( int i )
 {
 #ifdef OGL_DONE

@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #include "GlOgl.h"
-#include "GLextensions.h"
+#include "Glextensions.h"
 #include "PGTexture.h"
 #include "PGUTexture.h"
 

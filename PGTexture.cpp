@@ -9,9 +9,9 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
-#include "glogl.h"
+#include "GlOgl.h"
 #include "PGTexture.h"
-#include "glextensions.h"
+#include "Glextensions.h"
 #include "FormatConversion.h"
 #include "OGLTables.h"
 
@@ -441,14 +441,14 @@ bool PGTexture::MakeReady( void )
 
                 glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
 
-                SplitAP88( (WORD *)data, (BYTE *)m_tex_temp, (BYTE *)tex_temp2, texVals.nPixels );
+                SplitAP88( (FxU16 *)data, (FxU8 *)m_tex_temp, (FxU8 *)tex_temp2, texVals.nPixels );
                 
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, 
                               texVals.width, texVals.height, 0, 
                               GL_COLOR_INDEX, GL_UNSIGNED_BYTE, m_tex_temp );
                 if ( InternalConfig.EnableMipMaps )
                 {
-                    genPaletteMipmaps( texVals.width, texVals.height, (BYTE *)m_tex_temp );
+                    genPaletteMipmaps( texVals.width, texVals.height, (FxU8 *)m_tex_temp );
                 }
 
                 glActiveTextureARB( GL_TEXTURE1_ARB );
@@ -459,13 +459,13 @@ bool PGTexture::MakeReady( void )
             }
             else
             {
-                ConvertAP88to8888( (WORD*)data, m_tex_temp, texVals.nPixels, m_palette );
+                ConvertAP88to8888( (FxU16*)data, m_tex_temp, texVals.nPixels, m_palette );
                 OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_tex_temp );
             }
             break;
             
         case GR_TEXFMT_ALPHA_8:
-            ConvertA8toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
+            ConvertA8toAP88( (FxU8*)data, (FxU16*)m_tex_temp, texVals.nPixels );
             OGL_LOAD_CREATE_TEXTURE( 2, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
             break;
             
@@ -481,7 +481,7 @@ bool PGTexture::MakeReady( void )
 #if 0
             OGL_LOAD_CREATE_TEXTURE( GL_LUMINANCE4_ALPHA4, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data );
 #else
-            ConvertAI44toAP88( (BYTE*)data, (WORD*)m_tex_temp, texVals.nPixels );
+            ConvertAI44toAP88( (FxU8*)data, (FxU16*)m_tex_temp, texVals.nPixels );
             glTexImage2D( GL_TEXTURE_2D, texVals.lod, 2, texVals.width, texVals.height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, m_tex_temp );
             if ( InternalConfig.BuildMipMaps )
             {
@@ -495,17 +495,17 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_16BIT: //GR_TEXFMT_ARGB_8332:
-            Convert8332to8888( (WORD*)data, m_tex_temp, texVals.nPixels );
+            Convert8332to8888( (FxU16*)data, m_tex_temp, texVals.nPixels );
             OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
             break;
             
         case GR_TEXFMT_YIQ_422:
-            ConvertYIQto8888( (BYTE*)data, m_tex_temp, texVals.nPixels, &(m_ncc[m_ncc_select]) );
+            ConvertYIQto8888( (FxU8*)data, m_tex_temp, texVals.nPixels, &(m_ncc[m_ncc_select]) );
             OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
             break;
             
         case GR_TEXFMT_AYIQ_8422:
-            ConvertAYIQto8888( (WORD*)data, m_tex_temp, texVals.nPixels, &(m_ncc[m_ncc_select]) );
+            ConvertAYIQto8888( (FxU16*)data, m_tex_temp, texVals.nPixels, &(m_ncc[m_ncc_select]) );
             OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
             break;
             
@@ -612,9 +612,9 @@ void PGTexture::GetAspect( float *hAspect, float *wAspect )
 void PGTexture::ChromakeyValue( GrColor_t value )
 {
     m_chromakey_value_8888 = value & 0x00ffffff;
-    m_chromakey_value_565  = (WORD)( ( value & 0x00F80000 ) >> 8 |
-                                     ( value & 0x0000FC00 ) >> 5 |
-                                     ( value & 0x000000F8 ) >> 3 );
+    m_chromakey_value_565  = (FxU16)( ( value & 0x00F80000 ) >> 8 |
+                                      ( value & 0x0000FC00 ) >> 5 |
+                                      ( value & 0x000000F8 ) >> 3 );
     m_palette_dirty = true;
 }
 

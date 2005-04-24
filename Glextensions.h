@@ -12,7 +12,7 @@
 #ifndef __GLEXTENSIONS__
 #define __GLEXTENSIONS__
 
-#include "Glext.h"
+#include "glext.h"
 
 void ValidateUserConfig();
 

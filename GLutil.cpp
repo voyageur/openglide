@@ -9,14 +9,15 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
+#include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <io.h>
 
 #include "GlOgl.h"
-#include "GLExtensions.h"
+#include "Glextensions.h"
 #include "OGLTables.h"
-
 
 // Configuration Variables
 ConfigStruct    UserConfig;
@@ -30,13 +31,14 @@ static HGLRC hRC;
 static HWND hWND;
 static struct
 {
-    WORD red[ 256 ];
-    WORD green[ 256 ];
-    WORD blue[ 256 ];
+    FxU16 red[ 256 ];
+    FxU16 green[ 256 ];
+    FxU16 blue[ 256 ];
 } old_ramp;
 
-static BOOL ramp_stored = FALSE;
-static BOOL mode_changed = FALSE;
+static BOOL ramp_stored = TRUE;
+
+static BOOL mode_changed = TRUE;
 
 // Functions
 
@@ -90,29 +92,29 @@ void GLErro( char *Funcao )
     }
 }
 
-static BOOL SetScreenMode( HWND hWnd, int xsize, int ysize )
+static bool SetScreenMode( HWND hWnd, int xsize, int ysize )
 {
     HDC     hdc;
-    DWORD   bits_per_pixel;
-    BOOL    found;
+    FxU32   bits_per_pixel;
+    bool    found;
     DEVMODE DevMode;
 
     hdc = GetDC( hWnd );
     bits_per_pixel = GetDeviceCaps( hdc, BITSPIXEL );
     ReleaseDC( hWnd, hdc );
     
-    found = FALSE;
+    found = false;
     DevMode.dmSize = sizeof( DEVMODE );
     
     for ( int i = 0; 
-          !found && EnumDisplaySettings( NULL, i, &DevMode ) != FALSE; 
+          !found && EnumDisplaySettings( NULL, i, &DevMode ) != false; 
           i++ )
     {
-        if ( ( DevMode.dmPelsWidth == (DWORD)xsize ) && 
-             ( DevMode.dmPelsHeight == (DWORD)ysize ) && 
+        if ( ( DevMode.dmPelsWidth == (FxU32)xsize ) && 
+             ( DevMode.dmPelsHeight == (FxU32)ysize ) && 
              ( DevMode.dmBitsPerPel == bits_per_pixel ) )
         {
-            found = TRUE;
+            found = true;
         }
     }
     
@@ -124,12 +126,13 @@ static void ResetScreenMode( void )
     ChangeDisplaySettings( NULL, 0 );
 }
 
-void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
+void InitialiseOpenGLWindow( HWND hWnd, int x, int y, int width, int height )
 {
     PIXELFORMATDESCRIPTOR   pfd;
     int                     PixFormat;
     unsigned int            BitsPerPixel;
-    
+    HWND                    hwnd = (HWND) hWnd;
+
     if( hwnd == NULL )
     {
         hwnd = GetActiveWindow();
@@ -141,14 +144,14 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
         exit( 1 );
     }
 
-    mode_changed = FALSE;
+    mode_changed = false;
 
     if ( UserConfig.InitFullScreen )
     {
         SetWindowLong( hwnd, 
                        GWL_STYLE, 
                        WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS );
-        MoveWindow( hwnd, 0, 0, width, height, FALSE );
+        MoveWindow( hwnd, 0, 0, width, height, false );
         mode_changed = SetScreenMode( hwnd, width, height );
     }
     else
@@ -167,7 +170,7 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
                    x, y, 
                    x + ( rect.right - rect.left ),
                    y + ( rect.bottom - rect.top ),
-                   TRUE );
+                   true );
     }
 
     hWND = hwnd;
@@ -205,7 +208,7 @@ void InitialiseOpenGLWindow( HWND hwnd, int x, int y, UINT width, UINT height )
 
     if ( pfd.cDepthBits > 16 )
     {
-        UserConfig.PrecisionFix = FALSE;
+        UserConfig.PrecisionFix = false;
     }
 
     hRC = wglCreateContext( hDC );
@@ -239,41 +242,41 @@ void FinaliseOpenGLWindow( void )
     }
 }
 
-void ConvertColorB( GrColor_t GlideColor, BYTE &R, BYTE &G, BYTE &B, BYTE &A )
+void ConvertColorB( GrColor_t GlideColor, FxU8 &R, FxU8 &G, FxU8 &B, FxU8 &A )
 {
     switch ( Glide.State.ColorFormat )
     {
     case GR_COLORFORMAT_ARGB:   //0xAARRGGBB
-        A = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        R = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        G = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        B = (BYTE)( ( GlideColor & 0x000000FF )       );
+        A = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        R = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        G = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        B = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_ABGR:   //0xAABBGGRR
-        A = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        B = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        G = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        R = (BYTE)( ( GlideColor & 0x000000FF )       );
+        A = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        B = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        G = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        R = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_RGBA:   //0xRRGGBBAA
-        R = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        G = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        B = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        A = (BYTE)( ( GlideColor & 0x000000FF )       );
+        R = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        G = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        B = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        A = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
 
     case GR_COLORFORMAT_BGRA:   //0xBBGGRRAA
-        B = (BYTE)( ( GlideColor & 0xFF000000 ) >> 24 );
-        G = (BYTE)( ( GlideColor & 0x00FF0000 ) >> 16 );
-        R = (BYTE)( ( GlideColor & 0x0000FF00 ) >>  8 );
-        A = (BYTE)( ( GlideColor & 0x000000FF )       );
+        B = (FxU8)( ( GlideColor & 0xFF000000 ) >> 24 );
+        G = (FxU8)( ( GlideColor & 0x00FF0000 ) >> 16 );
+        R = (FxU8)( ( GlideColor & 0x0000FF00 ) >>  8 );
+        A = (FxU8)( ( GlideColor & 0x000000FF )       );
         break;
     }
 }
 
-void ConvertColor4B( GrColor_t GlideColor, DWORD &C )
+void ConvertColor4B( GrColor_t GlideColor, FxU32 &C )
 {
     switch ( Glide.State.ColorFormat )
     {
@@ -361,7 +364,7 @@ void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A
 }
 
 //*************************************************
-DWORD GetTexSize( const int Lod, const int aspectRatio, const int format )
+FxU32 GetTexSize( const int Lod, const int aspectRatio, const int format )
 {
     /*
     ** If the format is one of these:
@@ -411,8 +414,10 @@ float ClockFrequency( void )
 
 char * FindConfig( char *IniFile, char *IniConfig )
 {
-    char    Buffer1[ 256 ], 
-            * EqLocation, 
+    // Cannot return pointer to local buffer, unless
+    // static.
+    static char Buffer1[ 256 ];
+    char    * EqLocation, 
             * Find;
     FILE    * file;
 
@@ -500,7 +505,7 @@ void GetOptions( void )
     else
     {
         Pointer = FindConfig( Path, "Version" );
-        if ( !strcmp( Pointer, OpenGLideVersion ) )
+        if ( Pointer && !strcmp( Pointer, OpenGLideVersion ) )
         {
             Pointer = FindConfig( Path, "CreateWindow" );
             UserConfig.CreateWindow = atoi( Pointer ) ? true : false;
@@ -610,7 +615,7 @@ bool GenerateErrorFile( void )
 // Detect if Processor has MMX Instructions
 int DetectMMX( void )
 {
-    DWORD Result;
+    FxU32 Result;
 
     __asm
     {
@@ -627,7 +632,7 @@ int DetectMMX( void )
 }
 
 // Copy Blocks of Memory Using MMX
-void MMXCopyMemory( void *Dst, void *Src, DWORD NumberOfBytes )
+void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
     __asm
     {
@@ -644,7 +649,7 @@ start:  sub ECX, 8
     }
 }
 
-void MMXSetShort( void *Dst, short Value, DWORD NumberOfBytes )
+void MMXSetShort( void *Dst, short Value, FxU32 NumberOfBytes )
 {
     __asm
     {
@@ -664,7 +669,7 @@ start:  sub ECX, 8
     }
 }
 
-void MMXCopyByteFlip( void *Dst, void *Src, DWORD NumberOfBytes )
+void MMXCopyByteFlip( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
     __asm
     {       
