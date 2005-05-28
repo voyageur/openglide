@@ -111,18 +111,18 @@ void RenderUpdateArrays( void )
     glColorPointer( 4, GL_FLOAT, 0, &OGLRender.TColor[0] );
     if ( InternalConfig.ARB_multitexture )
     {
-        glClientActiveTexture( GL_TEXTURE0_ARB );
+        p_glClientActiveTexture( GL_TEXTURE0_ARB );
     }
     glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
     if ( InternalConfig.ARB_multitexture )
     {
-        glClientActiveTexture( GL_TEXTURE1_ARB );
+        p_glClientActiveTexture( GL_TEXTURE1_ARB );
         glTexCoordPointer( 4, GL_FLOAT, 0, &OGLRender.TTexture[0] );
     }
-    glSecondaryColorPointerEXT( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TColor2[0] );
+    p_glSecondaryColorPointerEXT( 3, GL_FLOAT, 4 * sizeof( GLfloat ), &OGLRender.TColor2[0] );
     if ( InternalConfig.EXT_fog_coord )
     {
-        glFogCoordPointerEXT( 1, GL_FLOAT, &OGLRender.TFog[0] );
+        p_glFogCoordPointerEXT( 1, GL_FLOAT, &OGLRender.TFog[0] );
     }
 
 #ifdef OPENGL_DEBUG
@@ -148,11 +148,11 @@ void RenderDrawTriangles( void )
 
         if ( use_two_tex )
         {
-            glActiveTextureARB( GL_TEXTURE1_ARB );
+            p_glActiveTextureARB( GL_TEXTURE1_ARB );
 
             glEnable( GL_TEXTURE_2D );
 
-            glActiveTextureARB( GL_TEXTURE0_ARB );
+            p_glActiveTextureARB( GL_TEXTURE0_ARB );
         }
     }
     else
@@ -191,20 +191,20 @@ void RenderDrawTriangles( void )
         for ( int i = 0; i < OGLRender.NumberOfTriangles; i++ )
         {
             glColor3fv( &OGLRender.TColor[ i ].ar );
-            glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
-            glFogCoordfEXT( OGLRender.TFog[ i ].af );
+            p_glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
+            p_glFogCoordfEXT( OGLRender.TFog[ i ].af );
             glTexCoord4fv( &OGLRender.TTexture[ i ].as );
             glVertex3fv( &OGLRender.TVertex[ i ].ax );
             
             glColor3fv( &OGLRender.TColor[ i ].br );
-            glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].br );
-            glFogCoordfEXT( OGLRender.TFog[ i ].bf );
+            p_glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].br );
+            p_glFogCoordfEXT( OGLRender.TFog[ i ].bf );
             glTexCoord4fv( &OGLRender.TTexture[ i ].bs );
             glVertex3fv( &OGLRender.TVertex[ i ].bx );
             
             glColor3fv( &OGLRender.TColor[ i ].cr );
-            glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].cr );
-            glFogCoordfEXT( OGLRender.TFog[ i ].cf );
+            p_glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].cr );
+            p_glFogCoordfEXT( OGLRender.TFog[ i ].cf );
             glTexCoord4fv( &OGLRender.TTexture[ i ].cs );
             glVertex3fv( &OGLRender.TVertex[ i ].cx );
         }
@@ -224,32 +224,32 @@ void RenderDrawTriangles( void )
             for ( int i = 0; i < OGLRender.NumberOfTriangles; i++ )
             {
                 glColor4fv( &OGLRender.TColor[ i ].ar );
-                glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
-                glFogCoordfEXT( OGLRender.TFog[ i ].af );
+                p_glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].ar );
+                p_glFogCoordfEXT( OGLRender.TFog[ i ].af );
                 glTexCoord4fv( &OGLRender.TTexture[ i ].as );
                 if ( use_two_tex )
                 {
-                    glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].as );
+                    p_glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].as );
                 }
                 glVertex3fv( &OGLRender.TVertex[ i ].ax );
                 
                 glColor4fv( &OGLRender.TColor[ i ].br );
-                glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].br );
-                glFogCoordfEXT( OGLRender.TFog[ i ].bf );
+                p_glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].br );
+                p_glFogCoordfEXT( OGLRender.TFog[ i ].bf );
                 glTexCoord4fv( &OGLRender.TTexture[ i ].bs );
                 if ( use_two_tex )
                 {
-                    glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].bs );
+                    p_glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].bs );
                 }
                 glVertex3fv( &OGLRender.TVertex[ i ].bx );
                 
                 glColor4fv( &OGLRender.TColor[ i ].cr );
-                glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].cr );
-                glFogCoordfEXT( OGLRender.TFog[ i ].cf );
+                p_glSecondaryColor3fvEXT( &OGLRender.TColor2[ i ].cr );
+                p_glFogCoordfEXT( OGLRender.TFog[ i ].cf );
                 glTexCoord4fv( &OGLRender.TTexture[ i ].cs );
                 if ( use_two_tex )
                 {
-                    glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].cs );
+                    p_glMultiTexCoord4fvARB( GL_TEXTURE1_ARB, &OGLRender.TTexture[ i ].cs );
                 }
                 glVertex3fv( &OGLRender.TVertex[ i ].cx );
             }
@@ -314,11 +314,11 @@ void RenderDrawTriangles( void )
 
     if ( use_two_tex )
     {
-        glActiveTextureARB( GL_TEXTURE1_ARB );
+        p_glActiveTextureARB( GL_TEXTURE1_ARB );
 
         glDisable( GL_TEXTURE_2D );
 
-        glActiveTextureARB( GL_TEXTURE0_ARB );
+        p_glActiveTextureARB( GL_TEXTURE0_ARB );
     }
 
 #ifdef OGL_DEBUG
@@ -1179,15 +1179,15 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
     
     glBegin( GL_LINES );
         glColor4fv( &pC->ar );
-        glSecondaryColor3fvEXT( &pC2->ar );
+        p_glSecondaryColor3fvEXT( &pC2->ar );
         glTexCoord4fv( &pTS->as );
-        glFogCoordfEXT( pF->af );
+        p_glFogCoordfEXT( pF->af );
         glVertex3fv( &pV->ax );
 
         glColor4fv( &pC->br );
-        glSecondaryColor3fvEXT( &pC2->br );
+        p_glSecondaryColor3fvEXT( &pC2->br );
         glTexCoord4fv( &pTS->bs );
-        glFogCoordfEXT( pF->bf );
+        p_glFogCoordfEXT( pF->bf );
         glVertex3fv( &pV->bx );
     glEnd();
 
@@ -1550,9 +1550,9 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
     
     glBegin( GL_POINTS );
         glColor4fv( &pC->ar );
-        glSecondaryColor3fvEXT( &pC2->ar );
+        p_glSecondaryColor3fvEXT( &pC2->ar );
         glTexCoord4fv( &pTS->as );
-        glFogCoordfEXT( pF->af );
+        p_glFogCoordfEXT( pF->af );
         glVertex3fv( &pV->ax );
     glEnd();
 

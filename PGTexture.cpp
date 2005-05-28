@@ -303,16 +303,16 @@ bool PGTexture::MakeReady( void )
 
         if ( palette_changed )
         {
-            glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
+            p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
         }
 
         if ( use_two_textures )
         {
-            glActiveTextureARB( GL_TEXTURE1_ARB );
+            p_glActiveTextureARB( GL_TEXTURE1_ARB );
 
             glBindTexture( GL_TEXTURE_2D, tex2Num );
 
-            glActiveTextureARB( GL_TEXTURE0_ARB );
+            p_glActiveTextureARB( GL_TEXTURE0_ARB );
         }
     }
     else
@@ -340,7 +340,7 @@ bool PGTexture::MakeReady( void )
 
         if ( use_two_textures )
         {
-            glActiveTextureARB( GL_TEXTURE1_ARB );
+            p_glActiveTextureARB( GL_TEXTURE1_ARB );
 
             glBindTexture( GL_TEXTURE_2D, tex2Num );
             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
@@ -354,7 +354,7 @@ bool PGTexture::MakeReady( void )
                 glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true );
             }
             
-            glActiveTextureARB( GL_TEXTURE0_ARB );
+            p_glActiveTextureARB( GL_TEXTURE0_ARB );
         }
 
         switch ( m_info.format )
@@ -417,7 +417,7 @@ bool PGTexture::MakeReady( void )
         case GR_TEXFMT_P_8:
             if ( InternalConfig.EXT_paletted_texture )
             {
-                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
+                p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
                 
                 glTexImage2D( GL_TEXTURE_2D, texVals.lod, GL_COLOR_INDEX8_EXT, 
                               texVals.width, texVals.height, 0, 
@@ -439,7 +439,7 @@ bool PGTexture::MakeReady( void )
             {
                 FxU32 *tex_temp2 = m_tex_temp + 256 * 128;
 
-                glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
+                p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
 
                 SplitAP88( (FxU16 *)data, (FxU8 *)m_tex_temp, (FxU8 *)tex_temp2, texVals.nPixels );
                 
@@ -451,11 +451,11 @@ bool PGTexture::MakeReady( void )
                     genPaletteMipmaps( texVals.width, texVals.height, (FxU8 *)m_tex_temp );
                 }
 
-                glActiveTextureARB( GL_TEXTURE1_ARB );
+                p_glActiveTextureARB( GL_TEXTURE1_ARB );
 
                 OGL_LOAD_CREATE_TEXTURE( GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, tex_temp2 );
 
-                glActiveTextureARB( GL_TEXTURE0_ARB );
+                p_glActiveTextureARB( GL_TEXTURE0_ARB );
             }
             else
             {
@@ -527,7 +527,7 @@ bool PGTexture::MakeReady( void )
     
     if ( use_two_textures )
     {
-        glActiveTextureARB( GL_TEXTURE1_ARB );
+        p_glActiveTextureARB( GL_TEXTURE1_ARB );
         
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGL.TClampMode );
@@ -535,7 +535,7 @@ bool PGTexture::MakeReady( void )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL.MinFilterMode );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL.MagFilterMode );
         
-        glActiveTextureARB( GL_TEXTURE0_ARB );
+        p_glActiveTextureARB( GL_TEXTURE0_ARB );
     }
 
     return use_two_textures;

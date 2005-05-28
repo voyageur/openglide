@@ -409,7 +409,7 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 //    }
 //    else
 //    {
-//        glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
+//        p_glBlendFuncSeparateEXT( OpenGL.SrcBlend, OpenGL.DstBlend, 
 //                                  OpenGL.SrcAlphaBlend, OpenGL.DstAlphaBlend );
 //    }
 
