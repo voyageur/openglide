@@ -17,6 +17,8 @@
 #include "PGTexture.h"
 #include "OGLTables.h"
 
+#include "platform/window.h"
+
 
 //*************************************************
 //* Sets the Dithering Mode 24->16 bits
@@ -561,27 +563,7 @@ grGammaCorrectionValue( float value )
 
     OpenGL.Gamma = value;
 
-    {
-        struct
-        {
-            WORD red[256];
-            WORD green[256];
-            WORD blue[256];
-        } ramp;
-        int i;
-        HDC pDC = GetDC( NULL );
-
-        for ( i = 0; i < 256; i++ )
-        {
-            WORD v = (WORD)( 0xffff * pow( i / 255.0, 1.0 / value ) );
-
-            ramp.red[ i ] = ramp.green[ i ] = ramp.blue[ i ] = ( v & 0xff00 );
-        }
-
-        BOOL res = SetDeviceGammaRamp( pDC, &ramp );
-
-        ReleaseDC( NULL, pDC );
-    }
+    SetGamma(value);
 
 #ifdef OPENGL_DEBUG
     GLErro( "grGammaCorrectionValue" );

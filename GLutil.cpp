@@ -13,11 +13,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <io.h>
 
 #include "GlOgl.h"
 #include "Glextensions.h"
 #include "OGLTables.h"
+
+#include "platform.h"
+#include "platform/window.h"
+#include "platform/clock.h"
 
 // Configuration Variables
 ConfigStruct    UserConfig;
@@ -26,23 +29,9 @@ ConfigStruct    InternalConfig;
 // Extern prototypes
 extern unsigned long    NumberOfErrors;
 
-HDC hDC;
-static HGLRC hRC;
-static HWND hWND;
-static struct
-{
-    FxU16 red[ 256 ];
-    FxU16 green[ 256 ];
-    FxU16 blue[ 256 ];
-} old_ramp;
-
-static BOOL ramp_stored = TRUE;
-
-static BOOL mode_changed = TRUE;
-
 // Functions
 
-void __cdecl GlideMsg( char *szString, ... )
+VARARGDECL(void) GlideMsg( char *szString, ... )
 {
     va_list( Arg );
     va_start( Arg, szString );
@@ -59,7 +48,7 @@ void __cdecl GlideMsg( char *szString, ... )
     va_end( Arg );
 }
 
-void __cdecl Error( char *szString, ... )
+VARARGDECL(void) Error( char *szString, ... )
 {
     va_list( Arg );
     va_start( Arg, szString );
@@ -89,156 +78,6 @@ void GLErro( char *Funcao )
     if ( Erro != GL_NO_ERROR )
     {
         Error( "%s: OpenGLError = %s\n", Funcao, gluErrorString( Erro ) );
-    }
-}
-
-static bool SetScreenMode( HWND hWnd, int xsize, int ysize )
-{
-    HDC     hdc;
-    FxU32   bits_per_pixel;
-    bool    found;
-    DEVMODE DevMode;
-
-    hdc = GetDC( hWnd );
-    bits_per_pixel = GetDeviceCaps( hdc, BITSPIXEL );
-    ReleaseDC( hWnd, hdc );
-    
-    found = false;
-    DevMode.dmSize = sizeof( DEVMODE );
-    
-    for ( int i = 0; 
-          !found && EnumDisplaySettings( NULL, i, &DevMode ) != false; 
-          i++ )
-    {
-        if ( ( DevMode.dmPelsWidth == (FxU32)xsize ) && 
-             ( DevMode.dmPelsHeight == (FxU32)ysize ) && 
-             ( DevMode.dmBitsPerPel == bits_per_pixel ) )
-        {
-            found = true;
-        }
-    }
-    
-    return ( found && ChangeDisplaySettings( &DevMode, CDS_RESET|CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL );
-}
-
-static void ResetScreenMode( void )
-{
-    ChangeDisplaySettings( NULL, 0 );
-}
-
-void InitialiseOpenGLWindow( HWND hWnd, int x, int y, int width, int height )
-{
-    PIXELFORMATDESCRIPTOR   pfd;
-    int                     PixFormat;
-    unsigned int            BitsPerPixel;
-    HWND                    hwnd = (HWND) hWnd;
-
-    if( hwnd == NULL )
-    {
-        hwnd = GetActiveWindow();
-    }
-
-    if ( hwnd == NULL )
-    {
-        MessageBox( NULL, "NULL window specified", "Error", MB_OK );
-        exit( 1 );
-    }
-
-    mode_changed = false;
-
-    if ( UserConfig.InitFullScreen )
-    {
-        SetWindowLong( hwnd, 
-                       GWL_STYLE, 
-                       WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS );
-        MoveWindow( hwnd, 0, 0, width, height, false );
-        mode_changed = SetScreenMode( hwnd, width, height );
-    }
-    else
-    {
-       RECT rect;
-       rect.left = 0;
-       rect.right = width;
-       rect.top = 0;
-       rect.bottom = height;
-
-       AdjustWindowRectEx( &rect, 
-                           GetWindowLong( hwnd, GWL_STYLE ),
-                           GetMenu( hwnd ) != NULL,
-                           GetWindowLong( hwnd, GWL_EXSTYLE ) );
-       MoveWindow( hwnd, 
-                   x, y, 
-                   x + ( rect.right - rect.left ),
-                   y + ( rect.bottom - rect.top ),
-                   true );
-    }
-
-    hWND = hwnd;
-
-    hDC = GetDC( hwnd );
-    BitsPerPixel = GetDeviceCaps( hDC, BITSPIXEL );
-
-    ZeroMemory( &pfd, sizeof( pfd ) );
-    pfd.nSize        = sizeof( pfd );
-    pfd.nVersion     = 1;
-    pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType   = PFD_TYPE_RGBA;
-    pfd.cColorBits   = BitsPerPixel;
-    pfd.cDepthBits   = BitsPerPixel;
-
-    if ( !( PixFormat = ChoosePixelFormat( hDC, &pfd ) ) )
-    {
-        MessageBox( NULL, "ChoosePixelFormat() failed:  "
-                    "Cannot find a suitable pixel format.", "Error", MB_OK );
-        exit( 1 );
-    } 
-
-    // the window must have WS_CLIPCHILDREN and WS_CLIPSIBLINGS for this call to
-    // work correctly, so we SHOULD set this attributes, not doing that yet
-    if ( !SetPixelFormat( hDC, PixFormat, &pfd ) )
-    {
-        MessageBox( NULL, "SetPixelFormat() failed:  "
-                    "Cannot set format specified.", "Error", MB_OK );
-        exit( 1 );
-    } 
-
-    DescribePixelFormat( hDC, PixFormat, sizeof( PIXELFORMATDESCRIPTOR ), &pfd );
-    GlideMsg( "ColorBits	= %d\n", pfd.cColorBits );
-    GlideMsg( "DepthBits	= %d\n", pfd.cDepthBits );
-
-    if ( pfd.cDepthBits > 16 )
-    {
-        UserConfig.PrecisionFix = false;
-    }
-
-    hRC = wglCreateContext( hDC );
-    wglMakeCurrent( hDC, hRC );
-
-    HDC pDC = GetDC( NULL );
-
-    ramp_stored = GetDeviceGammaRamp( pDC, &old_ramp );
-
-    ReleaseDC( NULL, pDC );
-}    
-
-void FinaliseOpenGLWindow( void )
-{
-    if ( ramp_stored )
-    {
-        HDC pDC = GetDC( NULL );
-
-        BOOL res = SetDeviceGammaRamp( pDC, &old_ramp );
-
-        ReleaseDC( NULL, pDC );
-    }
-
-    wglMakeCurrent( NULL, NULL );
-    wglDeleteContext( hRC );
-    ReleaseDC( hWND, hDC );
-
-    if( mode_changed )
-    {
-        ResetScreenMode( );
     }
 }
 
@@ -378,39 +217,6 @@ FxU32 GetTexSize( const int Lod, const int aspectRatio, const int format )
     */
     return nSquareLod[ format > GR_TEXFMT_RSVD1 ][ aspectRatio ][ Lod ];
 }
-
-// Calculates the frequency of the processor clock
-#pragma optimize( "", off )
-float ClockFrequency( void )
-{
-    __int64 i64_perf_start, 
-            i64_perf_freq, 
-            i64_perf_end,
-            i64_clock_start,
-            i64_clock_end;
-    double  d_loop_period, 
-            d_clock_freq;
-
-    QueryPerformanceFrequency( (LARGE_INTEGER*)&i64_perf_freq );
-
-    QueryPerformanceCounter( (LARGE_INTEGER*)&i64_perf_start );
-    i64_perf_end = 0;
-
-    RDTSC( i64_clock_start );
-    while( i64_perf_end < ( i64_perf_start + 350000 ) )
-    {
-        QueryPerformanceCounter( (LARGE_INTEGER*)&i64_perf_end );
-    }
-    RDTSC( i64_clock_end );
-
-    i64_clock_end -= i64_clock_start;
-
-    d_loop_period = ((double)i64_perf_freq) / 350000.0;
-    d_clock_freq = ((double)( i64_clock_end & 0xffffffff )) * d_loop_period;
-
-    return (float)d_clock_freq;
-}
-#pragma optimize( "", on )
 
 char * FindConfig( char *IniFile, char *IniConfig )
 {
@@ -617,6 +423,7 @@ int DetectMMX( void )
 {
     FxU32 Result;
 
+#ifdef _MSC_VER
     __asm
     {
         push EAX
@@ -627,6 +434,18 @@ int DetectMMX( void )
         pop EDX
         pop EAX
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("push %%ebx;"
+         "mov  $1, %%eax;"
+         "CPUID;"
+         "pop  %%ebx;"
+         : "=d" (Result) /* Outputs */
+         : /* No inputs */
+         : "%eax", "%ecx", "cc" /* Clobbers */
+        );
+#endif
 
     return Result & 0x00800000;
 }
@@ -634,6 +453,7 @@ int DetectMMX( void )
 // Copy Blocks of Memory Using MMX
 void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
+#ifdef _MSC_VER
     __asm
     {
         mov ECX, NumberOfBytes
@@ -647,10 +467,26 @@ start:  sub ECX, 8
         jae copying
         EMMS
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("jmp   MMXCopyMemory_start;"
+         "MMXCopyMemory_copying:"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm0, (%2,%0);"
+         "MMXCopyMemory_start:"
+         "subl  $8, %0;"
+         "jae   MMXCopyMemory_copying;"
+         : /* No outputs */
+         : "r" (NumberOfBytes), "r" (Src), "r" (Dst) /* Inputs */
+         : "%mm0", "memory" /* Clobbers */
+        );
+#endif
 }
 
 void MMXSetShort( void *Dst, short Value, FxU32 NumberOfBytes )
 {
+#ifdef _MSC_VER
     __asm
     {
         xor EAX, EAX
@@ -667,10 +503,28 @@ start:  sub ECX, 8
         jae copying
         EMMS
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("movd  %1, %%mm0;"
+         "PUNPCKLWD %%mm0, %%mm0;"
+         "PUNPCKLWD %%mm0, %%mm0;"
+         "jmp   MMXSetShort_start;"
+         "MMXSetShort_copying:"
+         "movq  %%mm0, (%2,%0);"
+         "MMXSetShort_start:"
+         "subl  $8, %0;"
+         "jae   MMXSetShort_copying;"
+         : /* No outputs */
+         : "r" (NumberOfBytes), "r" ((long) Value), "r" (Dst) /* Inputs */
+         : "%mm0", "memory" /* Clobbers */
+        );
+#endif
 }
 
 void MMXCopyByteFlip( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
+#ifdef _MSC_VER
     __asm
     {       
       mov ESI, Src
@@ -717,5 +571,55 @@ align 16
       jnz mcbf_loopd
     mcbf_breakd:
     }
-}
+#endif
 
+#ifdef __GNUC__
+    asm ("movl  %%ecx, %%eax;"
+         "movl  $~0xff, %%ecx;"
+         "subl  %%ecx, %%eax;"
+         "push  %%eax;"
+         "test  %%ecx, %%ecx;"
+         "jz    MMXCopyByteFlip_breakc;"
+         /* init. for inner loop */
+         "leal  (%%esi,%%ecx), %%esi;"
+         "leal  -8(%%edi,%%ecx), %%edi;"
+         "neg   %%ecx;"
+
+       ".align 16;"
+       "MMXCopyByteFlip_loopc:"
+         "movq  (%%esi,%%ecx), %%mm0;"
+         "movq  %%mm0, %%mm1;"
+         "psrlw $8, %%mm0;"
+         "addl  $8, %%ecx;"
+         "psllw $8, %%mm1;"
+         "por   %%mm0, %%mm1;"
+         "movq  %%mm1, (%%edi,%%ecx);"
+         "jnz   MMXCopyByteFlip_loopc;"
+         "addl  $8, %%edi;"
+         "emms;"
+
+       "MMXCopyByteFlip_breakc:"
+         "pop   %%ecx;"
+         "test  %%ecx, %%ecx;"
+         "jz    MMXCopyByteFlip_breakd;"
+         "andl  $~1, %%ecx;"
+         "leal  (%%esi,%%ecx), %%esi;"
+         "leal  (%%edi,%%ecx), %%edi;"
+         "neg   %%ecx;"
+
+       /* trailing data, one pixel at a time */
+       "MMXCopyByteFlip_loopd:"
+         "movb  (%%esi,%%ecx), %%al;"
+         "movb  %%al, 1(%%edi,%%ecx);"
+         "movb  1(%%esi,%%ecx), %%dl;"
+         "movb  %%dl, (%%edi,%%ecx);"
+         "addl  $2, %%ecx;"
+         "jnz   MMXCopyByteFlip_loopd;"
+         
+       "MMXCopyByteFlip_breakd:"
+         : /* No outputs */
+         : "c" (NumberOfBytes), "S" (Src), "D" (Dst) /* Inputs */
+         : "%eax", "%edx", "%mm0", "%mm1", "memory" /* Clobbers */
+        );
+#endif
+}

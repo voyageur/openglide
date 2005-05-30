@@ -11,10 +11,14 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "GlOgl.h"
 #include "GLRender.h"
 #include "Glextensions.h"
+
+#include "platform/openglext.h"
+#include "platform/error.h"
 
 enum enExtensionType
 {
@@ -244,7 +248,7 @@ void ValidateUserConfig( void )
                     glNecessaryExt[ index ].name );
                 Error( szError );
                 GlideMsg( szError );
-                MessageBox( 0, szError, "Warning", MB_OK ); 
+                ReportWarning( szError );
             }
             break;
 
@@ -306,7 +310,7 @@ void ValidateUserConfig( void )
         sprintf( szError, "Severe Problem: MMX is required for OpenGLide!" );
         Error( szError );
         GlideMsg( szError );
-        MessageBox( 0, szError, "PROBLEM", MB_OK );
+        ReportError( szError );
         exit( 1 );
     }
 
@@ -330,10 +334,10 @@ void GLExtensions( void )
         GlideMsg( "MultiTexture Textures Units = %x\n", NumberOfTMUs );
 
         OpenGL.MultiTextureTMUs     = NumberOfTMUs;
-        p_glClientActiveTexture       = (PFNGLCLIENTACTIVETEXTUREPROC) wglGetProcAddress( "glClientActiveTexture" );
-        p_glActiveTextureARB          = (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress( "glActiveTextureARB" );
-        p_glMultiTexCoord4fARB        = (PFNGLMULTITEXCOORD4FARBPROC) wglGetProcAddress( "glMultiTexCoord4fARB" );
-        p_glMultiTexCoord4fvARB       = (PFNGLMULTITEXCOORD4FVARBPROC) wglGetProcAddress( "glMultiTexCoord4fvARB" );
+        p_glClientActiveTexture       = (PFNGLCLIENTACTIVETEXTUREPROC) OGLGetProcAddress( "glClientActiveTexture" );
+        p_glActiveTextureARB          = (PFNGLACTIVETEXTUREARBPROC) OGLGetProcAddress( "glActiveTextureARB" );
+        p_glMultiTexCoord4fARB        = (PFNGLMULTITEXCOORD4FARBPROC) OGLGetProcAddress( "glMultiTexCoord4fARB" );
+        p_glMultiTexCoord4fvARB       = (PFNGLMULTITEXCOORD4FVARBPROC) OGLGetProcAddress( "glMultiTexCoord4fvARB" );
 
         if ( ( p_glActiveTextureARB == NULL ) || 
              ( p_glMultiTexCoord4fARB == NULL ) || 
@@ -346,10 +350,10 @@ void GLExtensions( void )
 
     if ( InternalConfig.EXT_secondary_color )
     {
-        p_glSecondaryColor3ubvEXT     = (PFNGLSECONDARYCOLOR3UBVEXTPROC) wglGetProcAddress( "glSecondaryColor3ubvEXT" );
-        p_glSecondaryColor3ubEXT      = (PFNGLSECONDARYCOLOR3UBEXTPROC) wglGetProcAddress( "glSecondaryColor3ubEXT" );
-        p_glSecondaryColor3fvEXT      = (PFNGLSECONDARYCOLOR3FVEXTPROC) wglGetProcAddress( "glSecondaryColor3fvEXT" );
-        p_glSecondaryColorPointerEXT  = (PFNGLSECONDARYCOLORPOINTEREXTPROC) wglGetProcAddress( "glSecondaryColorPointerEXT" );
+        p_glSecondaryColor3ubvEXT     = (PFNGLSECONDARYCOLOR3UBVEXTPROC) OGLGetProcAddress( "glSecondaryColor3ubvEXT" );
+        p_glSecondaryColor3ubEXT      = (PFNGLSECONDARYCOLOR3UBEXTPROC) OGLGetProcAddress( "glSecondaryColor3ubEXT" );
+        p_glSecondaryColor3fvEXT      = (PFNGLSECONDARYCOLOR3FVEXTPROC) OGLGetProcAddress( "glSecondaryColor3fvEXT" );
+        p_glSecondaryColorPointerEXT  = (PFNGLSECONDARYCOLORPOINTEREXTPROC) OGLGetProcAddress( "glSecondaryColorPointerEXT" );
         if ( ( p_glSecondaryColor3ubvEXT == NULL ) || 
              ( p_glSecondaryColor3ubEXT == NULL )  || 
              ( p_glSecondaryColorPointerEXT == NULL ) || 
@@ -366,8 +370,8 @@ void GLExtensions( void )
 
     if ( InternalConfig.EXT_fog_coord )
     {
-        p_glFogCoordfEXT = (PFNGLFOGCOORDFEXTPROC) wglGetProcAddress( "glFogCoordfEXT" );
-        p_glFogCoordPointerEXT = (PFNGLFOGCOORDPOINTEREXTPROC) wglGetProcAddress( "glFogCoordPointerEXT" );
+        p_glFogCoordfEXT = (PFNGLFOGCOORDFEXTPROC) OGLGetProcAddress( "glFogCoordfEXT" );
+        p_glFogCoordPointerEXT = (PFNGLFOGCOORDPOINTEREXTPROC) OGLGetProcAddress( "glFogCoordPointerEXT" );
         if ( ( p_glFogCoordfEXT == NULL ) || 
              ( p_glFogCoordPointerEXT == NULL ) )
         {
@@ -402,11 +406,11 @@ void GLExtensions( void )
 
     if ( InternalConfig.EXT_paletted_texture )
     {
-        p_glColorTableEXT                 = (PFNGLCOLORTABLEEXTPROC) wglGetProcAddress( "glColorTableEXT" );
-        p_glColorSubTableEXT              = (PFNGLCOLORSUBTABLEEXTPROC) wglGetProcAddress( "glColorSubTableEXT" );
-        p_glGetColorTableEXT              = (PFNGLGETCOLORTABLEEXTPROC) wglGetProcAddress( "glGetColorTableEXT" );
-        p_glGetColorTableParameterivEXT   = (PFNGLGETCOLORTABLEPARAMETERIVEXTPROC) wglGetProcAddress( "glGetColorTableParameterivEXT" );
-        p_glGetColorTableParameterfvEXT   = (PFNGLGETCOLORTABLEPARAMETERFVEXTPROC) wglGetProcAddress( "glGetColorTableParameterfvEXT" );
+        p_glColorTableEXT                 = (PFNGLCOLORTABLEEXTPROC) OGLGetProcAddress( "glColorTableEXT" );
+        p_glColorSubTableEXT              = (PFNGLCOLORSUBTABLEEXTPROC) OGLGetProcAddress( "glColorSubTableEXT" );
+        p_glGetColorTableEXT              = (PFNGLGETCOLORTABLEEXTPROC) OGLGetProcAddress( "glGetColorTableEXT" );
+        p_glGetColorTableParameterivEXT   = (PFNGLGETCOLORTABLEPARAMETERIVEXTPROC) OGLGetProcAddress( "glGetColorTableParameterivEXT" );
+        p_glGetColorTableParameterfvEXT   = (PFNGLGETCOLORTABLEPARAMETERFVEXTPROC) OGLGetProcAddress( "glGetColorTableParameterfvEXT" );
 
         if ( ( p_glColorTableEXT == NULL ) || 
              ( p_glColorSubTableEXT == NULL ) || 

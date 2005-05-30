@@ -34,9 +34,8 @@
  #define OGL_COMBINE
 #endif
 
-#include <windows.h>
-#define __uint64 unsigned __int64
-#define __UINT64_C(c) c
+#include "platform.h"
+#include "platform/window.h"
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -44,10 +43,16 @@
 
 #include "sdk2_glide.h"
 
+#ifdef _MSC_VER
 #define RDTSC(v)    __asm _emit 0x0f                \
                     __asm _emit 0x31                \
                     __asm mov dword ptr v, eax      \
                     __asm mov dword ptr v+4, edx
+#endif
+
+#ifdef __GNUC__
+#define RDTSC(v)    asm volatile ("rdtsc;" : "=A" (v) : : "%eax", "%edx")
+#endif
 
 #define ERRORFILE               "OpenGLid.err"
 #define GLIDEFILE               "OpenGLid.log"
@@ -290,8 +295,8 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
 #endif
 
 // Genral Prototypes
-void __cdecl GlideMsg( char *szString, ... );
-void __cdecl Error( char *szString, ... );
+VARARGDECL(void) GlideMsg( char *szString, ... );
+VARARGDECL(void) Error( char *szString, ... );
 void GLErro( char *Funcao );
 void ConvertColor4B( GrColor_t GlideColor, FxU32 &C );
 void ConvertColorB( GrColor_t GlideColor, FxU8 &R, FxU8 &G, FxU8 &B, FxU8 &A );
@@ -300,11 +305,10 @@ GrColor_t ConvertConstantColor( float R, float G, float B, float A );
 bool GenerateErrorFile( void );
 bool ClearAndGenerateLogFile( void );
 void CloseLogFile( void );
-bool InitWindow( HWND hWnd );
+bool InitWindow( FxU32 hWnd );
 void InitOpenGL( void );
 void GetOptions( void );
-void InitialiseOpenGLWindow( HWND hWnd, int x, int y, int width, int height );
-void FinaliseOpenGLWindow( void );
+void InitMainVariables( void );
 
 void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes );
 

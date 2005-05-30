@@ -85,6 +85,7 @@ __uint64 Mask565_5551_3 = __UINT64_C(0x0001000100010001);
 // the buffers should be large enough
 void MMXConvert565to5551( void *Src, void *Dst, int NumberOfPixels )
 {
+#ifdef _MSC_VER
     __asm
     {
         mov ecx, NumberOfPixels
@@ -112,6 +113,33 @@ copying:
         jge copying
         EMMS
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("shll  $1, %0;"
+         "subl  $8, %0;"
+         "movq  Mask565_5551_3, %%mm6;"
+         "movq  Mask565_5551_2, %%mm5;"
+         "movq  Mask565_5551_1, %%mm4;"
+         ".align 16;"
+         "MMXConvert565to5551_copying:"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm6, %%mm1;"
+         "movq  %%mm0, %%mm2;"
+         "pand  %%mm5, %%mm0;"
+         "pand  %%mm4, %%mm2;"
+         "psllq $1, %%mm0;"
+         "por   %%mm2, %%mm1;"
+         "por   %%mm1, %%mm0;"
+         "movq  %%mm0, (%2,%0);"
+         "subl  $8, %0;"
+         "jge   MMXConvert565to5551_copying;"
+         "EMMS;"
+         : /* No outputs */
+         : "r" (NumberOfPixels), "r" (Src), "r" (Dst) /*Inputs */
+         : "%mm0", "%mm1", "%mm2", "%mm4", "%mm5", "%mm6", "memory" /* Clobbers */
+        );
+#endif
 }
 
 // This functions processes 4 pixels at a time, there is no problem in
@@ -119,6 +147,7 @@ copying:
 // the buffers should be large enough
 void MMXConvert565Kto5551( void *Src, FxU32 key, void *Dst, int NumberOfPixels )
 {
+#ifdef _MSC_VER
     __asm
     {
         mov ecx, NumberOfPixels
@@ -160,6 +189,43 @@ copying:
         jge copying
         EMMS
     }
+#endif
+
+#ifdef __GNUC__
+    asm ("shll  $1, %0;"
+         "subl  $8, %0;"
+         "movq  Mask565_5551_3, %%mm6;"
+         "movq  Mask565_5551_2, %%mm5;"
+         "movq  Mask565_5551_1, %%mm4;"
+         "movd  %3, %%mm7;"
+         "movq  %%mm7, %%mm0;"
+         "psllq $16, %%mm0;"
+         "por   %%mm0, %%mm7;"
+         "movq  %%mm7, %%mm0;"
+         "psllq $32, %%mm0;"
+         "por   %%mm0, %%mm7;"
+         ".align 16;"
+         "MMXConvert565Kto5551_copying:"
+         "movq  %%mm7, %%mm3;"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm6, %%mm1;"
+         "movq  %%mm0, %%mm2;"
+         "pcmpeqw %%mm0, %%mm3;" /* Comparing */
+         "pand  %%mm5, %%mm0;"
+         "pand  %%mm4, %%mm2;"
+         "psllq $1, %%mm0;"
+         "por   %%mm2, %%mm1;"
+         "por   %%mm1, %%mm0;"
+         "pandn %%mm0, %%mm3;" /* Applying key */
+         "movq  %%mm3, (%2,%0);"
+         "subl  $8, %0;"
+         "jge   MMXConvert565Kto5551_copying;"
+         "EMMS;"
+         : /* No outputs */
+         : "r" (NumberOfPixels), "r" (Src), "r" (Dst), "g" (key) /*Inputs */
+         : "%mm0", "%mm1", "%mm2", "%mm3", "%mm4", "%mm5", "%mm6", "%mm7", "memory" /* Clobbers */
+        );
+#endif
 }
 
 __uint64 Mask5551_565_1 = __UINT64_C(0xFFC0FFC0FFC0FFC0);
@@ -170,6 +236,7 @@ __uint64 Mask5551_565_2 = __UINT64_C(0x003E003E003E003E);
 // the buffers should be large enough
 void MMXConvert5551to565( void *Src, void *Dst, int NumberOfPixels )
 {
+#ifdef _MSC_VER
    __asm
    {
       mov ecx, NumberOfPixels
@@ -194,6 +261,30 @@ copying:
       jge copying
       EMMS
    }
+#endif
+
+#ifdef __GNUC__
+    asm ("shll  $1, %0;"
+         "subl  $8, %0;"
+         "movq  Mask5551_565_2, %%mm5;"
+         "movq  Mask5551_565_1, %%mm4;"
+         ".align 16;"
+         "MMXConvert5551to565_copying:"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm0, %%mm2;"
+         "pand  %%mm5, %%mm0;"
+         "pand  %%mm4, %%mm2;"
+         "psllq $1, %%mm0;"
+         "por   %%mm2, %%mm0;"
+         "movq  %%mm0, (%2,%0);"
+         "subl  $8, %0;"
+         "jge   MMXConvert5551to565_copying;"
+         "EMMS;"
+         : /* No outputs */
+         : "r" (NumberOfPixels), "r" (Src), "r" (Dst) /*Inputs */
+         : "%mm0", "%mm2", "%mm4", "%mm5", "memory" /* Clobbers */
+        );
+#endif
 }
 
 __uint64 Mask4444_1 = __UINT64_C(0x0FFF0FFF0FFF0FFF);
@@ -204,6 +295,7 @@ __uint64 Mask4444_2 = __UINT64_C(0xF000F000F000F000);
 // the buffers should be large enough
 void MMXConvert4444to4444special( void *Src, void *Dst, int NumberOfPixels )
 {
+#ifdef _MSC_VER
    __asm
    {
       mov ecx, NumberOfPixels
@@ -229,6 +321,31 @@ copying:
       jge copying
       EMMS
    }
+#endif
+
+#ifdef __GNUC__
+    asm ("shll  $1, %0;"
+         "subl  $8, %0;"
+         "movq  Mask4444_2, %%mm7;"
+         "movq  Mask4444_1, %%mm6;"
+         ".align 16;"
+         "MMXConvert4444to4444special_copying:"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm0, %%mm1;"
+         "pand  %%mm6, %%mm0;"
+         "pand  %%mm7, %%mm1;"
+         "psllq $4, %%mm0;"
+         "psllq $12, %%mm1;"
+         "por   %%mm1, %%mm0;"
+         "movq  %%mm0, (%2,%0);"
+         "subl  $8, %0;"
+         "jge   MMXConvert4444to4444special_copying;"
+         "EMMS;"
+         : /* No outputs */
+         : "r" (NumberOfPixels), "r" (Src), "r" (Dst) /*Inputs */
+         : "%mm0", "%mm1", "%mm6", "%mm7", "memory" /* Clobbers */
+        );
+#endif
 }
 
 __uint64 Mask5551_1 = __UINT64_C(0x7FFF7FFF7FFF7FFF);
@@ -239,6 +356,7 @@ __uint64 Mask5551_2 = __UINT64_C(0x8000800080008000);
 // the buffers should be large enough
 void MMXConvert1555to5551( void *Src, void *Dst, int NumberOfPixels )
 {
+#ifdef _MSC_VER
    __asm
    {
       mov ecx, NumberOfPixels
@@ -264,6 +382,31 @@ copying:
       jge copying
       EMMS
    }
+#endif
+
+#ifdef __GNUC__
+    asm ("shll  $1, %0;"
+         "subl  $8, %0;"
+         "movq  Mask5551_2, %%mm7;"
+         "movq  Mask5551_1, %%mm6;"
+         ".align 16;"
+         "MMXConvert1555to5551_copying:"
+         "movq  (%1,%0), %%mm0;"
+         "movq  %%mm0, %%mm1;"
+         "pand  %%mm6, %%mm0;"
+         "pand  %%mm7, %%mm1;"
+         "psllq $1, %%mm0;"
+         "psllq $15, %%mm1;"
+         "por   %%mm1, %%mm0;"
+         "movq  %%mm0, (%2,%0);"
+         "subl  $8, %0;"
+         "jge   MMXConvert1555to5551_copying;"
+         "EMMS;"
+         : /* No outputs */
+         : "r" (NumberOfPixels), "r" (Src), "r" (Dst) /*Inputs */
+         : "%mm0", "%mm1", "%mm6", "%mm7", "memory" /* Clobbers */
+        );
+#endif
 }
 
 FxU8 Mask565A[8] = { 0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF };
@@ -273,6 +416,7 @@ FxU8 Mask565R[8] = { 0x1F,0x00,0x1F,0x00,0x1F,0x00,0x1F,0x00 };
 
 void MMXConvert565to8888( void *Src, void *Dst, FxU32 NumberOfPixels )
 {
+#ifdef _MSC_VER
    // Word entered is ARGB
    // Has to be ABGR
    __asm
@@ -317,6 +461,48 @@ copying:
       jg copying
       EMMS
    }
+#endif
+
+#ifdef __GNUC__
+    asm ("movq  Mask565A, %%mm7;"
+         "movq  Mask565B, %%mm6;"
+         "movq  Mask565G, %%mm5;"
+         "movq  Mask565R, %%mm4;"
+         ".align 16;"
+         "MMXConvert565to8888_copying:"
+         "movq  (%1), %%mm0;"
+         "addl  $8, %1;"
+         "movq  %%mm0, %%mm2;"
+         "movq  %%mm0, %%mm1;"
+         "pand  %%mm4, %%mm0;" /* Mask R */
+         "pand  %%mm6, %%mm2;" /* Mask B */
+         "psllw $11, %%mm0;"   /* Shift R */
+         "pand  %%mm5, %%mm1;" /* Mask G */
+         "psrlw $8, %%mm2;"    /* Shift B */
+
+         "movq  %%mm1, %%mm3;"
+         "psllw $13, %%mm1;"
+         "por   %%mm2, %%mm0;"
+         "psrlw $3, %%mm3;"
+         "por   %%mm3, %%mm1;"
+         "por   %%mm7, %%mm1;"
+
+         "movq  %%mm0, %%mm2;"
+         "punpckhbw %%mm1, %%mm0;"
+         "punpckhbw %%mm1, %%mm2;"
+
+         "movq  %%mm2, (%2);"  /* Storing Unpacked */
+         "addl  $16, %2;"
+         "movq  %%mm0, -8(%2);"
+         "subl  $4, %0;"
+         "jg    MMXConvert565to8888_copying;"
+         "EMMS;"
+         : /* No outputs */
+         : "r" (NumberOfPixels), "r" (Src), "r" (Dst) /*Inputs */
+         : "%mm0", "%mm1", "%mm2", "%mm3", "%mm4", "%mm5",
+           "%mm6", "%mm7", "memory" /* Clobbers */
+        );
+#endif
 }
 
 void ConvertA8toAP88( FxU8 *Buffer1, FxU16 *Buffer2, FxU32 Pixels )

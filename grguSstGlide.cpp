@@ -212,7 +212,7 @@ grSstWinOpen(   FxU32 hwnd,
     OpenGL.WaitSignal = (int)( 1000 / OpenGL.Refresh );
 
     // Initing OpenGL Window
-    if ( !InitWindow( (HWND)hwnd ) )
+    if ( !InitWindow( hwnd ) )
     {
         return FXFALSE;
     }

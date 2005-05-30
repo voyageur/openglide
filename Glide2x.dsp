@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -72,7 +72,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /FR /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x416 /d "_DEBUG"
@@ -100,7 +100,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -128,6 +128,14 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=.\amd3dx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\clock.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\error.h
 # End Source File
 # Begin Source File
 
@@ -159,11 +167,19 @@ SOURCE=.\OGLWindow.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\platform\openglext.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\PGTexture.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\PGUTexture.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\windows\platform.h
 # End Source File
 # Begin Source File
 
@@ -188,6 +204,10 @@ SOURCE=.\sdk2_sst1vid.h
 # Begin Source File
 
 SOURCE=.\TexDB.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\window.h
 # End Source File
 # End Group
 # Begin Group "Source"
@@ -284,7 +304,27 @@ SOURCE=.\TexDB.cpp
 # End Group
 # Begin Source File
 
+SOURCE=.\platform\windows\clock.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\windows\error.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Glide2x.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\windows\library.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\windows\openglext.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\platform\windows\window.cpp
 # End Source File
 # End Target
 # End Project

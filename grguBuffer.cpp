@@ -14,6 +14,8 @@
 #include "GlOgl.h"
 #include "GLRender.h"
 
+#include "platform/window.h"
+
 // extern variables
 extern __int64          InitialTick,
                         FinalTick;
@@ -21,7 +23,6 @@ extern int              Frame;
 extern double           Fps, 
                         FpsAux, 
                         ClockFreq;
-extern HDC              hDC;
 
 
 // extern functions
@@ -105,7 +106,7 @@ grBufferSwap( int swap_interval )
     OGLRender.FrameTriangles = 0;
 #endif
 
-    SwapBuffers( hDC );
+    SwapBuffers( );
 
 #ifdef OGL_DEBUG
     RDTSC( FinalTick );

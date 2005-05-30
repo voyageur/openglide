@@ -16,6 +16,8 @@
 #include "PGTexture.h"
 #include "PGUTexture.h"
 
+#include "platform/error.h"
+
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -70,75 +72,12 @@ void InitMainVariables( void )
     GetOptions( );
 }
 
-//*************************************************
-//* Initializes the DLL
-//*************************************************
-BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
+bool InitWindow( FxU32 hWnd )
 {
-    int Priority;
-
-    switch ( dwReason )
-    {
-    case DLL_THREAD_ATTACH:
-        break;
-
-    case DLL_PROCESS_ATTACH:
-        if ( !ClearAndGenerateLogFile( ) )
-        {
-            return false;
-        }
-        InitMainVariables( );
-
-        if ( SetPriorityClass( GetCurrentProcess( ), NORMAL_PRIORITY_CLASS ) == 0 )
-        {
-            Error( "Could not set Class Priority.\n" );
-        }
-        else
-        {
-            GlideMsg( OGL_LOG_SEPARATE );
-            GlideMsg( "Wrapper Class Priority of %d\n", NORMAL_PRIORITY_CLASS );
-        }
-
-        switch ( UserConfig.Priority )
-        {
-        case 0:     Priority = THREAD_PRIORITY_HIGHEST;         break;
-        case 1:     Priority = THREAD_PRIORITY_ABOVE_NORMAL;    break;
-        case 2:     Priority = THREAD_PRIORITY_NORMAL;          break;
-        case 3:     Priority = THREAD_PRIORITY_BELOW_NORMAL;    break;
-        case 4:     Priority = THREAD_PRIORITY_LOWEST;          break;
-        case 5:     Priority = THREAD_PRIORITY_IDLE;            break;
-        default:    Priority = THREAD_PRIORITY_NORMAL;          break;
-        }
-        if ( SetThreadPriority( GetCurrentThread(), Priority ) == 0 )
-        {
-            Error( "Could not set Thread Priority.\n" );
-        }
-        else
-        {
-            GlideMsg( "Wrapper Priority of %d\n", UserConfig.Priority );
-            GlideMsg( OGL_LOG_SEPARATE );
-        }
-        break;
-
-    case DLL_THREAD_DETACH:
-        break;
-
-    case DLL_PROCESS_DETACH:
-        grGlideShutdown( );
-        CloseLogFile( );
-        break;
-    }
-    return TRUE;
-}
-
-bool InitWindow( HWND hwnd )
-{
-    InitialiseOpenGLWindow( hwnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
+    InitialiseOpenGLWindow( hWnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
 
     if ( !strcmp( (char*)glGetString( GL_RENDERER ), "GDI Generic" ) )
-    {
-        MessageBox( NULL, "You are running in a Non-Accelerated OpenGL!!!\nThings can become really slow", "Warning", MB_OK );
-    }
+        ReportWarning("You are running in a Non-Accelerated OpenGL!!!\nThings can become really slow");
 
     ValidateUserConfig( );
 
