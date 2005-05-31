@@ -12,6 +12,8 @@
 #ifndef __OPENGLEXT_H__
 #define __OPENGLEXT_H__
 
-void *OGLGetProcAddress(const char *x);
+typedef void (*ExtFn)();
+
+ExtFn OGLGetProcAddress(const char *x);
 
 #endif

@@ -1,4 +1,5 @@
 
+#include "platform.h"
 #include "GlOgl.h"
 #include "GLRender.h"
 #include "PGTexture.h"

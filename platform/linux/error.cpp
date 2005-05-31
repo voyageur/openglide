@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
+#include <stdio.h>
 #include "platform/error.h"
 
 void ReportWarning(const char *message)
@@ -16,7 +17,7 @@ void ReportWarning(const char *message)
     printf("Warning: %s\n", message);
 }
 
-void ReportError(const char *)
+void ReportError(const char *message)
 {
     printf("Error: %s\n", message);
 }

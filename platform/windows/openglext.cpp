@@ -13,7 +13,7 @@
 
 #include "platform/openglext.h"
 
-void *OGLGetProcAddress(const char *x)
+ExtFn OGLGetProcAddress(const char *x)
 {
     return wglGetProcAddress(x);
 }

@@ -15,6 +15,10 @@
 #include <string.h>
 #define __STDC_LIMIT_MACROS
 #include <stdint.h> // Ansi C99 header
+#include <stdlib.h>
+#include <unistd.h>
+#define _strtime(s) {time_t t = time(0); strftime(s, 99, "%H:%M:%S", localtime (&t));}
+#define _strdate(s) {time_t t = time(0); strftime(s, 99, "%d %b %Y", localtime (&t));}
 #define ZeroMemory(d,l) memset(d,0,l)
 #define CopyMemory(d,s,l) memcpy(d,s,l)
 #define max(x,y) ((x) < (y) ? (y) : (x))

@@ -11,6 +11,7 @@
 
 
 #include <stdlib.h>
+#include "GlOgl.h"
 
 class InitLibrary
 {

@@ -11,14 +11,14 @@
 
 #include <GL/glx.h>
 
-#include "platform/openglext.cpp"
+#include "platform/openglext.h"
 
-void *OGLGetProcAddress(const char *x)
+ExtFn OGLGetProcAddress(const char *x)
 {
 #ifndef GL_VERSION_1_4
-    return glXGetProcAddressARB((const GLubyte *) x)
+    return glXGetProcAddressARB((const GLubyte *) x);
 #else
-    return glXGetProcAddress((const GLubyte *) x)
+    return glXGetProcAddress((const GLubyte *) x);
 #endif
 }
 

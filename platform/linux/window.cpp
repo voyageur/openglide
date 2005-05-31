@@ -9,11 +9,15 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
-#include "platform/window.h"
-
+#include <stdio.h>
 #include <unistd.h>
 #include <GL/glx.h>
 #include <X11/extensions/xf86vmode.h>
+
+#include "GlOgl.h"
+
+#include "platform/window.h"
+
 #define _strtime(s) {time_t t = time(0); strftime(s, 99, "%H:%M:%S", localtime (&t));}
 #define _strdate(s) {time_t t = time(0); strftime(s, 99, "%d %b %Y", localtime (&t));}
 #define KEY_MASK (KeyPressMask | KeyReleaseMask)
@@ -132,7 +136,7 @@ void RestoreGamma()
 {
 }
 
-bool SetScreenMode(int &xsize, int &ysize)
+bool SetScreenMode(int &width, int &height)
 {
     int best_fit, best_dist, dist, x, y, i;
     int num_vidmodes;

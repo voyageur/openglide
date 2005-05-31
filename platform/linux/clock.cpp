@@ -9,6 +9,8 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //**************************************************************
 
+#include <stdio.h>
+#include <string.h>
 #include "platform/clock.h"
 
 float ClockFrequency( void )
