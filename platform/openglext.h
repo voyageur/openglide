@@ -12,7 +12,7 @@
 #ifndef __OPENGLEXT_H__
 #define __OPENGLEXT_H__
 
-typedef void (*ExtFn)();
+#include "platform.h"
 
 ExtFn OGLGetProcAddress(const char *x);
 

@@ -19,5 +19,6 @@
 #define __UINT64_C(c) c
 
 #define VARARGDECL(t) t _cdecl
+typedef int (__stdcall *ExtFn)();
 
 #endif

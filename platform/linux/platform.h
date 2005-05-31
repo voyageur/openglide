@@ -27,5 +27,6 @@
 #define __fastcall __attribute__((__fastcall__))
 
 #define VARARGDECL(t) extern "C" t
+typedef void (*ExtFn)();
 
 #endif
