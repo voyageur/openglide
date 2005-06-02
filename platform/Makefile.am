@@ -2,8 +2,10 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS=linux
 
-EXTRADIST=\
+EXTRA_DIST=\
 clock.h \
 error.h \
 openglext.h \
-window.h
+window.h \
+\
+windows
