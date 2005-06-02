@@ -1,5 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
+SUBDIRS=platform
+
 lib_LTLIBRARIES = libglide2x.la
 
 libglide2x_la_SOURCES = \
@@ -26,12 +28,6 @@ grguBuffer.cpp \
 grguColorAlpha.cpp \
 GLutil.cpp \
 \
-platform/linux/clock.cpp \
-platform/linux/error.cpp \
-platform/linux/openglext.cpp \
-platform/linux/library.cpp \
-platform/linux/window.cpp \
-\
 FormatConversion.h \
 glext.h \
 Glextensions.h \
@@ -45,15 +41,7 @@ sdk2_glide.h \
 sdk2_glidesys.h \
 sdk2_glideutl.h \
 sdk2_sst1vid.h \
-TexDB.h \
-\
-platform/clock.h \
-platform/error.h \
-platform/openglext.h \
-platform/window.h \
-platform/linux/platform.h
-
-INCLUDES = -Iplatform/linux
+TexDB.h
 
 # We substitute the libtool-specific library version in configure.in.
 libglide2x_la_LDFLAGS = -version-info $(LIBVERSION) -L/usr/X11R6/lib -lGL -lGLU -lXxf86vm
