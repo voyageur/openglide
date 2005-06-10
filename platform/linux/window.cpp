@@ -190,7 +190,7 @@ void SwapBuffers()
     // Will need to change this later
     static FxU32 tempBuf[ 2048 * 2048 ];
 
-    if ( InternalConfig.OGLVersion > 1 )
+    if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
         type = GL_UNSIGNED_SHORT_5_6_5;
 
     // What a pain.  Under Glide front/back buffers are swapped.

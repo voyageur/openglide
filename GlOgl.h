@@ -66,6 +66,8 @@
 #define OGL_MIN_TEXTURE_BUFFER  2
 #define OGL_MAX_TEXTURE_BUFFER  32
 
+#define OGL_VER_1_1             101
+
 #define OPENGLBUFFERMEMORY      OpenGL.WindowWidth * OpenGL.WindowHeight
 
 #define OPENGLFOGTABLESIZE      64 * 1024

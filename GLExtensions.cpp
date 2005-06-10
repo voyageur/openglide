@@ -231,7 +231,13 @@ void ValidateUserConfig( void )
     GlideMsg( "Extensions:  %s\n", glGetString( GL_EXTENSIONS ) );
 
     GlideMsg( OGL_LOG_SEPARATE );
-    InternalConfig.OGLVersion = glGetString( GL_VERSION )[ 2 ] - '0';
+
+	int ver    = 0;
+	int subver = 0;
+
+	sscanf( (const char *)glGetString( GL_VERSION ), "%d.%d", &ver, &subver);
+
+    InternalConfig.OGLVersion = ver * 100 + subver;
 
     GlideMsg( "OpenGL Extensions:\n" );
     GlideMsg( OGL_LOG_SEPARATE );

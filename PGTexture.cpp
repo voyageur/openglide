@@ -368,7 +368,7 @@ bool PGTexture::MakeReady( void )
 //                Convert565Kto8888( (WORD*)data, m_chromakey_value_565, m_tex_temp, texVals.nPixels );
 //                OGL_LOAD_CREATE_TEXTURE( 4, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_temp );
             }
-            else if ( InternalConfig.OGLVersion > 1 )
+            else if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
             {
                 OGL_LOAD_CREATE_TEXTURE( 3, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data );
             }
@@ -390,7 +390,7 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ARGB_4444:
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
             {
                 OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV, data );
             }
@@ -403,7 +403,7 @@ bool PGTexture::MakeReady( void )
             break;
             
         case GR_TEXFMT_ARGB_1555:
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
             {
                 OGL_LOAD_CREATE_TEXTURE( 4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV, data );
             }

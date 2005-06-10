@@ -60,7 +60,7 @@ grLfbLock( GrLock_t dwType,
 
         if ( dwOrigin == GR_ORIGIN_UPPER_LEFT )
         {
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
             {
                 glReadPixels( 0, 0, 
                               Glide.WindowWidth, Glide.WindowHeight, 
@@ -86,7 +86,7 @@ grLfbLock( GrLock_t dwType,
         }
         else
         {
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
             {
                 glReadPixels( 0, 0, 
                               Glide.WindowWidth, Glide.WindowHeight, 
@@ -179,7 +179,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
                         ? GL_BACK : GL_FRONT );
 
-            if ( InternalConfig.OGLVersion > 1 )
+            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
             {
                 glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
                               xsize, ysize, 
@@ -221,7 +221,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 
             if ( ! Glide.DstBuffer.PixelPipeline )
             {
-                if ( InternalConfig.OGLVersion > 1 )
+                if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
                 {
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
                 }
@@ -235,7 +235,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             else
             {
                 glEnable( GL_SCISSOR_TEST );
-                if ( InternalConfig.OGLVersion > 1 )
+                if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
                 {
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
                 }
