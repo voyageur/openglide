@@ -44,6 +44,6 @@ sdk2_sst1vid.h \
 TexDB.h
 
 # We substitute the libtool-specific library version in configure.in.
-libglide2x_la_LDFLAGS = -version-info $(LIBVERSION) -L/usr/X11R6/lib -lGL -lGLU -lXxf86vm
+libglide2x_la_LDFLAGS = -version-info $(LIBVERSION) -lGL -lGLU $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS) -lXxf86vm
 
 libglide2x_la_LIBADD = ./platform/linux/libplatform.la

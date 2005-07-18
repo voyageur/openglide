@@ -25,6 +25,9 @@ AC_PROG_LIBTOOL
 dnl Checks for header files.
 AC_HEADER_STDC
 
+dnl Check for the X11 library
+AC_PATH_XTRA
+
 dnl OS flag define test
 osflag=""
 case "$host" in
@@ -51,7 +54,7 @@ case "$host" in
         ;;
 esac
 
-CXXFLAGS="$CXXFLAGS -D__unix__ -D$osflag -I\$(top_srcdir)/platform/linux"
+CXXFLAGS="$CXXFLAGS -D__unix__ -D$osflag -I\$(top_srcdir)/platform/linux $X_CFLAGS"
 
 AC_OUTPUT(
 Makefile \
