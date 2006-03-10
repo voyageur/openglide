@@ -88,7 +88,7 @@ __export __stdcall GU3DFGETINFO
     return FXFALSE;
 /*
     ENTRY (GU3DFGETINFO, CMD_Gu3dfGetInfo, entry);
-    return (*entry) (filename, file_info);
+    return __far (*entry) (filename, file_info);
 */
 }
 
@@ -100,7 +100,7 @@ __export __stdcall GU3DFLOAD
     return FXFALSE;
 /*
     ENTRY (GU3DFLOAD, CMD_Gu3dfLoad, entry);
-    return (*entry) (filename, file_info);
+    return __far (*entry) (filename, file_info);
 */
 }
 
@@ -110,7 +110,7 @@ __export __stdcall GUALPHASOURCE
     static GUALPHASOURCE *entry = 0;
     D_printf("GUALPHASOURCE@4\n");
     ENTRY (GUALPHASOURCE, GUALPHASOURCE, entry);
-    (*entry) (a);
+    __far (*entry) (a);
 }
 
 typedef void (GUCOLORCOMBINEFUNCTION)(int a);
@@ -120,7 +120,7 @@ __export __stdcall GUCOLORCOMBINEFUNCTION
     D_printf("GUCOLORCOMBINEFUNCTION@4\n");
     ENTRY (GUCOLORCOMBINEFUNCTION,
            CMD_GuColorCombineFunction, entry);
-    (*entry) (a);
+    __far (*entry) (a);
 }
 
 __export __stdcall void GUENDIANSWAPWORDS(int a)
@@ -145,7 +145,7 @@ __export __stdcall GUFOGGENERATEEXP
     D_printf("GUFOGGENERATEEXP@8\n");
     ENTRY (GUFOGGENERATEEXP,
            CMD_GuFogGenerateExp, entry);
-    (*entry) (table, density);
+    __far (*entry) (table, density);
 }
 
 __export __stdcall void GUFOGGENERATEEXP2(int a, int b)
@@ -175,7 +175,7 @@ __export __stdcall GUDRAWTRIANGLEWITHCLIP
     D_printf("GUDRAWTRIANGLEWITHCLIP@12\n");
     ENTRY (GUDRAWTRIANGLEWITHCLIP,
            CMD_GuDrawTriangleWithClip, entry);
-    (*entry) (v1, v2, v3);
+    __far (*entry) (v1, v2, v3);
 }
 
 __export __stdcall void GUAADRAWTRIANGLEWITHCLIP(int a, int b, int c)
@@ -231,7 +231,7 @@ __export __stdcall GRHINTS
     D_printf("GRHINTS@8\n");
     ENTRY (GRHINTS,
            CMD_GrHints, entry);
-    (*entry) (a, b);
+    __far (*entry) (a, b);
 }
 
 typedef void (_GRGLIDEINIT)(int);
@@ -241,7 +241,7 @@ __export __stdcall void GRGLIDEINIT(void)
     D_printf("GRGLIDEINIT@0\n");
     ENTRY (_GRGLIDEINIT,
            CMD_GrGlideInit, entry);
-    (*entry) (VERSION);
+    __far (*entry) (VERSION);
 }
 
 __export __stdcall void GRGLIDESHAMELESSPLUG(int a)
@@ -271,7 +271,7 @@ __export __stdcall GRSSTQUERYHARDWARE
     D_printf("GRSSTQUERYHARDWARE@4\n");
     ENTRY (GRSSTQUERYHARDWARE,
            CMD_GrSstQueryHardware, entry);
-    return (*entry) (VERSION);
+    __far return (*entry) (VERSION);
 }
 
 typedef void (GRSSTSELECT)(int which_sst);
@@ -281,7 +281,7 @@ __export __stdcall GRSSTSELECT
     D_printf("GRSSTSELECT@4\n");
     ENTRY (GRSSTSELECT,
            CMD_GrSstSelect, entry);
-    (*entry) (which_sst);
+    __far (*entry) (which_sst);
 }
 
 __export __stdcall void GRSSTSCREENWIDTH(void)
@@ -353,7 +353,7 @@ __export __stdcall GRTEXDOWNLOADMIPMAP
     D_printf("GRTEXDOWNLOADMIPMAP@16\n");
     ENTRY (GRTEXDOWNLOADMIPMAP,
            CMD_GrTexDownloadMipMap, entry);
-    (*entry) (tmu, startAddress, evenOdd, info);
+    __far (*entry) (tmu, startAddress, evenOdd, info);
 }
 
 __export __stdcall void GRTEXDOWNLOADTABLEPARTIAL(int a, int b, int c, int d, int e)
@@ -423,10 +423,10 @@ __export __stdcall GUTEXALLOCATEMEMORY
     D_printf("GUTEXALLOCATEMEMORY@60\n");
     ENTRY (GUTEXALLOCATEMEMORY,
            CMD_GuTexAllocateMemory, entry);
-    return (*entry) (tmu, odd_even_mask, width, height, fmt,
-                     mm_mode, smallest_lod, largest_lod, aspect,
-                     s_clamp_mode, t_clamp_mode, minfilter_mode,
-                     magfilter_mode, lod_bias, trilinear);
+    __far return (*entry) (tmu, odd_even_mask, width, height, fmt,
+                           mm_mode, smallest_lod, largest_lod, aspect,
+                           s_clamp_mode, t_clamp_mode, minfilter_mode,
+                           magfilter_mode, lod_bias, trilinear);
 }
 
 __export __stdcall void GUTEXCHANGEATTRIBUTES(int a, int b, int c, int d,
@@ -442,7 +442,7 @@ __export __stdcall void GRTEXCOMBINEFUNCTION(int a, int b)
     D_printf("GRTEXCOMBINEFUNCTION@8\n");
     ENTRY (GRTEXCOMBINEFUNCTION,
            CMD_GrTexCombineFunction, entry);
-    (*entry) (a, b);
+    __far (*entry) (a, b);
 }
 
 typedef void (GUTEXCOMBINEFUNCTION)(int a, int b);
@@ -452,7 +452,7 @@ __export __stdcall GUTEXCOMBINEFUNCTION
     D_printf("GUTEXCOMBINEFUNCTION@8\n");
     ENTRY (GUTEXCOMBINEFUNCTION,
            CMD_GrTexCombineFunction, entry);
-    (*entry) (a, b);
+    __far (*entry) (a, b);
 }
 
 typedef void (GUTEXDOWNLOADMIPMAP)(GrMipMapId_t mmid, void *src, GuNccTable *table);
@@ -462,7 +462,7 @@ __export __stdcall GUTEXDOWNLOADMIPMAP
     D_printf("GUTEXDOWNLOADMIPMAP@12\n");
     ENTRY (GUTEXDOWNLOADMIPMAP,
            CMD_GuTexDownloadMipMap, entry);
-    (*entry) (mmid, src, table);
+    __far (*entry) (mmid, src, table);
 }
 
 __export __stdcall void GUTEXDOWNLOADMIPMAPLEVEL(int a, int b, int c)
@@ -494,7 +494,7 @@ __export __stdcall GUTEXMEMRESET
     D_printf("GUTEXMEMRESET@0\n");
     ENTRY (GUTEXMEMRESET,
            CMD_GuTexMemReset, entry);
-    (*entry) ();
+    __far (*entry) ();
 }
 
 __export __stdcall void _GUMPTEXCOMBINEFUNCTION(int a)
@@ -520,7 +520,7 @@ __export __stdcall GRAADRAWLINE
     D_printf("GRAADRAWLINE@8\n");
     ENTRY (GRAADRAWLINE,
            CMD_GrAADrawLine, entry);
-    (*entry) (v1, v2);
+    __far (*entry) (v1, v2);
 }
 
 __export __stdcall void GRAADRAWTRIANGLE(int a, int b, int c, int d, int e, int f)
@@ -550,7 +550,7 @@ __export __stdcall GRDRAWLINE
     D_printf("GRDRAWLINE@8\n");
     ENTRY (GRAADRAWLINE,
            CMD_GrDrawLine, entry);
-    (*entry) (v1, v2);
+    __far (*entry) (v1, v2);
 }
 
 typedef void GRDRAWTRIANGLE(GrVertex *v1, GrVertex *v2, GrVertex *v3);
@@ -560,7 +560,7 @@ __export __stdcall GRDRAWTRIANGLE
     D_printf("GRDRAWTRIANGLE@12\n");
     ENTRY (GRDRAWTRIANGLE,
            CMD_GrDrawTriangle, entry);
-    (*entry) (v1, v2, v2);
+    __far (*entry) (v1, v2, v2);
 }
 
 __export __stdcall void GRDRAWPLANARPOLYGON(int a, int b, int c)
@@ -585,7 +585,7 @@ __export __stdcall GRDRAWPOLYGONVERTEXLIST
     D_printf("GRDRAWPOLYGONVERTEXLIST@8\n");
     ENTRY (GRDRAWPOLYGONVERTEXLIST,
            CMD_GrDrawPolygonVertexList, entry);
-    (*entry) (nverts, vlist);
+    __far (*entry) (nverts, vlist);
 }
 
 __export __stdcall void _GRCOLORCOMBINEDELTA0MODE(int a)
@@ -600,7 +600,7 @@ __export __stdcall GRALPHABLENDFUNCTION
     D_printf("GRALPHABLENDFUNCTION@16\n");
     ENTRY (GRALPHABLENDFUNCTION,
            CMD_GrAlphaBlendFunction, entry);
-    (*entry) (a, b, c, d);
+    __far (*entry) (a, b, c, d);
 }
 
 typedef void GRALPHACOMBINE(int a, int b, int c, int d, int e);
@@ -610,7 +610,7 @@ __export __stdcall GRALPHACOMBINE
     D_printf("GRALPHACOMBINE@20\n");
     ENTRY (GRALPHACOMBINE,
            CMD_GrAlphaCombine, entry);
-    (*entry) (a, b, c, d, e);
+    __far (*entry) (a, b, c, d, e);
 }
 
 __export __stdcall void GRALPHACONTROLSITRGBLIGHTING(int a)
@@ -625,7 +625,7 @@ __export __stdcall GRALPHATESTFUNCTION
     D_printf("GRALPHATESTFUNCTION@4\n");
     ENTRY (GRALPHATESTFUNCTION,
            CMD_GrAlphaTestFunction, entry);
-    (*entry) (a);
+    __far (*entry) (a);
 }
 
 __export __stdcall void GRALPHATESTREFERENCEVALUE(int a)
@@ -957,7 +957,7 @@ __export __stdcall GRSSTWINOPEN
     D_printf("GRSSTWINOPEN@28\n");
     ENTRY (GRSSTWINOPEN,
            CMD_GrSstWinOpen, entry);
-    return (*entry) (a, b, c, d, e, f, g);
+    __far return (*entry) (a, b, c, d, e, f, g);
 }
 
 typedef void GRSSTWINCLOSE(void);
@@ -973,7 +973,7 @@ __export __stdcall GRSSTWINCLOSE
     D_printf("GRSSTWINCLOSE@0\n");
     ENTRY (GRSSTWINCLOSE,
            CMD_GrSstWinClose, entry);
-    (*entry) ();
+    __far (*entry) ();
 }
 
 __export __stdcall void GRSSTCONTROL(int a)
@@ -1025,7 +1025,7 @@ __export __stdcall void GRGAMMACORRECTIONVALUE(int a)
     D_printf("GRGAMMACORRECTIONVALUE@4\n");
     ENTRY (GRGAMMACORRECTIONVALUE,
            CMD_GrGammaCorrectionValue, entry);
-    (*entry) (a);
+    __far (*entry) (a);
 }
 
 __export __stdcall void GRSSTORIGIN(int a)
@@ -1045,7 +1045,7 @@ __export __stdcall GRTEXCLAMPMODE
     D_printf("GRTEXCLAMPMODE@12\n");
     ENTRY (GRTEXCLAMPMODE,
            CMD_GrTexClampMode, entry);
-    (*entry) (a, b, c);
+    __far (*entry) (a, b, c);
 }
 
 typedef void GRTEXCOMBINE(int a, int b, int c, int d,
@@ -1056,7 +1056,7 @@ __export __stdcall GRTEXCOMBINE
     D_printf("GRTEXCOMBINE@28\n");
     ENTRY (GRTEXCOMBINE,
            CMD_GrTexCombine, entry);
-    (*entry) (a, b, c, d, e, f, g);
+    __far (*entry) (a, b, c, d, e, f, g);
 }
 
 __export __stdcall void _GRTEXDETAILCONTROL(int a, int b)
@@ -1071,7 +1071,7 @@ __export __stdcall GRTEXFILTERMODE
     D_printf("GRTEXFILTERMODE@12\n");
     ENTRY (GRTEXFILTERMODE,
            CMD_GrTexFilterMode, entry);
-    (*entry) (a, b, c);
+    __far (*entry) (a, b, c);
 }
 
 typedef void GRTEXLODBIASVALUE(int a, int b);
@@ -1081,7 +1081,7 @@ __export __stdcall GRTEXLODBIASVALUE
     D_printf("GRTEXLODBIASVALUE@8\n");
     ENTRY (GRTEXLODBIASVALUE,
            CMD_GrTexLodBiasValue, entry);
-    (*entry) (a, b);
+    __far (*entry) (a, b);
 }
 
 typedef void GRTEXMIPMAPMODE(GrChipID_t tmu, GrMipMapMode_t mode, FxBool lodBlend);
@@ -1091,7 +1091,7 @@ __export __stdcall GRTEXMIPMAPMODE
     D_printf("GRTEXMIPMAPMODE@12\n");
     ENTRY (GRTEXMIPMAPMODE,
            CMD_GrTexMipMapMode, entry);
-    (*entry) (tmu, mode, lodBlend);
+    __far (*entry) (tmu, mode, lodBlend);
 }
 
 __export __stdcall void GRTEXNCCTABLE(int a, int b)
@@ -1106,7 +1106,7 @@ __export __stdcall GRTEXSOURCE
     D_printf("GRTEXSOURCE@16\n");
     ENTRY (GRTEXSOURCE,
            CMD_GrTexSource, entry);
-    (*entry) (tmu, startAddress, evenOdd, info);
+    __far (*entry) (tmu, startAddress, evenOdd, info);
 }
 
 __export __stdcall void GRTEXMULTIBASE(int a, int b)
@@ -1136,7 +1136,7 @@ __export __stdcall GRTEXDOWNLOADTABLE
     D_printf("GRTEXDOWNLOADTABLE@12\n");
     ENTRY (GRTEXDOWNLOADTABLE,
            CMD_GrTexDownloadTable, entry);
-    (*entry) (tmu, type, data);
+    __far (*entry) (tmu, type, data);
 }
 
 __export __stdcall void GRTEXDOWNLOADMIPMAPLEVELPARTIAL(int a, int b, int c, int d,
@@ -1153,7 +1153,7 @@ __export __stdcall GUTEXSOURCE
     D_printf("GUTEXSOURCE@4\n");
     ENTRY (GUTEXSOURCE,
            CMD_GrTexSource, entry);
-    (*entry) (a);
+    __far (*entry) (a);
 }
 
 __export __stdcall void _GRCOMMANDTRANSPORTMAKEROOM(int a, int b, int c)
