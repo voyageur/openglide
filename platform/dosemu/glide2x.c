@@ -1,85 +1,145 @@
 #include <stdio.h>
+#include <string.h>
+
+#include "glide.h"
+#include "glide2x.h"
 
 #define VERSION 11
-#define __far  asm("push %%cs;": : :"memory");
-#define __stdcall __attribute__(stdcall)
+
 #define __export
-#define ENTRY(type, cmd, call) \
-    if (!call) \
+#define __stdcall __attribute__((__stdcall__))
+
+#define __fptr(type) \
+struct fptr_##type##_t \
+{ \
+    void          *entry; \
+    type##_t      *thunk; \
+    unsigned short segment; \
+    unsigned int   offset; \
+}
+
+#define __faddr(type, addr) ((type *)((unsigned int)(addr)+fptr.offset))
+
+#define __fcall(...) \
+({ \
+    unsigned int ret; \
+    asm(/* Backup regs */ \
+        "push %%eax;" \
+        "push %%ecx;" \
+        "push %%edx;" \
+        /* Far return address */ \
+        "push %%cs;" \
+        "push $0;" \
+        "mov  %0, %%ecx;" \
+        "mov  %%es, %%edx;" \
+        : : "g"((unsigned int) &fptr) : "memory"); \
+    (*(fptr.thunk)) (__VA_ARGS__); \
+    /* Restore regs and store return value*/ \
+    asm("pop %%ecx;" \
+        "pop %%edx;" \
+        "mov %%eax, ret;" \
+        "pop %%eax;" \
+        :"=m"(ret) : :"memory"); \
+    ret; \
+})
+
+#define DECLARE_THUNK(func,ret,...) \
+typedef ret (func##_t) (__VA_ARGS__); \
+ret func (__VA_ARGS__) \
+{ \
+    static __fptr(func) fptr = {0}; \
+    printf ("%s\n", __func__); \
+    if (!fptr.entry) \
     { \
-        call = (type *) cmd_entry (cmd); \
-        assert  (call); \
-    }
-#define D_printf(fmt,arg...) printf(fmt,##arg)
+        cmd_entry (CMD_##func, &fptr.segment); \
+        assert (fptr.entry); \
+        fptr.thunk = (func##_t *) &thunk; \
+    } {
 
-extern void *CMD_entry (unsigned int cmd);
+#define DECLARE_STUB(func,ret,...) \
+ret func (__VA_ARGS__) \
+{ \
+    printf ("%s\n", __func__); {
+
+#define ENDDECLARE }}
 
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_4_8(int a, int b, int c, int d, int e, int f)
+extern void *CMD_entry (unsigned int cmd, unsigned short *segment);
+
+typedef void void_t;
+__fptr(void);
+static void __attribute__((__fastcall__)) thunk(struct fptr_void_t *fptr, unsigned int *stack)
 {
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_4_8@24\n");
+    printf ("stack[0] = %08x [1] = %08x\n", stack[0], stack[1]);
+    asm (/* Move the near call address up one stack position
+          * into the gap we left */
+         "mov  %0, %%eax;"
+         "mov  %%eax, %1;"
+         /* Set the return address to be label 2: instead which will
+          * be a near ret in the host OS memory space */
+         "mov  $2f, %%eax;"
+         "add  %3,  %%eax;"
+         "mov  %%eax, %0;"
+         /* entry point in hosts memory */
+         "push %4;"
+         /* Far call to get us to label 1:" */
+         "push %2;"
+         "mov  $1f, %%eax;"
+         "add  %3,  %%eax;"
+         "push %%eax;"
+         "lret;"
+         /* We have far called to this address from the above code and
+          * are now in the hosts memory space */
+         "1:"
+         "ret;"
+         /* Returned from hte linux function, now far return back to the
+          * dos memory space */
+         "2:"
+         "lret;"
+         /* We have changed some registers but don't care.  The fast call
+          * will restore ecx, edx and eax will be set correctly on return */
+         : "=m"(stack[0]), "=m"(stack[1])
+         : "m"(fptr->segment), "m"(fptr->offset), "m"(fptr->entry), "m"(stack[0])
+         : "memory");
 }
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_4_WIDES(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_4_WIDES@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_4_8, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_8_1(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_8_1@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_4_WIDES, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_8_2(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_8_2@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_8_1, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_8_4(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_8_4@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_8_2, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_8_WIDES(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_8_WIDES@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_8_4, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_16_1(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_16_1@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_8_WIDES, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_16_2(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_16_2@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_16_1, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_16_WIDES(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_16_WIDES@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_16_2, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_32_1(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_32_1@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_16_WIDES, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOAD_DEFAULT_32_WIDES(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("_GRTEXDOWNLOAD_DEFAULT_32_WIDES@24\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_32_1, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void GRSPLASH(int a, int b, int c, int d, int e)
-{
-    D_printf("GRSPLASH@20\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_32_WIDES, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-typedef FxBool (GU3DFGETINFO)(char *filename, Gu3dfInfo *file_info);
-__export __stdcall GU3DFGETINFO
-{
-/*    static GU3DFGETINFO *call = 0; */
-    D_printf("GU3DFGETINFO@8\n");
+DECLARE_STUB(GRSPLASH, void, int a, int b, int c, int d, int e)
+ENDDECLARE
+
+DECLARE_STUB(GU3DFGETINFO, FxBool, char *filename, Gu3dfInfo *file_info)
     /*
      * Pretend file doesn't exist to get TRI to
      * generate textures on the fly.
@@ -87,293 +147,180 @@ __export __stdcall GU3DFGETINFO
      */
     return FXFALSE;
 /*
-    ENTRY (GU3DFGETINFO, CMD_Gu3dfGetInfo, call);
-    return __far (*call) (filename, file_info);
+    return __fcall (__faddr(char,filename),
+                    __faddr(Gu3dfInfo,file_info));
 */
-}
+ENDDECLARE
 
-typedef FxBool (GU3DFLOAD)(char *filename, Gu3dfInfo *file_info);
-__export __stdcall GU3DFLOAD
-{
-/*    static GU3DFLOAD *call = 0; */
-    D_printf("GU3DFLOAD@8\n");
+DECLARE_STUB(GU3DFLOAD, FxBool, char *filename, Gu3dfInfo *file_info)
     return FXFALSE;
 /*
-    ENTRY (GU3DFLOAD, CMD_Gu3dfLoad, call);
-    return __far (*call) (filename, file_info);
+    return __fcall (__faddr(char,filename),
+                    __faddr(Gu3dfInfo,file_info));
 */
-}
+ENDDECLARE
 
-typedef void (GUALPHASOURCE)(int a);
-__export __stdcall GUALPHASOURCE
-{
-    static GUALPHASOURCE *call = 0;
-    D_printf("GUALPHASOURCE@4\n");
-    ENTRY (GUALPHASOURCE, GUALPHASOURCE, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GUALPHASOURCE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GUCOLORCOMBINEFUNCTION)(int a);
-__export __stdcall GUCOLORCOMBINEFUNCTION
-{
-    static GUCOLORCOMBINEFUNCTION *call = 0;
-    D_printf("GUCOLORCOMBINEFUNCTION@4\n");
-    ENTRY (GUCOLORCOMBINEFUNCTION,
-           CMD_GuColorCombineFunction, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GUCOLORCOMBINEFUNCTION, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-__export __stdcall void GUENDIANSWAPWORDS(int a)
-{
-    D_printf("GUENDIANSWAPWORDS@4\n");
-}
+DECLARE_STUB(GUENDIANSWAPWORDS, void, int a)
+ENDDECLARE
 
-__export __stdcall void GUENDIANSWAPBYTES(int a)
-{
-    D_printf("GUENDIANSWAPBYTES@4\n");
-}
+DECLARE_STUB(GUENDIANSWAPBYTES, void, int a)
+ENDDECLARE
 
-__export __stdcall void GUFOGTABLEINDEXTOW(int a)
-{
-    D_printf("GUFOGTABLEINDEXTOW@4\n");
-}
+DECLARE_STUB(GUFOGTABLEINDEXTOW, void, int a)
+ENDDECLARE
 
-typedef void (GUFOGGENERATEEXP)(GrFog_t *table, int density);
-__export __stdcall GUFOGGENERATEEXP
-{
-    static GUFOGGENERATEEXP *call = 0;
-    D_printf("GUFOGGENERATEEXP@8\n");
-    ENTRY (GUFOGGENERATEEXP,
-           CMD_GuFogGenerateExp, call);
-    __far (*call) (table, density);
-}
+DECLARE_THUNK(GUFOGGENERATEEXP, void, GrFog_t *table, int density)
+    __fcall (__faddr(GrFog_t,table), density);
+ENDDECLARE
 
-__export __stdcall void GUFOGGENERATEEXP2(int a, int b)
-{
-    D_printf("GUFOGGENERATEEXP2@8\n");
-}
+DECLARE_STUB(GUFOGGENERATEEXP2, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GUFOGGENERATELINEAR(int a, int b, int c)
-{
-    D_printf("GUFOGGENERATELINEAR@12\n");
-}
+DECLARE_STUB(GUFOGGENERATELINEAR, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void GUTEXCREATECOLORMIPMAP(void)
-{
-    D_printf("GUTEXCREATECOLORMIPMAP@0\n");
-}
+DECLARE_STUB(GUTEXCREATECOLORMIPMAP, void, void)
+ENDDECLARE
 
-__export __stdcall void GUENCODERLE16(int a, int b, int c, int d)
-{
-    D_printf("GUENCODERLE16@16\n");
-}
+DECLARE_STUB(GUENCODERLE16, void, int a, int b, int c, int d)
+ENDDECLARE
 
-typedef void (GUDRAWTRIANGLEWITHCLIP)(GrVertex *v1, GrVertex *v2, GrVertex *v3);
-__export __stdcall GUDRAWTRIANGLEWITHCLIP
-{
-    static GUDRAWTRIANGLEWITHCLIP *call = 0;
-    D_printf("GUDRAWTRIANGLEWITHCLIP@12\n");
-    ENTRY (GUDRAWTRIANGLEWITHCLIP,
-           CMD_GuDrawTriangleWithClip, call);
-    __far (*call) (v1, v2, v3);
-}
+DECLARE_THUNK(GUDRAWTRIANGLEWITHCLIP, void, GrVertex *v1, GrVertex *v2, GrVertex *v3)
+    __fcall (__faddr(GrVertex,v1),
+             __faddr(GrVertex,v2),
+             __faddr(GrVertex,v3));
+ENDDECLARE
 
-__export __stdcall void GUAADRAWTRIANGLEWITHCLIP(int a, int b, int c)
-{
-    D_printf("GUAADRAWTRIANGLEWITHCLIP@12\n");
-}
+DECLARE_STUB(GUAADRAWTRIANGLEWITHCLIP, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void GUDRAWPOLYGONVERTEXLISTWITHCLIP(int a, int b)
-{
-    D_printf("GUDRAWPOLYGONVERTEXLISTWITHCLIP@8\n");
-}
+DECLARE_STUB(GUDRAWPOLYGONVERTEXLISTWITHCLIP, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GUMPINIT(void)
-{
-    D_printf("GUMPINIT@0\n");
-}
+DECLARE_STUB(GUMPINIT, void, void)
+ENDDECLARE
 
-__export __stdcall void GUMPTEXCOMBINEFUNCTION(int a)
-{
-    D_printf("GUMPTEXCOMBINEFUNCTION@4\n");
-}
+DECLARE_STUB(GUMPTEXCOMBINEFUNCTION, void, int a)
+ENDDECLARE
 
-__export __stdcall void GUMPTEXSOURCE(int a, int b)
-{
-    D_printf("GUMPTEXSOURCE@8\n");
-}
+DECLARE_STUB(GUMPTEXSOURCE, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GUFBREADREGION(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("GUFBREADREGION@24\n");
-}
+DECLARE_STUB(GUFBREADREGION, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void GUFBWRITEREGION(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("GUFBWRITEREGION@24\n");
-}
+DECLARE_STUB(GUFBWRITEREGION, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void GRGLIDEGETVERSION(char version[80])
-{
-    D_printf("GRGLIDEGETVERSION@4\n");
+DECLARE_STUB(GRGLIDEGETVERSION, void, char version[80])
     memcpy(version, "2.48.00.0455", 13);
-}
+ENDDECLARE
 
-__export __stdcall void GRGLIDEGETSTATE(int a)
-{
-    D_printf("GRGLIDEGETSTATE@4\n");
-}
+DECLARE_STUB(GRGLIDEGETSTATE, void, int a)
+ENDDECLARE
 
-typedef void (GRHINTS)(int a, int b);
-__export __stdcall GRHINTS
-{
-    static GRHINTS *call = 0;
-    D_printf("GRHINTS@8\n");
-    ENTRY (GRHINTS,
-           CMD_GrHints, call);
-    __far (*call) (a, b);
-}
+DECLARE_THUNK(GRHINTS, void, int a, int b)
+    __fcall (a, b);
+ENDDECLARE
 
-typedef void (_GRGLIDEINIT)(int);
-__export __stdcall void GRGLIDEINIT(void)
-{
-    static _GRGLIDEINIT *call = 0;
-    D_printf("GRGLIDEINIT@0\n");
-    ENTRY (_GRGLIDEINIT,
-           CMD_GrGlideInit, call);
-    __far (*call) (VERSION);
-}
+DECLARE_STUB(_GRGLIDEINIT, void, int version)
+#warning TODO
+ENDDECLARE
 
-__export __stdcall void GRGLIDESHAMELESSPLUG(int a)
-{
-    D_printf("GRGLIDESHAMELESSPLUG@4\n");
-}
+DECLARE_STUB(GRGLIDESHAMELESSPLUG, void, int a)
+ENDDECLARE
 
-__export __stdcall void GRRESETTRISTATS(void)
-{
-    D_printf("GRRESETTRISTATS@0\n");
-}
+DECLARE_STUB(GRRESETTRISTATS, void, void)
+ENDDECLARE
 
-__export __stdcall void GRTRISTATS(int a, int b)
-{
-    D_printf("GRTRISTATS@8\n");
-}
+DECLARE_STUB(GRTRISTATS, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GRSSTQUERYBOARDS(int a)
-{
-    D_printf("GRSSTQUERYBOARDS@4\n");
-}
+DECLARE_STUB(GRSSTQUERYBOARDS, void, int a)
+ENDDECLARE
 
-typedef FxBool (GRSSTQUERYHARDWARE)(GrHwConfiguration *hwConfig);
-__export __stdcall GRSSTQUERYHARDWARE
-{
-    static GRSSTQUERYHARDWARE *call = 0;
-    D_printf("GRSSTQUERYHARDWARE@4\n");
-    ENTRY (GRSSTQUERYHARDWARE,
-           CMD_GrSstQueryHardware, call);
-    __far return (*call) (VERSION);
-}
+DECLARE_THUNK(GRSSTQUERYHARDWARE, FxBool, GrHwConfiguration *hwConfig)
+    return __fcall (__faddr(GrHwConfiguration,hwConfig));
+ENDDECLARE
 
-typedef void (GRSSTSELECT)(int which_sst);
-__export __stdcall GRSSTSELECT
-{
-    static GRSSTSELECT *call = 0;
-    D_printf("GRSSTSELECT@4\n");
-    ENTRY (GRSSTSELECT,
-           CMD_GrSstSelect, call);
-    __far (*call) (which_sst);
-}
+DECLARE_THUNK(GRSSTSELECT, void, int which_sst)
+    __fcall (which_sst);
+ENDDECLARE
 
-__export __stdcall void GRSSTSCREENWIDTH(void)
-{
-    D_printf("GRSSTSCREENWIDTH@0\n");
-}
+DECLARE_STUB(GRSSTSCREENWIDTH, void, void)
+ENDDECLARE
 
-__export __stdcall void GRSSTSCREENHEIGHT(void)
-{
-    D_printf("GRSSTSCREENHEIGHT@0\n");
-}
+DECLARE_STUB(GRSSTSCREENHEIGHT, void, void)
+ENDDECLARE
 
-__export __stdcall void GRSSTVIDMODE(int a, int b)
-{
-    D_printf("GRSSTVIDMODE@8\n");
-}
+DECLARE_STUB(GRSSTVIDMODE, void, int a, int b)
+ENDDECLARE
 
-FxU32 __export __stdcall GRTEXCALCMEMREQUIRED(GrLOD_t lodmin, GrLOD_t lodmax, GrAspectRatio_t aspect, GrTextureFormat_t fmt)
-{
+DECLARE_STUB(GRTEXCALCMEMREQUIRED, FxU32, GrLOD_t lodmin, GrLOD_t lodmax, GrAspectRatio_t aspect, GrTextureFormat_t fmt)
+#if 0
     int size, i;
-    D_printf("GRTEXCALCMEMREQUIRED@16\n");
 
     size = 0;
 
     for(i = lodmax; i <= lodmin; i++)
         size += texture_size(i, aspect, fmt);
 
-    D_printf("size = %x\n", size);
+    DPRINTF("size = %x\n", size);
 
     return size;
-}
+#endif
+    return 0;
+ENDDECLARE
 
-__export __stdcall void GRTEXDETAILCONTROL(int a, int b, int c, int d)
-{
-    D_printf("GRTEXDETAILCONTROL@16\n");
+/* FIXME? */
+DECLARE_STUB(GRTEXDETAILCONTROL, void, int a, int b, int c, int d)
+#if 0
     send_char(CMD_GrTexDetailControl);
-}
+#endif
+ENDDECLARE
 
 /* FIXME? */
-FxU32 __export __stdcall GRTEXMINADDRESS(int a)
-{
-    D_printf("GRTEXMINADDRESS@4\n");
-
+DECLARE_STUB(GRTEXMINADDRESS, FxU32, int a)
     return 8;
-}
+ENDDECLARE
 
 /* FIXME? */
-FxU32 __export __stdcall GRTEXMAXADDRESS(int a)
-{
-    D_printf("GRTEXMAXADDRESS@4\n");
-
+DECLARE_STUB(GRTEXMAXADDRESS, FxU32, int a)
     return 8*1024*1024 - 128*1024;
-}
+ENDDECLARE
 
 /* FIXME */
-int __export __stdcall GRTEXTEXTUREMEMREQUIRED(FxU32 evenOdd,
-                                       GrTexInfo *info)
-{
-    D_printf("GRTEXTEXTUREMEMREQUIRED@8\n");
+DECLARE_STUB(GRTEXTEXTUREMEMREQUIRED, int, FxU32 evenOdd, GrTexInfo *info)
     return 0;
-}
+ENDDECLARE
 
-typedef void (GRTEXDOWNLOADMIPMAP)(GrChipID_t tmu, FxU32 startAddress,
-                                   FxU32 evenOdd, GrTexInfo *info);
-__export __stdcall GRTEXDOWNLOADMIPMAP
-{
-    static GRTEXDOWNLOADMIPMAP *call = 0;
-    D_printf("GRTEXDOWNLOADMIPMAP@16\n");
-    ENTRY (GRTEXDOWNLOADMIPMAP,
-           CMD_GrTexDownloadMipMap, call);
-    __far (*call) (tmu, startAddress, evenOdd, info);
-}
+DECLARE_THUNK(GRTEXDOWNLOADMIPMAP, void, GrChipID_t tmu, FxU32 startAddress,
+                                   FxU32 evenOdd, GrTexInfo *info)
+    __fcall (tmu, startAddress, evenOdd, __faddr(GrTexInfo,info));
+ENDDECLARE
 
-__export __stdcall void GRTEXDOWNLOADTABLEPARTIAL(int a, int b, int c, int d, int e)
-{
-    D_printf("GRTEXDOWNLOADTABLEPARTIAL@20\n");
-}
+DECLARE_STUB(GRTEXDOWNLOADTABLEPARTIAL, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
 /* FIXME? */
-__export __stdcall void GRTEXDOWNLOADMIPMAPLEVEL(
-                          GrChipID_t        tmu,
-                          FxU32             startAddress,
-                          GrLOD_t           thisLod,
-                          GrLOD_t           largeLod,
-                          GrAspectRatio_t   aspectRatio,
-                          GrTextureFormat_t format,
-                          FxU32             evenOdd,
-                          void              *data)
-{
+DECLARE_STUB(GRTEXDOWNLOADMIPMAPLEVEL, void,
+                                       GrChipID_t        tmu,
+                                       FxU32             startAddress,
+                                       GrLOD_t           thisLod,
+                                       GrLOD_t           largeLod,
+                                       GrAspectRatio_t   aspectRatio,
+                                       GrTextureFormat_t format,
+                                       FxU32             evenOdd,
+                                       void             *data)
     GrTexInfo info;
-
-    D_printf("GRTEXDOWNLOADMIPMAPLEVEL@32");
 
     if(thisLod == largeLod)
     {
@@ -385,500 +332,260 @@ __export __stdcall void GRTEXDOWNLOADMIPMAPLEVEL(
 
         GRTEXDOWNLOADMIPMAP(tmu, startAddress, evenOdd, &info);
     }
-}
+ENDDECLARE
 
-__export __stdcall void GRERRORSETCALLBACK(int a)
-{
-    D_printf("GRERRORSETCALLBACK@4\n");
-}
+DECLARE_STUB(GRERRORSETCALLBACK, void, int a)
+ENDDECLARE
 
-__export __stdcall void GUMOVIESTART(void)
-{
-    D_printf("GUMOVIESTART@0\n");
-}
+DECLARE_STUB(GUMOVIESTART, void, void)
+ENDDECLARE
 
-__export __stdcall void GUMOVIESTOP(void)
-{
-    D_printf("GUMOVIESTOP@0\n");
-}
+DECLARE_STUB(GUMOVIESTOP, void, void)
+ENDDECLARE
 
-__export __stdcall void GUMOVIESETNAME(int a)
-{
-    D_printf("GUMOVIESETNAME@4\n");
-}
+DECLARE_STUB(GUMOVIESETNAME, void, int a)
+ENDDECLARE
 
-typedef int (GUTEXALLOCATEMEMORY)(GrChipID_t tmu, FxU8 odd_even_mask,
-                                  int width, int height, GrTextureFormat_t fmt,
-                                  GrMipMapMode_t mm_mode, GrLOD_t smallest_lod,
-                                  GrLOD_t largest_lod, GrAspectRatio_t aspect,
-                                  GrTextureClampMode_t s_clamp_mode,
-                                  GrTextureClampMode_t t_clamp_mode,
-                                  GrTextureFilterMode_t minfilter_mode,
-                                  GrTextureFilterMode_t magfilter_mode,
-                                  int lod_bias, FxBool trilinear);
-__export __stdcall GUTEXALLOCATEMEMORY
-{
-    static GUTEXALLOCATEMEMORY *call = 0;
-    D_printf("GUTEXALLOCATEMEMORY@60\n");
-    ENTRY (GUTEXALLOCATEMEMORY,
-           CMD_GuTexAllocateMemory, call);
-    __far return (*call) (tmu, odd_even_mask, width, height, fmt,
-                           mm_mode, smallest_lod, largest_lod, aspect,
-                           s_clamp_mode, t_clamp_mode, minfilter_mode,
-                           magfilter_mode, lod_bias, trilinear);
-}
+DECLARE_THUNK(GUTEXALLOCATEMEMORY, int,
+                                   GrChipID_t tmu, FxU8 odd_even_mask,
+                                   int width, int height, GrTextureFormat_t fmt,
+                                   GrMipMapMode_t mm_mode, GrLOD_t smallest_lod,
+                                   GrLOD_t largest_lod, GrAspectRatio_t aspect,
+                                   GrTextureClampMode_t s_clamp_mode,
+                                   GrTextureClampMode_t t_clamp_mode,
+                                   GrTextureFilterMode_t minfilter_mode,
+                                   GrTextureFilterMode_t magfilter_mode,
+                                   int lod_bias, FxBool trilinear)
+    return __fcall (tmu, odd_even_mask, width, height, fmt,
+                    mm_mode, smallest_lod, largest_lod, aspect,
+                    s_clamp_mode, t_clamp_mode, minfilter_mode,
+                    magfilter_mode, lod_bias, trilinear);
+ENDDECLARE
 
-__export __stdcall void GUTEXCHANGEATTRIBUTES(int a, int b, int c, int d,
-                           int e, int f, int g, int h,
-                           int i, int j, int k, int l)
-{
-    D_printf("GUTEXCHANGEATTRIBUTES@48\n");
-}
+DECLARE_STUB(GUTEXCHANGEATTRIBUTES, void, int a, int b, int c, int d,
+                                    int e, int f, int g, int h,
+                                    int i, int j, int k, int l)
+ENDDECLARE
 
-__export __stdcall void GRTEXCOMBINEFUNCTION(int a, int b)
-{
-    static GRTEXCOMBINEFUNCTION *call = 0;
-    D_printf("GRTEXCOMBINEFUNCTION@8\n");
-    ENTRY (GRTEXCOMBINEFUNCTION,
-           CMD_GrTexCombineFunction, call);
-    __far (*call) (a, b);
-}
-
-typedef void (GUTEXCOMBINEFUNCTION)(int a, int b);
-__export __stdcall GUTEXCOMBINEFUNCTION
-{
-    static GUTEXCOMBINEFUNCTION *call = 0;
-    D_printf("GUTEXCOMBINEFUNCTION@8\n");
-    ENTRY (GUTEXCOMBINEFUNCTION,
-           CMD_GrTexCombineFunction, call);
-    __far (*call) (a, b);
-}
-
-typedef void (GUTEXDOWNLOADMIPMAP)(GrMipMapId_t mmid, void *src, GuNccTable *table);
-__export __stdcall GUTEXDOWNLOADMIPMAP
-{
-    static GUTEXDOWNLOADMIPMAP *call = 0;
-    D_printf("GUTEXDOWNLOADMIPMAP@12\n");
-    ENTRY (GUTEXDOWNLOADMIPMAP,
-           CMD_GuTexDownloadMipMap, call);
-    __far (*call) (mmid, src, table);
-}
-
-__export __stdcall void GUTEXDOWNLOADMIPMAPLEVEL(int a, int b, int c)
-{
-    D_printf("GUTEXDOWNLOADMIPMAPLEVEL@12\n");
-}
-
-__export __stdcall void GUTEXGETCURRENTMIPMAP(int a)
-{
-    D_printf("GUTEXGETCURRENTMIPMAP@4\n");
-}
-
-__export __stdcall void GUTEXGETMIPMAPINFO(int a)
-{
-    D_printf("GUTEXGETMIPMAPINFO@4\n");
-}
+DECLARE_THUNK(GRTEXCOMBINEFUNCTION, void, int a, int b)
+    __fcall (a, b);
+ENDDECLARE
 
 /* FIXME */
-__export __stdcall FxU32 GUTEXMEMQUERYAVAIL(int a)
-{
-    D_printf("GUTEXMEMQUERYAVAIL@4\n");
+DECLARE_STUB(GUTEXCOMBINEFUNCTION, void, int a, int b)
+/*    __fcall (a, b); */
+ENDDECLARE
+
+DECLARE_THUNK(GUTEXDOWNLOADMIPMAP, void, GrMipMapId_t mmid, void *src, GuNccTable *table)
+    __fcall (mmid, __faddr(void,src), __faddr(GuNccTable,table));
+ENDDECLARE
+
+DECLARE_STUB(GUTEXDOWNLOADMIPMAPLEVEL, void, int a, int b, int c)
+ENDDECLARE
+
+DECLARE_STUB(GUTEXGETCURRENTMIPMAP, void, int a)
+ENDDECLARE
+
+DECLARE_STUB(GUTEXGETMIPMAPINFO, void, int a)
+ENDDECLARE
+
+/* FIXME */
+DECLARE_STUB(GUTEXMEMQUERYAVAIL, FxU32, int a)
     return 16 * 1024 * 1024;
-}
+ENDDECLARE
 
-typedef void (GUTEXMEMRESET)(void);
-__export __stdcall GUTEXMEMRESET
-{
-    static GUTEXMEMRESET *call = 0;
-    D_printf("GUTEXMEMRESET@0\n");
-    ENTRY (GUTEXMEMRESET,
-           CMD_GuTexMemReset, call);
-    __far (*call) ();
-}
+DECLARE_THUNK(GUTEXMEMRESET, void, void)
+    __fcall ();
+ENDDECLARE
 
-__export __stdcall void _GUMPTEXCOMBINEFUNCTION(int a)
-{
-    D_printf("_GUMPTEXCOMBINEFUNCTION@4\n");
-}
+DECLARE_STUB(_GUMPTEXCOMBINEFUNCTION, void, int a)
+ENDDECLARE
 
-__export __stdcall void GUMPDRAWTRIANGLE(int a, int b, int c)
-{
-    D_printf("GUMPDRAWTRIANGLE@12\n");
-}
+DECLARE_STUB(GUMPDRAWTRIANGLE, void, int a, int b, int c)
+ENDDECLARE
 
-typedef void GRAADRAWPOINT(int a);
-__export __stdcall GRAADRAWPOINT
-{
-    D_printf("GRAADRAWPOINT@4\n");
-}
+DECLARE_STUB(GRAADRAWPOINT, void, int a)
+ENDDECLARE
 
-typedef void GRAADRAWLINE(GrVertex *v1, GrVertex *v2);
-__export __stdcall GRAADRAWLINE
-{
-    static GRAADRAWLINE *call = 0;
-    D_printf("GRAADRAWLINE@8\n");
-    ENTRY (GRAADRAWLINE,
-           CMD_GrAADrawLine, call);
-    __far (*call) (v1, v2);
-}
+DECLARE_THUNK(GRAADRAWLINE, void, GrVertex *v1, GrVertex *v2)
+    __fcall (__faddr(GrVertex,v1),
+             __faddr(GrVertex,v2));
+ENDDECLARE
 
-__export __stdcall void GRAADRAWTRIANGLE(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("GRAADRAWTRIANGLE@24\n");
-}
+DECLARE_STUB(GRAADRAWTRIANGLE, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void GRAADRAWPOLYGON(int a, int b, int c)
-{
-    D_printf("GRAADRAWPOLYGON@12\n");
-}
+DECLARE_STUB(GRAADRAWPOLYGON, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void GRAADRAWPOLYGONVERTEXLIST(int nverts, GrVertex vlist[])
-{
-    D_printf("GRAADRAWPOLYGONVERTEXLIST@8\n");
-}
+DECLARE_STUB(GRAADRAWPOLYGONVERTEXLIST, void, int nverts, GrVertex vlist[])
+ENDDECLARE
 
-__export __stdcall void GRDRAWPOINT(int a)
-{
-    D_printf("GRDRAWPOINT@4\n");
-}
+DECLARE_STUB(GRDRAWPOINT, void, int a)
+ENDDECLARE
 
-typedef void GRDRAWLINE(GrVertex *v1, GrVertex *v2);
-__export __stdcall GRDRAWLINE
-{
-    static GRDRAWLINE *call = 0;
-    D_printf("GRDRAWLINE@8\n");
-    ENTRY (GRAADRAWLINE,
-           CMD_GrDrawLine, call);
-    __far (*call) (v1, v2);
-}
+DECLARE_THUNK(GRDRAWLINE, void, GrVertex *v1, GrVertex *v2)
+    __fcall (__faddr(GrVertex,v1),
+             __faddr(GrVertex,v2));
+ENDDECLARE
 
-typedef void GRDRAWTRIANGLE(GrVertex *v1, GrVertex *v2, GrVertex *v3);
-__export __stdcall GRDRAWTRIANGLE
-{
-    static GRDRAWTRIANGLE *call = 0;
-    D_printf("GRDRAWTRIANGLE@12\n");
-    ENTRY (GRDRAWTRIANGLE,
-           CMD_GrDrawTriangle, call);
-    __far (*call) (v1, v2, v2);
-}
+DECLARE_THUNK(GRDRAWTRIANGLE, void, GrVertex *v1, GrVertex *v2, GrVertex *v3)
+    __fcall (__faddr(GrVertex,v1),
+             __faddr(GrVertex,v2),
+             __faddr(GrVertex,v3));
+ENDDECLARE
 
-__export __stdcall void GRDRAWPLANARPOLYGON(int a, int b, int c)
-{
-    D_printf("GRDRAWPLANARPOLYGON@12\n");
-}
+DECLARE_STUB(GRDRAWPLANARPOLYGON, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void GRDRAWPLANARPOLYGONVERTEXLIST(int a, int b)
-{
-    D_printf("GRDRAWPLANARPOLYGONVERTEXLIST@8\n");
-}
+DECLARE_STUB(GRDRAWPLANARPOLYGONVERTEXLIST, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GRDRAWPOLYGON(int a, int b, int c)
-{
-    D_printf("GRDRAWPOLYGON@12\n");
-}
+DECLARE_STUB(GRDRAWPOLYGON, void, int a, int b, int c)
+ENDDECLARE
 
-typedef void GRDRAWPOLYGONVERTEXLIST(int nverts, GrVertex vlist[]);
-__export __stdcall GRDRAWPOLYGONVERTEXLIST
-{
-    static GRDRAWTRIANGLE *call = 0;
-    D_printf("GRDRAWPOLYGONVERTEXLIST@8\n");
-    ENTRY (GRDRAWPOLYGONVERTEXLIST,
-           CMD_GrDrawPolygonVertexList, call);
-    __far (*call) (nverts, vlist);
-}
+DECLARE_THUNK(GRDRAWPOLYGONVERTEXLIST, void, int nverts, GrVertex vlist[])
+    __fcall (nverts, __faddr(GrVertex,vlist));
+ENDDECLARE
 
-__export __stdcall void _GRCOLORCOMBINEDELTA0MODE(int a)
-{
-    D_printf("_GRCOLORCOMBINEDELTA0MODE@4\n");
-}
+DECLARE_STUB(_GRCOLORCOMBINEDELTA0MODE, void, int a)
+ENDDECLARE
 
-typedef void GRALPHABLENDFUNCTION(int a, int b, int c, int d);
-__export __stdcall GRALPHABLENDFUNCTION
-{
-    static GRALPHABLENDFUNCTION *call = 0;
-    D_printf("GRALPHABLENDFUNCTION@16\n");
-    ENTRY (GRALPHABLENDFUNCTION,
-           CMD_GrAlphaBlendFunction, call);
-    __far (*call) (a, b, c, d);
-}
+DECLARE_THUNK(GRALPHABLENDFUNCTION, void, int a, int b, int c, int d)
+    __fcall (a, b, c, d);
+ENDDECLARE
 
-typedef void GRALPHACOMBINE(int a, int b, int c, int d, int e);
-__export __stdcall GRALPHACOMBINE
-{
-    static GRALPHACOMBINE *call = 0;
-    D_printf("GRALPHACOMBINE@20\n");
-    ENTRY (GRALPHACOMBINE,
-           CMD_GrAlphaCombine, call);
-    __far (*call) (a, b, c, d, e);
-}
+DECLARE_THUNK(GRALPHACOMBINE, void, int a, int b, int c, int d, int e)
+    __fcall (a, b, c, d, e);
+ENDDECLARE
 
-__export __stdcall void GRALPHACONTROLSITRGBLIGHTING(int a)
-{
-    D_printf("GRALPHACONTROLSITRGBLIGHTING@4\n");
-}
+DECLARE_STUB(GRALPHACONTROLSITRGBLIGHTING, void, int a)
+ENDDECLARE
 
-typedef void GRALPHATESTFUNCTION(int a);
-__export __stdcall GRALPHATESTFUNCTION
-{
-    static GRALPHATESTFUNCTION *call = 0;
-    D_printf("GRALPHATESTFUNCTION@4\n");
-    ENTRY (GRALPHATESTFUNCTION,
-           CMD_GrAlphaTestFunction, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRALPHATESTFUNCTION, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-__export __stdcall void GRALPHATESTREFERENCEVALUE(int a)
-{
-    D_printf("GRALPHATESTREFERENCEVALUE@4\n");
-}
+DECLARE_STUB(GRALPHATESTREFERENCEVALUE, void, int a)
+ENDDECLARE
 
-typedef void (GRBUFFERCLEAR)(int a, int b, int c);
-__export __stdcall GRBUFFERCLEAR
-{
-    static GRBUFFERCLEAR *call = 0;
-    D_printf("GRBUFFERCLEAR@12\n");
-    ENTRY (GRBUFFERCLEAR,
-           CMD_GrBufferClear, call);
-    __far (*call) (a, b, c);
-}
+DECLARE_THUNK(GRBUFFERCLEAR, void, int a, int b, int c)
+    __fcall (a, b, c);
+ENDDECLARE
 
 /* FIXME? */
-typedef void (GRBUFFERSWAP)(int a);
-__export __stdcall GRBUFFERSWAP
-{
-    static GRBUFFERSWAP *call = 0;
-    D_printf("GRBUFFERSWAP@4\n");
-    ENTRY (GRBUFFERSWAP,
-           CMD_GrBufferSwap, call);
-    __far (*call) (a, b, c);
-}
+DECLARE_THUNK(GRBUFFERSWAP, void, int a)
+    __fcall (a);
+ENDDECLARE
 
 /* FIXME? */
-int __export __stdcall GRBUFFERNUMPENDING(void)
-{
-    D_printf("GRBUFFERNUMPENDING@0\n");
+DECLARE_STUB(GRBUFFERNUMPENDING, int, void)
     return 0;
-}
+ENDDECLARE
 
-typedef void (GRCHROMAKEYMODE)(int a);
-__export __stdcall void GRCHROMAKEYMODE(int a)
-{
-    static GRCHROMAKEYMODE *call = 0;
-    D_printf("GRCHROMAKEYMODE@4\n");
-    ENTRY (GRCHROMAKEYMODE,
-           CMD_GrChromaKeyMode, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRCHROMAKEYMODE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRCHROMAKEYVALUE)(int a);
-__export __stdcall GRCHROMAKEYVALUE
-{
-    static GRCHROMAKEYVALUE *call = 0;
-    D_printf("GRCHROMAKEYVALUE@4\n");
-    ENTRY (GRCHROMAKEYVALUE,
-           CMD_GrChromaKeyValue, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRCHROMAKEYVALUE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRCLIPWINDOW)(int a, int b, int c, int d);
-__export __stdcall GRCLIPWINDOW
-{
-    static GRCLIPWINDOW *call = 0;
-    D_printf("GRCLIPWINDOW@16\n");
-    ENTRY (GRCLIPWINDOW,
-           CMD_GrClipWindow, call);
-    __far (*call) (a, b, c, d);
-}
+DECLARE_THUNK(GRCLIPWINDOW, void, int a, int b, int c, int d)
+    __fcall (a, b, c, d);
+ENDDECLARE
 
-typedef void (GRCOLORCOMBINE)(int a, int b, int c, int d, int e);
-__export __stdcall GRCOLORCOMBINE
-{
-    static GRCOLORCOMBINE *call = 0;
-    D_printf("GRCOLORCOMBINE@20\n");
-    ENTRY (GRCOLORCOMBINE,
-           CMD_GrColorCombine, call);
-    __far (*call) (a, b, c, d, e);
-}
+DECLARE_THUNK(GRCOLORCOMBINE, void, int a, int b, int c, int d, int e)
+    __fcall (a, b, c, d, e);
+ENDDECLARE
 
-typedef void (GRCOLORMASK)(int a, int b);
-__export __stdcall GRCOLORMASK
-{
-    static GRCOLORMASK *call = 0;
-    D_printf("GRCOLORMASK@8\n");
-    ENTRY (GRCOLORMASK,
-           CMD_GrColorMask, call);
-    __far (*call) (a, b);
-}
+DECLARE_THUNK(GRCOLORMASK, void, int a, int b)
+    __fcall (a, b);
+ENDDECLARE
 
-__export __stdcall void GRCONSTANTCOLORVALUE(int a)
-{
-    static GRCONSTANTCOLORVALUE *call = 0;
-    D_printf("GRCONSTANTCOLORVALUE@4\n");
-    ENTRY (GRCONSTANTCOLORVALUE,
-           CMD_GrConstantColorValue, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRCONSTANTCOLORVALUE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRCONSTANTCOLORVALUE4)(int a, int b, int c, int d);
-__export __stdcall GRCONSTANTCOLORVALUE4
-{
-    static GRCONSTANTCOLORVALUE4 *call = 0;
-    D_printf("GRCONSTANTCOLORVALUE4@16\n");
-    ENTRY (GRCONSTANTCOLORVALUE4,
-           CMD_GrConstantColorValue4, call);
-    __far (*call) (a, b, c, d);
-}
+DECLARE_THUNK(GRCONSTANTCOLORVALUE4, void, int a, int b, int c, int d)
+    __fcall (a, b, c, d);
+ENDDECLARE
 
-typedef void (GRCULLMODE)(int a);
-__export __stdcall GRCULLMODE
-{
-    static GRCULLMODE *call = 0;
-    D_printf("GRCULLMODE@4\n");
-    ENTRY (GRCULLMODE,
-           CMD_GrCullMode, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRCULLMODE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRDEPTHBIASLEVEL)(int a);
-__export __stdcall GRDEPTHBIASLEVEL
-{
-    static GRDEPTHBIASLEVEL *call = 0;
-    D_printf("GRDEPTHBIASLEVEL@4\n");
-    ENTRY (GRDEPTHBIASLEVEL,
-           CMD_GrDepthBiasLevel, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRDEPTHBIASLEVEL, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRDEPTHBUFFERFUNCTION)(int a);
-__export __stdcall GRDEPTHBUFFERFUNCTION
-{
-    static GRDEPTHBUFFERFUNCTION *call = 0;
-    D_printf("GRDEPTHBUFFERFUNCTION@4\n");
-    ENTRY (GRDEPTHBUFFERFUNCTION,
-           CMD_GrDepthBufferFunction, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRDEPTHBUFFERFUNCTION, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRDEPTHBUFFERMODE)(int a);
-__export __stdcall GRDEPTHBUFFERMODE
-{
-    static GRDEPTHBUFFERMODE *call = 0;
-    D_printf("GRDEPTHBUFFERMODE@4\n");
-    ENTRY (GRDEPTHBUFFERMODE,
-           CMD_GrDepthBufferMode, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRDEPTHBUFFERMODE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRDEPTHMASK)(int a);
-__export __stdcall GRDEPTHMASK
-{
-    static GRDEPTHMASK *call = 0;
-    D_printf("GRDEPTHMASK@4\n");
-    ENTRY (GRDEPTHMASK,
-           CMD_GrDepthMask, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRDEPTHMASK, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRDISABLEALLEFFECTS)(void);
-__export __stdcall GRDISABLEALLEFFECTS
-{
-    static GRDISABLEALLEFFECTS *call = 0;
-    D_printf("GRDISABLEALLEFFECTS@0\n");
-    ENTRY (GRDISABLEALLEFFECTS,
-           CMD_GrDisableAllEffects, call);
-    __far (*call) ();
-}
+DECLARE_THUNK(GRDISABLEALLEFFECTS, void, void)
+    __fcall ();
+ENDDECLARE
 
-__export __stdcall void GRDITHERMODE(int a)
-{
-    D_printf("GRDITHERMODE@4\n");
-}
+DECLARE_STUB(GRDITHERMODE, void, int a)
+ENDDECLARE
 
-typedef void (GRFOGMODE)(int a);
-__export __stdcall GRFOGMODE
-{
-    static GRFOGMODE *call = 0;
-    D_printf("GRFOGMODE@4\n");
-    ENTRY (GRFOGMODE,
-           CMD_GrFogMode, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRFOGMODE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRFOGCOLORVALUE)(int a);
-__export __stdcall GRFOGCOLORVALUE
-{
-    static GRFOGCOLORVALUE *call = 0;
-    D_printf("GRFOGCOLORVALUE@4\n");
-    ENTRY (GRFOGCOLORVALUE,
-           CMD_GrFogColorValue, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRFOGCOLORVALUE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-typedef void (GRFOGTABLE)(GrFog_t *ft);
-__export __stdcall GRFOGTABLE
-{
-    static GRFOGTABLE *call = 0;
-    D_printf("GRFOGTABLE@4\n");
-    ENTRY (GRFOGTABLE,
-           CMD_GrFogTable, call);
-    __far (*call) (ft);
-}
+DECLARE_THUNK(GRFOGTABLE, void, GrFog_t *ft)
+    __fcall (__faddr(GrFog_t,ft));
+ENDDECLARE
 
 /* FIXME? */
-typedef void GRGLIDESHUTDOWN(void);
-__export __stdcall GRGLIDESHUTDOWN
-{
-    static GRGLIDESHUTDOWN *call = 0;
-    D_printf("GRGLIDESHUTDOWN@0\n");
-    ENTRY (GRGLIDESHUTDOWN,
-           CMD_GrGlideShutdown, call);
-    __far (*call) ();
-}
+DECLARE_THUNK(GRGLIDESHUTDOWN, void, void)
+    __fcall ();
+ENDDECLARE
 
-__export __stdcall void GRGLIDESETSTATE(int a)
-{
-    D_printf("GRGLIDESETSTATE@4\n");
-}
+DECLARE_STUB(GRGLIDESETSTATE, void, int a)
+ENDDECLARE
 
-typedef void GRRENDERBUFFER(int a);
-__export __stdcall GRRENDERBUFFER
-{
-    static GRRENDERBUFFER *call = 0;
-    D_printf("GRRENDERBUFFER@4\n");
-    ENTRY (GRRENDERBUFFER,
-           CMD_GrRenderBuffer, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRRENDERBUFFER, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-__export __stdcall void GRCHECKFORROOM(int a)
-{
-    D_printf("GRCHECKFORROOM@4");
-}
+DECLARE_STUB(GRCHECKFORROOM, void, int a)
+ENDDECLARE
 
-__export __stdcall void _GRUPDATEPARAMINDEX(void)
-{
-    D_printf("_GRUPDATEPARAMINDEX@0\n");
-}
+DECLARE_STUB(_GRUPDATEPARAMINDEX, void, void)
+ENDDECLARE
 
-__export __stdcall void _GRREBUILDDATALIST(void)
-{
-    D_printf("_GRREBUILDDATALIST@0\n");
-}
+DECLARE_STUB(_GRREBUILDDATALIST, void, void)
+ENDDECLARE
 
-__export __stdcall void GRLFBCONSTANTALPHA(int a)
-{
-    D_printf("GRLFBCONSTANTALPHA@4\n");
-}
+DECLARE_STUB(GRLFBCONSTANTALPHA, void, int a)
+ENDDECLARE
 
-__export __stdcall void GRLFBCONSTANTDEPTH(int a)
-{
-    D_printf("GRLFBCONSTANTDEPTH@4\n");
-}
+DECLARE_STUB(GRLFBCONSTANTDEPTH, void, int a)
+ENDDECLARE
 
 /* FIXME! */
-FxBool __export __stdcall GRLFBLOCK(GrLock_t type, GrBuffer_t buffer, GrLfbWriteMode_t writeMode, GrOriginLocation_t origin, FxBool pixelPipeline, GrLfbInfo_t *info)
-{
-    D_printf("GRLFBLOCK@24 type = %d, mode = %d, buffer = %d\n", type, writeMode, buffer);
+DECLARE_THUNK(GRLFBLOCK, FxBool,
+                         GrLock_t           type,
+                         GrBuffer_t         buffer,
+                         GrLfbWriteMode_t   writeMode,
+                         GrOriginLocation_t origin,
+                         FxBool             pixelPipeline,
+                         GrLfbInfo_t       *info)
+#if 0
     info->strideInBytes = 2 * 1024;
     info->writeMode = GR_LFBWRITEMODE_565;
     info->origin = GR_ORIGIN_UPPER_LEFT;
@@ -894,8 +601,10 @@ FxBool __export __stdcall GRLFBLOCK(GrLock_t type, GrBuffer_t buffer, GrLfbWrite
             locked_buffer = buffer;
         }
 
+
         lfb_write_pending = 0;
     }
+
     else
     {
         char c;
@@ -911,6 +620,7 @@ FxBool __export __stdcall GRLFBLOCK(GrLock_t type, GrBuffer_t buffer, GrLfbWrite
                     for(x = 0; x < 640; x++)
                         lfb_read[y][x] = 0xB000;
             }
+
             else
             {
                 send_char(CMD_GrLFBLock);
@@ -920,17 +630,18 @@ FxBool __export __stdcall GRLFBLOCK(GrLock_t type, GrBuffer_t buffer, GrLfbWrite
                 for(y = 0; y < 480; y++)
                     pipe->get((char *)lfb_read[y], 640*2);
             }
+
         }
+
     }
 
+#endif
     return FXTRUE;
-}
+ENDDECLARE
 
 /* FIXME! */
-FxBool __export __stdcall GRLFBUNLOCK(GrLock_t type, GrBuffer_t buffer)
-{
-    D_printf("GRLFBUNLOCK@8 type = %d, buffer = %d\n", type, buffer);
-
+DECLARE_STUB(GRLFBUNLOCK, FxBool, GrLock_t type, GrBuffer_t buffer)
+#if 0
     if((type & 1) == 1)
     {
        /*
@@ -944,400 +655,226 @@ FxBool __export __stdcall GRLFBUNLOCK(GrLock_t type, GrBuffer_t buffer)
         {
             lfb_write_pending = 1;
         }
+
         else
         {
             send_blue_screen(buffer);
             buffer_is_locked = 0;
         }
+
     }
 
+#endif
     return FXTRUE;
-}
+ENDDECLARE
 
-__export __stdcall void GRLFBWRITECOLORFORMAT(int a)
-{
-    D_printf("GRLFBWRITECOLORFORMAT@4\n");
-}
+DECLARE_STUB(GRLFBWRITECOLORFORMAT, void, int a)
+ENDDECLARE
 
-__export __stdcall void GRLFBWRITECOLORSWIZZLE(int a, int b)
-{
-    D_printf("GRLFBWRITECOLORSWIZZLE@8\n");
-}
+DECLARE_STUB(GRLFBWRITECOLORSWIZZLE, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GRLFBWRITEREGION(int a, int b, int c, int d,
-                      int e, int f, int g, int h)
-{
-    D_printf("GRLFBWRITEREGION@32\n");
-}
+DECLARE_STUB(GRLFBWRITEREGION, void, int a, int b, int c, int d,
+                               int e, int f, int g, int h)
+ENDDECLARE
 
-__export __stdcall void GRLFBREADREGION(int a, int b, int c, int d,
-                     int e, int f, int g)
-{
-    D_printf("GRLFBREADREGION@28\n");
-}
+DECLARE_STUB(GRLFBREADREGION, void, int a, int b, int c, int d,
+                              int e, int f, int g)
+ENDDECLARE
 
-typedef FxBool GRSSTWINOPEN(int a, int b, int c, int d,
-                            int e, int f, int g);
-__export __stdcall GRSSTWINOPEN
-{
-    D_printf("GRSSTWINOPEN@28\n");
-    ENTRY (GRSSTWINOPEN,
-           CMD_GrSstWinOpen, call);
-    __far return (*call) (a, b, c, d, e, f, g);
-}
+DECLARE_THUNK(GRSSTWINOPEN, FxBool, int a, int b, int c,
+                      int d, int e, int f, int g)
+    return __fcall (a, b, c, d, e, f, g);
+ENDDECLARE
 
-typedef void GRSSTWINCLOSE(void);
-__export __stdcall GRSSTWINCLOSE
-{
-   /*
-    * We request a confirmation and wait for it,
-    * to give Glidos the chance to put us (remember
-    * we are running in a DOS box) in fullscreen
-    * mode.
-    */
-    static GRSSTWINCLOSE *call = 0;
-    D_printf("GRSSTWINCLOSE@0\n");
-    ENTRY (GRSSTWINCLOSE,
-           CMD_GrSstWinClose, call);
-    __far (*call) ();
-}
+DECLARE_THUNK(GRSSTWINCLOSE, void, void)
+    __fcall ();
+ENDDECLARE
 
-__export __stdcall void GRSSTCONTROL(int a)
-{
-    D_printf("GRSSTCONTROL@4\n");
-}
+DECLARE_STUB(GRSSTCONTROL, void, int a)
+ENDDECLARE
 
-__export __stdcall void GRSSTPERFSTATS(int a)
-{
-    D_printf("GRSSTPERFSTATS@4\n");
-}
+DECLARE_STUB(GRSSTPERFSTATS, void, int a)
+ENDDECLARE
 
-__export __stdcall void GRSSTRESETPERFSTATS(void)
-{
-    D_printf("GRSSTRESETPERFSTATS@0\n");
-}
+DECLARE_STUB(GRSSTRESETPERFSTATS, void, void)
+ENDDECLARE
 
 /* FIXME */
-__export __stdcall int GRSSTSTATUS(void)
-{
-    D_printf("GRSSTSTATUS@0\n");
-
+DECLARE_STUB(GRSSTSTATUS, int, void)
     return 0x0FFFF43F;
-}
+ENDDECLARE
 
-__export __stdcall void GRSSTVIDEOLINE(void)
-{
-    D_printf("GRSSTVIDEOLINE@0\n");
-}
+DECLARE_STUB(GRSSTVIDEOLINE, void, void)
+ENDDECLARE
 
-__export __stdcall void GRSSTVRETRACEON(void)
-{
-    D_printf("GRSSTVRETRACEON@0\n");
-}
+DECLARE_STUB(GRSSTVRETRACEON, void, void)
+ENDDECLARE
 
-__export __stdcall void GRSSTIDLE(void)
-{
-    D_printf("GRSSTIDLE@0\n");
-}
+DECLARE_STUB(GRSSTIDLE, void, void)
+ENDDECLARE
 
-__export __stdcall void GRSSTISBUSY(void)
-{
-    D_printf("GRSSTISBUSY@0\n");
-}
+DECLARE_STUB(GRSSTISBUSY, void, void)
+ENDDECLARE
 
-__export __stdcall void GRGAMMACORRECTIONVALUE(int a)
-{
-    static GRGAMMACORRECTIONVALUE *call = 0;
-    D_printf("GRGAMMACORRECTIONVALUE@4\n");
-    ENTRY (GRGAMMACORRECTIONVALUE,
-           CMD_GrGammaCorrectionValue, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GRGAMMACORRECTIONVALUE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-__export __stdcall void GRSSTORIGIN(int a)
-{
-    D_printf("GRSSTORIGIN@4\n");
-}
+DECLARE_STUB(GRSSTORIGIN, void, int a)
+ENDDECLARE
 
-__export __stdcall void GRSSTCONFIGPIPELINE(int a, int b, int c)
-{
-    D_printf("GRSSTCONFIGPIPELINE@12\n");
-}
+DECLARE_STUB(GRSSTCONFIGPIPELINE, void, int a, int b, int c)
+ENDDECLARE
 
-typedef void GRTEXCLAMPMODE(int a, int b, int c);
-__export __stdcall GRTEXCLAMPMODE
-{
-    static GRTEXCLAMPMODE *call = 0;
-    D_printf("GRTEXCLAMPMODE@12\n");
-    ENTRY (GRTEXCLAMPMODE,
-           CMD_GrTexClampMode, call);
-    __far (*call) (a, b, c);
-}
+DECLARE_THUNK(GRTEXCLAMPMODE, void, int a, int b, int c)
+    __fcall (a, b, c);
+ENDDECLARE
 
-typedef void GRTEXCOMBINE(int a, int b, int c, int d,
-                          int e, int f, int g);
-__export __stdcall GRTEXCOMBINE
-{
-    static GRTEXCOMBINE *call = 0;
-    D_printf("GRTEXCOMBINE@28\n");
-    ENTRY (GRTEXCOMBINE,
-           CMD_GrTexCombine, call);
-    __far (*call) (a, b, c, d, e, f, g);
-}
+DECLARE_THUNK(GRTEXCOMBINE, void, int a, int b, int c, int d,
+                            int e, int f, int g)
+    __fcall (a, b, c, d, e, f, g);
+ENDDECLARE
 
-__export __stdcall void _GRTEXDETAILCONTROL(int a, int b)
-{
-    D_printf("_GRTEXDETAILCONTROL@8\n");
-}
+DECLARE_STUB(_GRTEXDETAILCONTROL, void, int a, int b)
+ENDDECLARE
 
-typedef void GRTEXFILTERMODE(int a, int b, int c);
-__export __stdcall GRTEXFILTERMODE
-{
-    static GRTEXFILTERMODE *call = 0;
-    D_printf("GRTEXFILTERMODE@12\n");
-    ENTRY (GRTEXFILTERMODE,
-           CMD_GrTexFilterMode, call);
-    __far (*call) (a, b, c);
-}
+DECLARE_THUNK(GRTEXFILTERMODE, void, int a, int b, int c)
+    __fcall (a, b, c);
+ENDDECLARE
 
-typedef void GRTEXLODBIASVALUE(int a, int b);
-__export __stdcall GRTEXLODBIASVALUE
-{
-    static GRTEXLODBIASVALUE *call = 0;
-    D_printf("GRTEXLODBIASVALUE@8\n");
-    ENTRY (GRTEXLODBIASVALUE,
-           CMD_GrTexLodBiasValue, call);
-    __far (*call) (a, b);
-}
+DECLARE_THUNK(GRTEXLODBIASVALUE, void, int a, int b)
+    __fcall (a, b);
+ENDDECLARE
 
-typedef void GRTEXMIPMAPMODE(GrChipID_t tmu, GrMipMapMode_t mode, FxBool lodBlend);
-__export __stdcall GRTEXMIPMAPMODE
-{
-    static GRTEXMIPMAPMODE *call = 0;
-    D_printf("GRTEXMIPMAPMODE@12\n");
-    ENTRY (GRTEXMIPMAPMODE,
-           CMD_GrTexMipMapMode, call);
-    __far (*call) (tmu, mode, lodBlend);
-}
+DECLARE_THUNK(GRTEXMIPMAPMODE, void, GrChipID_t tmu, GrMipMapMode_t mode, FxBool lodBlend)
+    __fcall (tmu, mode, lodBlend);
+ENDDECLARE
 
-__export __stdcall void GRTEXNCCTABLE(int a, int b)
-{
-    D_printf("GRTEXNCCTABLE@8\n");
-}
+DECLARE_STUB(GRTEXNCCTABLE, void, int a, int b)
+ENDDECLARE
 
-typedef void GRTEXSOURCE(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info);
-__export __stdcall GRTEXSOURCE
-{
-    static GRTEXSOURCE *call = 0;
-    D_printf("GRTEXSOURCE@16\n");
-    ENTRY (GRTEXSOURCE,
-           CMD_GrTexSource, call);
-    __far (*call) (tmu, startAddress, evenOdd, info);
-}
+DECLARE_THUNK(GRTEXSOURCE, void, GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
+    __fcall (tmu, startAddress, evenOdd, __faddr(GrTexInfo,info));
+ENDDECLARE
 
-__export __stdcall void GRTEXMULTIBASE(int a, int b)
-{
-    D_printf("GRTEXMULTIBASE@8\n");
-}
+DECLARE_STUB(GRTEXMULTIBASE, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void GRTEXMULTIBASEADDRESS(int a, int b, int c, int d, int e)
-{
-    D_printf("GRTEXMULTIBASEADDRESS@20\n");
-}
+DECLARE_STUB(GRTEXMULTIBASEADDRESS, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOADNCCTABLE(int a, int b, int c, int d, int e)
-{
-    D_printf("_GRTEXDOWNLOADNCCTABLE@20\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOADNCCTABLE, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void _GRTEXDOWNLOADPALETTE(int a, int b, int c, int d)
-{
-    D_printf("_GRTEXDOWNLOADPALETTE@16\n");
-}
+DECLARE_STUB(_GRTEXDOWNLOADPALETTE, void, int a, int b, int c, int d)
+ENDDECLARE
 
-typedef void GRTEXDOWNLOADTABLE(GrChipID_t tmu, GrTexTable_t type, void *data);
-__export __stdcall GRTEXDOWNLOADTABLE
-{
-    static GRTEXDOWNLOADTABLE *call = 0;
-    D_printf("GRTEXDOWNLOADTABLE@12\n");
-    ENTRY (GRTEXDOWNLOADTABLE,
-           CMD_GrTexDownloadTable, call);
-    __far (*call) (tmu, type, data);
-}
+DECLARE_THUNK(GRTEXDOWNLOADTABLE, void, GrChipID_t tmu, GrTexTable_t type, void *data)
+    __fcall (tmu, type, __faddr(void,data));
+ENDDECLARE
 
-__export __stdcall void GRTEXDOWNLOADMIPMAPLEVELPARTIAL(int a, int b, int c, int d,
-                                     int e, int f, int g, int h,
-                                     int i, int j)
-{
-    D_printf("GRTEXDOWNLOADMIPMAPLEVELPARTIAL@40\n");
-}
+DECLARE_STUB(GRTEXDOWNLOADMIPMAPLEVELPARTIAL, void, int a, int b, int c, int d,
+                                              int e, int f, int g, int h,
+                                              int i, int j)
+ENDDECLARE
 
-typedef void (GUTEXSOURCE)(int a);
-__export __stdcall GUTEXSOURCE
-{
-    static GUTEXSOURCE *call = 0;
-    D_printf("GUTEXSOURCE@4\n");
-    ENTRY (GUTEXSOURCE,
-           CMD_GrTexSource, call);
-    __far (*call) (a);
-}
+DECLARE_THUNK(GUTEXSOURCE, void, int a)
+    __fcall (a);
+ENDDECLARE
 
-__export __stdcall void _GRCOMMANDTRANSPORTMAKEROOM(int a, int b, int c)
-{
-    D_printf("_GRCOMMANDTRANSPORTMAKEROOM@12\n");
-}
+DECLARE_STUB(_GRCOMMANDTRANSPORTMAKEROOM, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void PIOINBYTE(int a)
-{
-    D_printf("PIOINBYTE@4\n");
-}
+DECLARE_STUB(PIOINBYTE, void, int a)
+ENDDECLARE
 
-__export __stdcall void PIOINWORD(int a)
-{
-    D_printf("PIOINWORD@4\n");
-}
+DECLARE_STUB(PIOINWORD, void, int a)
+ENDDECLARE
 
-__export __stdcall void PIOINLONG(int a)
-{
-    D_printf("PIOINLONG@4\n");
-}
+DECLARE_STUB(PIOINLONG, void, int a)
+ENDDECLARE
 
-__export __stdcall void PIOOUTBYTE(int a, int b)
-{
-    D_printf("PIOOUTBYTE@8\n");
-}
+DECLARE_STUB(PIOOUTBYTE, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void PIOOUTWORD(int a, int b)
-{
-    D_printf("PIOOUTWORD@8\n");
-}
+DECLARE_STUB(PIOOUTWORD, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void PIOOUTLONG(int a, int b)
-{
-    D_printf("PIOOUTLONG@8\n");
-}
+DECLARE_STUB(PIOOUTLONG, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void PCIPRINTDEVICELIST(void)
-{
-    D_printf("PCIPRINTDEVICELIST@0\n");
-}
+DECLARE_STUB(PCIPRINTDEVICELIST, void, void)
+ENDDECLARE
 
-__export __stdcall void _PCIFETCHREGISTER(int a, int b, int c, int d)
-{
-    D_printf("_PCIFETCHREGISTER@16\n");
-}
+DECLARE_STUB(_PCIFETCHREGISTER, void, int a, int b, int c, int d)
+ENDDECLARE
 
-__export __stdcall void _PCIUPDATEREGISTER(int a, int b, int c, int d, int e)
-{
-    D_printf("_PCIUPDATEREGISTER@20\n");
-}
+DECLARE_STUB(_PCIUPDATEREGISTER, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCIGETERRORSTRING(void)
-{
-    D_printf("PCIGETERRORSTRING@0\n");
-}
+DECLARE_STUB(PCIGETERRORSTRING, void, void)
+ENDDECLARE
 
-__export __stdcall void PCIGETERRORCODE(void)
-{
-    D_printf("PCIGETERRORCODE@0\n");
-}
+DECLARE_STUB(PCIGETERRORCODE, void, void)
+ENDDECLARE
 
-__export __stdcall void PCIOPENEX(int a)
-{
-    D_printf("PCIOPENEX@4\n");
-}
+DECLARE_STUB(PCIOPENEX, void, int a)
+ENDDECLARE
 
-__export __stdcall void PCIOPEN(void)
-{
-    D_printf("PCIOPEN@0\n");
-}
+DECLARE_STUB(PCIOPEN, void, void)
+ENDDECLARE
 
-__export __stdcall void PCICLOSE(void)
-{
-    D_printf("PCICLOSE@0\n");
-}
+DECLARE_STUB(PCICLOSE, void, void)
+ENDDECLARE
 
-__export __stdcall void PCIDEVICEEXISTS(int a)
-{
-    D_printf("PCIDEVICEEXISTS@4\n");
-}
+DECLARE_STUB(PCIDEVICEEXISTS, void, int a)
+ENDDECLARE
 
-__export __stdcall void PCIGETCONFIGDATA(int a, int b, int c, int d, int e)
-{
-    D_printf("PCIGETCONFIGDATA@20\n");
-}
+DECLARE_STUB(PCIGETCONFIGDATA, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCIGETCONFIGDATARAW(int a, int b, int c, int d, int e)
-{
-    D_printf("PCIGETCONFIGDATARAW@20\n");
-}
+DECLARE_STUB(PCIGETCONFIGDATARAW, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCISETCONFIGDATA(int a, int b, int c, int d, int e)
-{
-    D_printf("PCISETCONFIGDATA@20\n");
-}
+DECLARE_STUB(PCISETCONFIGDATA, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCISETCONFIGDATARAW(int a, int b, int c, int d, int e)
-{
-    D_printf("PCISETCONFIGDATARAW@20\n");
-}
+DECLARE_STUB(PCISETCONFIGDATARAW, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCIFINDCARDMULTI(int a, int b, int c, int d)
-{
-    D_printf("PCIFINDCARDMULTI@16\n");
-}
+DECLARE_STUB(PCIFINDCARDMULTI, void, int a, int b, int c, int d)
+ENDDECLARE
 
-__export __stdcall void PCIFINDCARDMULTIFUNC(int a, int b, int c, int d, int e)
-{
-    D_printf("PCIFINDCARDMULTIFUNC@20\n");
-}
+DECLARE_STUB(PCIFINDCARDMULTIFUNC, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCIFINDCARD(int a, int b, int c)
-{
-    D_printf("PCIFINDCARD@12\n");
-}
+DECLARE_STUB(PCIFINDCARD, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void PCIMAPCARDMULTI(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("PCIMAPCARDMULTI@24\n");
-}
+DECLARE_STUB(PCIMAPCARDMULTI, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void PCIMAPCARDMULTIFUNC(int a, int b, int c, int d, int e, int f)
-{
-    D_printf("PCIMAPCARDMULTIFUNC@24\n");
-}
+DECLARE_STUB(PCIMAPCARDMULTIFUNC, void, int a, int b, int c, int d, int e, int f)
+ENDDECLARE
 
-__export __stdcall void PCIMAPCARD(int a, int b, int c, int d, int e)
-{
-    D_printf("PCIMAPCARD@20\n");
-}
+DECLARE_STUB(PCIMAPCARD, void, int a, int b, int c, int d, int e)
+ENDDECLARE
 
-__export __stdcall void PCIMAPPHYSICALTOLINEAR(int a, int b, int c)
-{
-    D_printf("PCIMAPPHYSICALTOLINEAR@12\n");
-}
+DECLARE_STUB(PCIMAPPHYSICALTOLINEAR, void, int a, int b, int c)
+ENDDECLARE
 
-__export __stdcall void PCIMAPPHYSICALDEVICETOLINEAR(int a, int b, int c, int d)
-{
-    D_printf("PCIMAPPHYSICALDEVICETOLINEAR@16\n");
-}
+DECLARE_STUB(PCIMAPPHYSICALDEVICETOLINEAR, void, int a, int b, int c, int d)
+ENDDECLARE
 
-__export __stdcall void PCIUNMAPPHYSICAL(int a, int b)
-{
-    D_printf("PCIUNMAPPHYSICAL@8\n");
-}
+DECLARE_STUB(PCIUNMAPPHYSICAL, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void PCISETPASSTHROUGHBASE(int a, int b)
-{
-    D_printf("PCISETPASSTHROUGHBASE@8\n");
-}
+DECLARE_STUB(PCISETPASSTHROUGHBASE, void, int a, int b)
+ENDDECLARE
 
-__export __stdcall void PCIOUTPUTDEBUGSTRING(int a)
-{
-    D_printf("PCIOUTPUTDEBUGSTRING@4\n");
-}
+DECLARE_STUB(PCIOUTPUTDEBUGSTRING, void, int a)
+ENDDECLARE
 
-__export __stdcall void PCILINEARRANGESETPERMISSION(int a, int b, int c)
-{
-    D_printf("PCILINEARRANGESETPERMISSION@12\n");
-}
+DECLARE_STUB(PCILINEARRANGESETPERMISSION, void, int a, int b, int c)
+ENDDECLARE
