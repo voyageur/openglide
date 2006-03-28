@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "wrapper_config.h"
 #include "GlOgl.h"
 #include "Glextensions.h"
 #include "OGLTables.h"
@@ -346,6 +347,13 @@ void GetOptions( void )
         }
     }
 }
+
+
+FX_ENTRY void FX_CALL setConfig(FxU32 flags)
+{
+    UserConfig.EnableMipMaps = ((flags & WRAPPER_FLAG_MIPMAPS) != 0);
+}
+
 
 bool ClearAndGenerateLogFile( void )
 {
