@@ -290,6 +290,10 @@ bool PGTexture::MakeReady( void )
             pal_change_ptr   = &palette_changed;
             use_two_textures = true;
         }
+        else
+        {
+            wipe_hash = m_palette_hash;
+        }
 
         test_hash = m_palette_hash;
         break;
