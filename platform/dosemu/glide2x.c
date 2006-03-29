@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -23,22 +24,24 @@ struct fptr_##type##_t \
 #define __fcall(...) \
 ({ \
     unsigned int ret; \
-    asm(/* Backup regs */ \
-        "push %%eax;" \
-        "push %%ecx;" \
-        "push %%edx;" \
+    asm volatile ( \
+        /* Backup regs */ \
+        "push %%eax\n\t" \
+        "push %%ecx\n\t" \
+        "push %%edx\n\t" \
         /* Far return address */ \
-        "push %%cs;" \
-        "push $0;" \
-        "mov  %0, %%ecx;" \
-        "mov  %%es, %%edx;" \
+        "push %%cs\n\t" \
+        "push $0\n\t" \
+        "mov  %0, %%ecx\n\t" \
+        "mov  %%es, %%edx" \
         : : "g"((unsigned int) &fptr) : "memory"); \
     (*(fptr.thunk)) (__VA_ARGS__); \
     /* Restore regs and store return value*/ \
-    asm("pop %%ecx;" \
-        "pop %%edx;" \
-        "mov %%eax, ret;" \
-        "pop %%eax;" \
+    asm volatile ( \
+        "pop %%ecx\n\t" \
+        "pop %%edx\n\t" \
+        "mov %%eax, %0\n\t" \
+        "pop %%eax" \
         :"=m"(ret) : :"memory"); \
     ret; \
 })
@@ -70,32 +73,32 @@ typedef void void_t;
 __fptr(void);
 static void __attribute__((__fastcall__)) thunk(struct fptr_void_t *fptr, unsigned int *stack)
 {
-    printf ("stack[0] = %08x [1] = %08x\n", stack[0], stack[1]);
-    asm (/* Move the near call address up one stack position
+    asm volatile (
+         /* Move the near call address up one stack position
           * into the gap we left */
-         "mov  %0, %%eax;"
-         "mov  %%eax, %1;"
+         "mov  %0, %%eax\n\t"
+         "mov  %%eax, %1\n\t"
          /* Set the return address to be label 2: instead which will
           * be a near ret in the host OS memory space */
-         "mov  $2f, %%eax;"
-         "add  %3,  %%eax;"
-         "mov  %%eax, %0;"
+         "mov  $2f, %%eax\n\t"
+         "add  %3,  %%eax\n\t"
+         "mov  %%eax, %0\n\t"
          /* entry point in hosts memory */
-         "push %4;"
+         "push %4\n\t"
          /* Far call to get us to label 1:" */
-         "push %2;"
-         "mov  $1f, %%eax;"
-         "add  %3,  %%eax;"
-         "push %%eax;"
-         "lret;"
+         "push %2\n\t"
+         "mov  $1f, %%eax\n\t"
+         "add  %3,  %%eax\n\t"
+         "push %%eax\n\t"
+         "lret\n\t"
          /* We have far called to this address from the above code and
           * are now in the hosts memory space */
-         "1:"
-         "ret;"
+         "1:\n\t"
+         "ret\n\t"
          /* Returned from hte linux function, now far return back to the
           * dos memory space */
-         "2:"
-         "lret;"
+         "2:\n\t"
+         "lret"
          /* We have changed some registers but don't care.  The fast call
           * will restore ecx, edx and eax will be set correctly on return */
          : "=m"(stack[0]), "=m"(stack[1])
@@ -147,16 +150,18 @@ DECLARE_STUB(GU3DFGETINFO, FxBool, char *filename, Gu3dfInfo *file_info)
      */
     return FXFALSE;
 /*
-    return __fcall (__faddr(char,filename),
-                    __faddr(Gu3dfInfo,file_info));
+    filename  = __faddr(char,filename);
+    file_info = __faddr(Gu3dfInfo,file_info);
+    return __fcall (filename, file_info);
 */
 ENDDECLARE
 
 DECLARE_STUB(GU3DFLOAD, FxBool, char *filename, Gu3dfInfo *file_info)
     return FXFALSE;
 /*
-    return __fcall (__faddr(char,filename),
-                    __faddr(Gu3dfInfo,file_info));
+    filename  = __faddr(char,filename);
+    file_info = __faddr(Gu3dfInfo,file_info);
+    return __fcall (filename, file_info);
 */
 ENDDECLARE
 
@@ -178,7 +183,8 @@ DECLARE_STUB(GUFOGTABLEINDEXTOW, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GUFOGGENERATEEXP, void, GrFog_t *table, int density)
-    __fcall (__faddr(GrFog_t,table), density);
+    table = __faddr(GrFog_t,table);
+    __fcall (table, density);
 ENDDECLARE
 
 DECLARE_STUB(GUFOGGENERATEEXP2, void, int a, int b)
@@ -194,9 +200,10 @@ DECLARE_STUB(GUENCODERLE16, void, int a, int b, int c, int d)
 ENDDECLARE
 
 DECLARE_THUNK(GUDRAWTRIANGLEWITHCLIP, void, GrVertex *v1, GrVertex *v2, GrVertex *v3)
-    __fcall (__faddr(GrVertex,v1),
-             __faddr(GrVertex,v2),
-             __faddr(GrVertex,v3));
+    v1 = __faddr(GrVertex,v1);
+    v2 = __faddr(GrVertex,v2);
+    v3 = __faddr(GrVertex,v3);
+    __fcall (v1, v2, v3);
 ENDDECLARE
 
 DECLARE_STUB(GUAADRAWTRIANGLEWITHCLIP, void, int a, int b, int c)
@@ -248,7 +255,8 @@ DECLARE_STUB(GRSSTQUERYBOARDS, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRSSTQUERYHARDWARE, FxBool, GrHwConfiguration *hwConfig)
-    return __fcall (__faddr(GrHwConfiguration,hwConfig));
+    hwConfig = __faddr(GrHwConfiguration,hwConfig);
+    return __fcall (hwConfig);
 ENDDECLARE
 
 DECLARE_THUNK(GRSSTSELECT, void, int which_sst)
@@ -304,7 +312,8 @@ ENDDECLARE
 
 DECLARE_THUNK(GRTEXDOWNLOADMIPMAP, void, GrChipID_t tmu, FxU32 startAddress,
                                    FxU32 evenOdd, GrTexInfo *info)
-    __fcall (tmu, startAddress, evenOdd, __faddr(GrTexInfo,info));
+    info = __faddr(GrTexInfo,info);
+    __fcall (tmu, startAddress, evenOdd, info);
 ENDDECLARE
 
 DECLARE_STUB(GRTEXDOWNLOADTABLEPARTIAL, void, int a, int b, int c, int d, int e)
@@ -377,7 +386,9 @@ DECLARE_STUB(GUTEXCOMBINEFUNCTION, void, int a, int b)
 ENDDECLARE
 
 DECLARE_THUNK(GUTEXDOWNLOADMIPMAP, void, GrMipMapId_t mmid, void *src, GuNccTable *table)
-    __fcall (mmid, __faddr(void,src), __faddr(GuNccTable,table));
+    src   = __faddr(void,src);
+    table = __faddr(GuNccTable,table);
+    __fcall (mmid, src, table);
 ENDDECLARE
 
 DECLARE_STUB(GUTEXDOWNLOADMIPMAPLEVEL, void, int a, int b, int c)
@@ -408,8 +419,9 @@ DECLARE_STUB(GRAADRAWPOINT, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRAADRAWLINE, void, GrVertex *v1, GrVertex *v2)
-    __fcall (__faddr(GrVertex,v1),
-             __faddr(GrVertex,v2));
+    v1 = __faddr(GrVertex,v1);
+    v2 = __faddr(GrVertex,v2);
+    __fcall (v1, v2);
 ENDDECLARE
 
 DECLARE_STUB(GRAADRAWTRIANGLE, void, int a, int b, int c, int d, int e, int f)
@@ -425,14 +437,16 @@ DECLARE_STUB(GRDRAWPOINT, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRDRAWLINE, void, GrVertex *v1, GrVertex *v2)
-    __fcall (__faddr(GrVertex,v1),
-             __faddr(GrVertex,v2));
+    v1 = __faddr(GrVertex,v1);
+    v2 = __faddr(GrVertex,v2);
+    __fcall (v1, v2);
 ENDDECLARE
 
 DECLARE_THUNK(GRDRAWTRIANGLE, void, GrVertex *v1, GrVertex *v2, GrVertex *v3)
-    __fcall (__faddr(GrVertex,v1),
-             __faddr(GrVertex,v2),
-             __faddr(GrVertex,v3));
+    v1 = __faddr(GrVertex,v1);
+    v2 = __faddr(GrVertex,v2);
+    v3 = __faddr(GrVertex,v3);
+    __fcall (v1, v2, v3);
 ENDDECLARE
 
 DECLARE_STUB(GRDRAWPLANARPOLYGON, void, int a, int b, int c)
@@ -444,8 +458,9 @@ ENDDECLARE
 DECLARE_STUB(GRDRAWPOLYGON, void, int a, int b, int c)
 ENDDECLARE
 
-DECLARE_THUNK(GRDRAWPOLYGONVERTEXLIST, void, int nverts, GrVertex vlist[])
-    __fcall (nverts, __faddr(GrVertex,vlist));
+DECLARE_THUNK(GRDRAWPOLYGONVERTEXLIST, void, int nverts, GrVertex *vlist)
+    vlist = __faddr(GrVertex,vlist);
+    __fcall (nverts, vlist);
 ENDDECLARE
 
 DECLARE_STUB(_GRCOLORCOMBINEDELTA0MODE, void, int a)
@@ -547,7 +562,8 @@ DECLARE_THUNK(GRFOGCOLORVALUE, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRFOGTABLE, void, GrFog_t *ft)
-    __fcall (__faddr(GrFog_t,ft));
+    ft = __faddr(GrFog_t,ft);
+    __fcall (ft);
 ENDDECLARE
 
 /* FIXME? */
@@ -755,7 +771,8 @@ DECLARE_STUB(GRTEXNCCTABLE, void, int a, int b)
 ENDDECLARE
 
 DECLARE_THUNK(GRTEXSOURCE, void, GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
-    __fcall (tmu, startAddress, evenOdd, __faddr(GrTexInfo,info));
+    info = __faddr(GrTexInfo,info);
+    __fcall (tmu, startAddress, evenOdd, info);
 ENDDECLARE
 
 DECLARE_STUB(GRTEXMULTIBASE, void, int a, int b)
@@ -771,7 +788,8 @@ DECLARE_STUB(_GRTEXDOWNLOADPALETTE, void, int a, int b, int c, int d)
 ENDDECLARE
 
 DECLARE_THUNK(GRTEXDOWNLOADTABLE, void, GrChipID_t tmu, GrTexTable_t type, void *data)
-    __fcall (tmu, type, __faddr(void,data));
+    data = __faddr(void,data);
+    __fcall (tmu, type, data);
 ENDDECLARE
 
 DECLARE_STUB(GRTEXDOWNLOADMIPMAPLEVELPARTIAL, void, int a, int b, int c, int d,
