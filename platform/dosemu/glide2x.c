@@ -19,30 +19,35 @@ struct fptr_##type##_t \
     unsigned int   offset; \
 }
 
-#define __faddr(type, addr) ((type *)((unsigned int)(addr)+fptr.offset))
+#define __faddr(addr) asm volatile ("mov %1, %%eax; add %%eax, %0": "=g"(addr): "m"(fptr.offset): "%eax")
 
 #define __fcall(...) \
 ({ \
     unsigned int ret; \
+    /* Typesafe thunk */ \
     asm volatile ( \
-        /* Backup regs */ \
-        "push %%eax\n\t" \
-        "push %%ecx\n\t" \
-        "push %%edx\n\t" \
-        /* Far return address */ \
+    /* Return address to DOS memory space */ \
         "push %%cs\n\t" \
-        "push $0\n\t" \
-        "mov  %0, %%ecx\n\t" \
-        "mov  %%es, %%edx" \
-        : : "g"((unsigned int) &fptr) : "memory"); \
+        "push $1f\n\t" \
+        "xor  %%ebx, %%ebx" \
+        : : : "%ebx", "memory"); \
     (*(fptr.thunk)) (__VA_ARGS__); \
-    /* Restore regs and store return value*/ \
     asm volatile ( \
-        "pop %%ecx\n\t" \
-        "pop %%edx\n\t" \
-        "mov %%eax, %0\n\t" \
-        "pop %%eax" \
-        :"=m"(ret) : :"memory"); \
+    /* Remove stale return address and stack entry point */ \
+        "xchg %%ebx, %%esp\n\t" \
+        "pop  %%eax\n\t" \
+        "push %1\n\t" \
+    /* Enter host OS memory space */ \
+        "push %2\n\t" \
+        "mov  thunk1, %%eax\n\t" \
+        "add  %3, %%eax\n\t" \
+        "push %%eax\n\t" \
+        "lret\n\t" \
+    /* Returned to DOS memory space */ \
+        "1:\tmov  %%eax, %0" \
+        :"=g"(ret) \
+        :"m"(fptr.entry), "m"(fptr.segment), "m"(fptr.offset) \
+        :"%eax", "memory"); \
     ret; \
 })
 
@@ -54,9 +59,10 @@ ret func (__VA_ARGS__) \
     printf ("%s\n", __func__); \
     if (!fptr.entry) \
     { \
-        cmd_entry (CMD_##func, &fptr.segment); \
-        assert (fptr.entry); \
+        fptr.entry = entry (CMD_##func, &fptr.segment); \
         fptr.thunk = (func##_t *) &thunk; \
+        /*asm ("push %es; lea %%cs:(0), %0, lea %%, %eaxfptr.offset = */ \
+        assert (fptr.entry); \
     } {
 
 #define DECLARE_STUB(func,ret,...) \
@@ -66,44 +72,79 @@ ret func (__VA_ARGS__) \
 
 #define ENDDECLARE }}
 
+void thunk (void);
 
-extern void *CMD_entry (unsigned int cmd, unsigned short *segment);
+static struct vxd_driver
+{
+    const    char  name[8];
+    unsigned short segment;
+    unsigned int   offset;
+} vxd =
+{
+    .name[0] = 'O',
+    .name[1] = 'P',
+    .name[2] = 'E',
+    .name[3] = 'N',
+    .name[4] = 'G',
+    .name[5] = 'L',
+    .name[6] = 'D',
+    .name[7] = '1',
+    .segment = 0,
+    .offset  = 0
+};
 
-typedef void void_t;
-__fptr(void);
-static void __attribute__((__fastcall__)) thunk(struct fptr_void_t *fptr, unsigned int *stack)
+static void *entry (unsigned int cmd, unsigned short *segment)
+{
+    void *func;
+
+    if (!(vxd.segment || vxd.offset))
+    {
+        asm ("push %%es\n\t"
+             "mov %2, %%edi\n\t"
+             "mov $0x1684, %%eax\n\t"
+             "mov $0, %%ebx\n\t"
+             "int $0x2f\n\t"
+             "mov %%es, %0\n\t"
+             "mov %%edi, %1\n\t"
+             "pop %%es"
+             : "=m"(vxd.segment), "=m"(vxd.offset) /* Outputs */
+             : "r"(vxd.name)                       /* Inputs */
+             : "%eax", "%ebx", "%edi", "memory"    /* Clobbers */
+            );
+        assert (vxd.segment || vxd.offset);
+    }
+
+    asm ("mov  %1, %%eax\n\t"
+         "push %%cs\n\t"
+         "push $1f\n\t"
+         "push %2\n\t"
+         "push %3\n\t"
+         "lret\n"
+         "1:\tmov  %%eax, %0"
+         : "=r"(func)                        /* Outputs */
+         : "r"(cmd),
+           "m"(vxd.segment), "m"(vxd.offset) /* Inputs */
+         : "%eax", "memory"                  /* Clobbers */
+        );
+
+    *segment = vxd.segment;
+}
+
+/* This function is never run bus creates two static "naked" functions */
+static void __attribute__((__used__)) thunk2 (void)
 {
     asm volatile (
-         /* Move the near call address up one stack position
-          * into the gap we left */
-         "mov  %0, %%eax\n\t"
-         "mov  %%eax, %1\n\t"
-         /* Set the return address to be label 2: instead which will
-          * be a near ret in the host OS memory space */
-         "mov  $2f, %%eax\n\t"
-         "add  %3,  %%eax\n\t"
-         "mov  %%eax, %0\n\t"
-         /* entry point in hosts memory */
-         "push %4\n\t"
-         /* Far call to get us to label 1:" */
-         "push %2\n\t"
-         "mov  $1f, %%eax\n\t"
-         "add  %3,  %%eax\n\t"
-         "push %%eax\n\t"
-         "lret\n\t"
-         /* We have far called to this address from the above code and
-          * are now in the hosts memory space */
-         "1:\n\t"
-         "ret\n\t"
-         /* Returned from hte linux function, now far return back to the
-          * dos memory space */
-         "2:\n\t"
-         "lret"
-         /* We have changed some registers but don't care.  The fast call
-          * will restore ecx, edx and eax will be set correctly on return */
-         : "=m"(stack[0]), "=m"(stack[1])
-         : "m"(fptr->segment), "m"(fptr->offset), "m"(fptr->entry), "m"(stack[0])
-         : "memory");
+    /* Dummy to get parameters stacked and stack frame size */
+        ".text\n"
+        "_thunk:\tmov  %esp, %ebx\n\t"
+        "ret\n\t"
+    /* Entered host OS memory space */
+        ".text\n\t"
+        "thunk1:\tpop  %eax\n\t"
+        "call %eax\n\t"
+    /* Return to DOS memory space */
+        "xchg %esp, %ebx\n\t"
+        "lret\n");
 }
 
 DECLARE_STUB(_GRTEXDOWNLOAD_DEFAULT_4_8, void, int a, int b, int c, int d, int e, int f)
@@ -150,8 +191,8 @@ DECLARE_STUB(GU3DFGETINFO, FxBool, char *filename, Gu3dfInfo *file_info)
      */
     return FXFALSE;
 /*
-    filename  = __faddr(char,filename);
-    file_info = __faddr(Gu3dfInfo,file_info);
+    __faddr (filename);
+    __faddr (file_info);
     return __fcall (filename, file_info);
 */
 ENDDECLARE
@@ -159,8 +200,8 @@ ENDDECLARE
 DECLARE_STUB(GU3DFLOAD, FxBool, char *filename, Gu3dfInfo *file_info)
     return FXFALSE;
 /*
-    filename  = __faddr(char,filename);
-    file_info = __faddr(Gu3dfInfo,file_info);
+    __faddr (filename);
+    __faddr (file_info);
     return __fcall (filename, file_info);
 */
 ENDDECLARE
@@ -183,7 +224,7 @@ DECLARE_STUB(GUFOGTABLEINDEXTOW, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GUFOGGENERATEEXP, void, GrFog_t *table, int density)
-    table = __faddr(GrFog_t,table);
+    __faddr (table);
     __fcall (table, density);
 ENDDECLARE
 
@@ -200,9 +241,9 @@ DECLARE_STUB(GUENCODERLE16, void, int a, int b, int c, int d)
 ENDDECLARE
 
 DECLARE_THUNK(GUDRAWTRIANGLEWITHCLIP, void, GrVertex *v1, GrVertex *v2, GrVertex *v3)
-    v1 = __faddr(GrVertex,v1);
-    v2 = __faddr(GrVertex,v2);
-    v3 = __faddr(GrVertex,v3);
+    __faddr (v1);
+    __faddr (v2);
+    __faddr (v3);
     __fcall (v1, v2, v3);
 ENDDECLARE
 
@@ -255,7 +296,7 @@ DECLARE_STUB(GRSSTQUERYBOARDS, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRSSTQUERYHARDWARE, FxBool, GrHwConfiguration *hwConfig)
-    hwConfig = __faddr(GrHwConfiguration,hwConfig);
+    __faddr (hwConfig);
     return __fcall (hwConfig);
 ENDDECLARE
 
@@ -312,7 +353,7 @@ ENDDECLARE
 
 DECLARE_THUNK(GRTEXDOWNLOADMIPMAP, void, GrChipID_t tmu, FxU32 startAddress,
                                    FxU32 evenOdd, GrTexInfo *info)
-    info = __faddr(GrTexInfo,info);
+    __faddr (info);
     __fcall (tmu, startAddress, evenOdd, info);
 ENDDECLARE
 
@@ -386,8 +427,8 @@ DECLARE_STUB(GUTEXCOMBINEFUNCTION, void, int a, int b)
 ENDDECLARE
 
 DECLARE_THUNK(GUTEXDOWNLOADMIPMAP, void, GrMipMapId_t mmid, void *src, GuNccTable *table)
-    src   = __faddr(void,src);
-    table = __faddr(GuNccTable,table);
+    __faddr (src);
+    __faddr (table);
     __fcall (mmid, src, table);
 ENDDECLARE
 
@@ -419,8 +460,8 @@ DECLARE_STUB(GRAADRAWPOINT, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRAADRAWLINE, void, GrVertex *v1, GrVertex *v2)
-    v1 = __faddr(GrVertex,v1);
-    v2 = __faddr(GrVertex,v2);
+    __faddr (v1);
+    __faddr (v2);
     __fcall (v1, v2);
 ENDDECLARE
 
@@ -437,15 +478,15 @@ DECLARE_STUB(GRDRAWPOINT, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRDRAWLINE, void, GrVertex *v1, GrVertex *v2)
-    v1 = __faddr(GrVertex,v1);
-    v2 = __faddr(GrVertex,v2);
+    __faddr (v1);
+    __faddr (v2);
     __fcall (v1, v2);
 ENDDECLARE
 
 DECLARE_THUNK(GRDRAWTRIANGLE, void, GrVertex *v1, GrVertex *v2, GrVertex *v3)
-    v1 = __faddr(GrVertex,v1);
-    v2 = __faddr(GrVertex,v2);
-    v3 = __faddr(GrVertex,v3);
+    __faddr (v1);
+    __faddr (v2);
+    __faddr (v3);
     __fcall (v1, v2, v3);
 ENDDECLARE
 
@@ -459,7 +500,7 @@ DECLARE_STUB(GRDRAWPOLYGON, void, int a, int b, int c)
 ENDDECLARE
 
 DECLARE_THUNK(GRDRAWPOLYGONVERTEXLIST, void, int nverts, GrVertex *vlist)
-    vlist = __faddr(GrVertex,vlist);
+    __faddr (vlist);
     __fcall (nverts, vlist);
 ENDDECLARE
 
@@ -562,7 +603,7 @@ DECLARE_THUNK(GRFOGCOLORVALUE, void, int a)
 ENDDECLARE
 
 DECLARE_THUNK(GRFOGTABLE, void, GrFog_t *ft)
-    ft = __faddr(GrFog_t,ft);
+    __faddr (ft);
     __fcall (ft);
 ENDDECLARE
 
@@ -771,7 +812,7 @@ DECLARE_STUB(GRTEXNCCTABLE, void, int a, int b)
 ENDDECLARE
 
 DECLARE_THUNK(GRTEXSOURCE, void, GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
-    info = __faddr(GrTexInfo,info);
+    __faddr (info);
     __fcall (tmu, startAddress, evenOdd, info);
 ENDDECLARE
 
@@ -788,7 +829,7 @@ DECLARE_STUB(_GRTEXDOWNLOADPALETTE, void, int a, int b, int c, int d)
 ENDDECLARE
 
 DECLARE_THUNK(GRTEXDOWNLOADTABLE, void, GrChipID_t tmu, GrTexTable_t type, void *data)
-    data = __faddr(void,data);
+    __faddr (data);
     __fcall (tmu, type, data);
 ENDDECLARE
 
