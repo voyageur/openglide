@@ -16,7 +16,7 @@
 
 ExtFn OGLGetProcAddress(const char *x)
 {
-#ifndef GL_VERSION_1_4
+#ifdef GLX_ARB_get_proc_address
     return glXGetProcAddressARB((const GLubyte *) x);
 #else
     return glXGetProcAddress((const GLubyte *) x);
