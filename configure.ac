@@ -41,6 +41,7 @@ case "$host" in
         ;;
     *linux*)
         osflag="__linux__"
+        CXXFLAGS="$CXXFLAGS -mmmx"
         ;;
     *netbsd*)
         ;;
