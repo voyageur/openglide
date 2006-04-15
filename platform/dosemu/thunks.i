@@ -27,7 +27,7 @@ DECLARE_THUNK1(GRSSTQUERYHARDWARE, FxBool, GrHwConfiguration*, hwConfig)
     FxBool ret;
     __faddr (hwConfig);
     ret = __fcall (hwConfig);
-    RETURNI(ret);
+    RETURNI (ret);
 ENDDECLARE
 
 DECLARE_THUNK1(GRSSTSELECT, void, int, which_sst)
@@ -55,7 +55,7 @@ DECLARE_THUNK15(GUTEXALLOCATEMEMORY, GrMipMapId_t,
                    mm_mode, smallest_lod, largest_lod, aspect,
                    s_clamp_mode, t_clamp_mode, minfilter_mode,
                    magfilter_mode, lod_bias, trilinear);
-    return ret;
+    RETURNI (ret);
 ENDDECLARE
 
 DECLARE_THUNK2(GRTEXCOMBINEFUNCTION, void, GrChipID_t, a, GrTextureCombineFnc_t, b)
@@ -255,7 +255,7 @@ DECLARE_THUNK6(GRLFBLOCK, FxBool,
     }
 
 #endif
-    return FXTRUE;
+    RETURNI (FXTRUE);
 ENDDECLARE
 
 DECLARE_THUNK7(GRSSTWINOPEN, FxBool, FxU32, a, GrScreenResolution_t, b,
@@ -263,7 +263,7 @@ DECLARE_THUNK7(GRSSTWINOPEN, FxBool, FxU32, a, GrScreenResolution_t, b,
                              GrOriginLocation_t, e, int, f, int, g)
     FxBool ret;
     ret = __fcall (a, b, c, d, e, f, g);
-    RETURNI(ret);
+    RETURNI (ret);
 ENDDECLARE
 
 DECLARE_THUNK0(GRSSTWINCLOSE, void)
