@@ -7,8 +7,12 @@
 
 #define VERSION 11
 
-#define __export
-#define __stdcall __attribute__((__stdcall__))
+#ifdef  defined(__DJGPP__)
+#undef  FX_ENTRY
+#undef  FX_CALL
+#define FX_ENTRY __attribute__((visibility("default")))
+#define FX_CALL  __attribute__((__stdcall__))
+#endif
 
 #define __fptr(type) \
 struct fptr_##type##_t \
@@ -22,14 +26,14 @@ struct fptr_##type##_t \
 /*******************************************************************************************************/
 /* WRAPPERS */
 
-#define __faddr(addr) asm volatile ("mov %1, %%eax; add %%eax, %0": "=g"(addr): "m"(fptr.offset): "%eax")
+#define __faddr(addr) asm ("mov %1, %%eax; add %%eax, %0": "=g"(addr): "m"(fptr.offset), "0"(addr): "%eax")
 
 #define __fcall(...) \
     (*(fptr.thunk)) (__VA_ARGS__)
 
 #define DECLARE_THUNK(func,ret,...) \
 typedef ret (func##_t) (__VA_ARGS__); \
-ret func (__VA_ARGS__) \
+FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
 { \
     static __fptr(func) fptr = {0}; \
     printf ("%s\n", __func__); \
@@ -56,7 +60,7 @@ ret func (__VA_ARGS__) \
     } {
 
 #define DECLARE_STUB(func,ret,...) \
-ret func (__VA_ARGS__) \
+FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
 { \
     printf ("%s\n", __func__); {
 
@@ -133,7 +137,8 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
 
     if (!(vxd.segment || vxd.offset))
     {
-        asm volatile (
+        asm (
+             "push %%ebx\n\t"
              "push %%es\n\t"
              "push %%edi\n\t"
              "mov %2, %%edi\n\t"
@@ -143,15 +148,16 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
              "mov %%es, %0\n\t"
              "mov %%edi, %1\n\t"
              "pop %%edi\n\t"
-             "pop %%es"
+             "pop %%es\n\t"
+             "pop %%ebx"
              : "=m"(vxd.segment), "=m"(vxd.offset) /* Outputs */
              : "r"(vxd.name)                       /* Inputs */
-             : "%eax", "%ebx", "memory"            /* Clobbers */
+             : "%eax"                              /* Clobbers */
             );
         assert (vxd.segment || vxd.offset);
     }
 
-    asm volatile (
+    asm (
          "mov  %2, %%eax\n\t"
          "push %%cs\n\t"
          "push $1f\n\t"
@@ -164,7 +170,7 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
          : "=r"(func), "=g"(*offset)         /* Outputs */
          : "r"(cmd),
            "m"(vxd.segment), "m"(vxd.offset) /* Inputs */
-         : "%eax", "%edx", "memory"          /* Clobbers */
+         : "%eax", "%edx",                   /* Clobbers */
         );
 
     *segment = vxd.segment;
@@ -520,11 +526,3 @@ ENDDECLARE
 
 DECLARE_STUB3(PCILINEARRANGESETPERMISSION, void, int, a, int, b, int, c)
 ENDDECLARE
-
-
-int main ()
-{
-GRDEPTHMASK (0);
-GRDEPTHMASK (0);
-return 0;
-}
