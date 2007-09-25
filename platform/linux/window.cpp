@@ -178,7 +178,8 @@ bool SetScreenMode(int &width, int &height)
 
 void ResetScreenMode()
 {
-    XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
+    if (mode_changed)
+        XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
 }
 
 void SwapBuffers()
