@@ -48,8 +48,8 @@ PGUTexture       UTextures;
 
 #ifdef OGL_DEBUG
     // Profiling variables
-    __int64         InitialTick;
-    __int64         FinalTick;
+    FxI64           InitialTick;
+    FxI64           FinalTick;
     DWORD           Frame;
     double          Fps;
     double          FpsAux;

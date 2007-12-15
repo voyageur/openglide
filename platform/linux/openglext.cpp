@@ -9,6 +9,11 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifndef C_USE_SDL
 
 #include <GL/glx.h>
 
@@ -23,3 +28,4 @@ ExtFn OGLGetProcAddress(const char *x)
 #endif
 }
 
+#endif // C_USE_SDL

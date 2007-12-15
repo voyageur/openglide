@@ -1,6 +1,10 @@
 #ifndef WRAPPER_CONFIG_H
 #define WRAPPER_CONFIG_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "sdk2_3dfx.h"
 
 #define WRAPPER_FLAG_WINDOWED               (0x1)

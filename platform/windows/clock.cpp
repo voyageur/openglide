@@ -18,7 +18,7 @@
 #pragma optimize( "", off )
 float ClockFrequency( void )
 {
-    __int64 i64_perf_start, 
+    FxI64   i64_perf_start, 
             i64_perf_freq, 
             i64_perf_end,
             i64_clock_start,

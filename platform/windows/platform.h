@@ -22,4 +22,11 @@
 #define VARARGDECL(t) t _cdecl
 typedef int (__stdcall *ExtFn)();
 
+#ifdef _MSC_VER
+typedef __int64  FxI64;
+typedef unsigned __int64 FxU64;
+typedef int FxI;
+typedef unsigned int FxU;
+#endif
+
 #endif

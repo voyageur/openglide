@@ -9,6 +9,11 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef C_USE_SDL
 
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -94,3 +99,4 @@ void SwapBuffers()
     SDL_GL_SwapBuffers();
 }
 
+#endif // C_USE_SDL

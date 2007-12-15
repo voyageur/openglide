@@ -18,7 +18,7 @@
 #include "platform/window.h"
 
 // extern variables
-extern __int64          InitialTick,
+extern FxI64            InitialTick,
                         FinalTick;
 extern int              Frame;
 extern double           Fps, 

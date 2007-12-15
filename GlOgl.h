@@ -35,6 +35,10 @@
  #define OGL_COMBINE
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "platform.h"
 #include "platform/window.h"
 
@@ -290,8 +294,8 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
 
 #ifdef OGL_DEBUG
     // Profiling variables
-    extern __int64          InitialTick;
-    extern __int64          FinalTick;
+    extern FxI64            InitialTick;
+    extern FxI64            FinalTick;
     extern int              Frame;
     extern double           Fps;
     extern double           FpsAux;
