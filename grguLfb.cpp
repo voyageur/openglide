@@ -39,10 +39,6 @@ grLfbLock( GrLock_t dwType,
 
     if ( dwType & 1 )
     {
-        for ( int i = Glide.WindowTotalPixels - 1; i >= 0; --i )
-        {
-            Glide.DstBuffer.Address[ i ] = BLUE_SCREEN;
-        }
         Glide.DstBuffer.Lock            = true;
         Glide.DstBuffer.Type            = dwType;
         Glide.DstBuffer.Buffer          = dwBuffer;
@@ -58,48 +54,23 @@ grLfbLock( GrLock_t dwType,
         glReadBuffer( dwBuffer == GR_BUFFER_BACKBUFFER
                       ? GL_BACK : GL_FRONT );
 
+        glReadPixels( 0, 0,
+                      Glide.WindowWidth, Glide.WindowHeight,
+                      GL_BGRA, GL_UNSIGNED_BYTE,
+                      (void *)tempBuf );
+
         if ( dwOrigin == GR_ORIGIN_UPPER_LEFT )
         {
-            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-            {
-                glReadPixels( 0, 0, 
-                              Glide.WindowWidth, Glide.WindowHeight, 
-                              GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
-                              (void *)Glide.DstBuffer.Address );
-            }
-            else
-            {
-                glReadPixels( 0, 0, 
-                              Glide.WindowWidth, Glide.WindowHeight, 
-                              GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
-                              (void *)tempBuf );
-                Convert5551to565( tempBuf, (FxU32*)Glide.DstBuffer.Address, Glide.WindowTotalPixels );
-            }
-
             for ( j = 0; j < Glide.WindowHeight; j++ )
             {
-                memcpy( Glide.SrcBuffer.Address + ( j * Glide.WindowWidth ),
-                        Glide.DstBuffer.Address + ( ( Glide.WindowHeight - 1 - j ) * Glide.WindowWidth ),
-                        2 * Glide.WindowWidth );
+                Convert8888to565( tempBuf + ( ( ( Glide.WindowHeight ) - 1 - j ) * Glide.WindowWidth ),
+                        Glide.SrcBuffer.Address + ( j * Glide.WindowWidth ),
+                        Glide.WindowWidth );
             }
         }
         else
         {
-            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-            {
-                glReadPixels( 0, 0, 
-                              Glide.WindowWidth, Glide.WindowHeight, 
-                              GL_RGB, GL_UNSIGNED_SHORT_5_6_5, 
-                              (void *)Glide.SrcBuffer.Address );
-            }
-            else
-            {
-                glReadPixels( 0, 0, 
-                              Glide.WindowWidth, Glide.WindowHeight, 
-                              GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
-                              (void *)tempBuf );
-                Convert5551to565( tempBuf, (FxU32*)Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
-            }
+            Convert8888to565( tempBuf, Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
         }    
         Glide.SrcBuffer.Lock            = true;
         Glide.SrcBuffer.Type            = dwType;
@@ -147,7 +118,15 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                 if ( y > maxy ) maxy = y;
                 if ( x < minx ) minx = x;
                 if ( y < miny ) miny = y;
-            }
+
+                tempBuf[ ii ] = 0x0    |    // A
+                ( Glide.DstBuffer.Address[ ii ] & 0x001F ) << 19 |  // B
+                ( Glide.DstBuffer.Address[ ii ] & 0x07E0 ) << 5  |  // G
+                ( Glide.DstBuffer.Address[ ii ] >> 8 );             // R
+                Glide.DstBuffer.Address[ ii ] = BLUE_SCREEN;
+            } else
+                tempBuf[ ii ] = 0xFFFFFFFF;
+
             x++;
             if ( x == Glide.WindowWidth )
             {
@@ -155,100 +134,54 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                 y++;
             }
         }
-        for ( y = 0; y < Glide.WindowHeight; y++ )
-        {
-            for ( x = 0; x < Glide.WindowWidth; x++ )
-            {
-                if ( Glide.DstBuffer.Address[ y * Glide.WindowWidth + x ] != BLUE_SCREEN )
-                {
-                    if ( x > maxx ) maxx = x;
-                    if ( y > maxy ) maxy = y;
-                    if ( x < minx ) minx = x;
-                    if ( y < miny ) miny = y;
-                }
-            }
-        }
 
         if ( maxx >= minx )
         {
-            int xsize = maxx + 1 - minx;
-            int ysize = maxy + 1 - miny;
+            maxx++; maxy++;
+            int xsize = maxx - minx;
+            int ysize = maxy - miny;
 
-            glReadBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
-                        ? GL_BACK : GL_FRONT );
-
-            if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-            {
-                glReadPixels( minx, Glide.WindowHeight - miny - ysize, 
-                              xsize, ysize, 
-                              GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-            }
-            else
-            {
-                glReadPixels( minx, Glide.WindowHeight - miny - ysize,
-                              xsize, ysize, 
-                              GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
-                              (void *)tempBuf );
-                Convert5551to565( tempBuf, (FxU32*)tempBuf, xsize * ysize );
-            }
-
-            for ( y = 0; y < ysize; y++ )
-            {
-                FxU16   * line = Glide.DstBuffer.Address + ( miny + ysize - 1 - y ) * 
-                                    Glide.WindowWidth + minx;
-                FxU16   * bufl = (FxU16*)tempBuf + y * xsize;
-
-                for ( x = 0; x < xsize; x++ )
-                {
-                    if ( line[ x ] != BLUE_SCREEN )
-                    {
-                        bufl[ x ] = line[ x ];
-                    }
-                }
-            }
+            // Draw a textured quad
+            glPushAttrib( GL_COLOR_BUFFER_BIT|GL_TEXTURE_BIT|GL_DEPTH_BUFFER_BIT );
 
             glDisable( GL_BLEND );
+            glEnable( GL_TEXTURE_2D );
 
-            glDisable( GL_TEXTURE_2D );
+            if ( Glide.DstBuffer.PixelPipeline )
+                glEnable( GL_SCISSOR_TEST );
 
+            glAlphaFunc( GL_EQUAL, 0.0f );
+            glEnable( GL_ALPHA_TEST );
+
+            glDepthMask( GL_FALSE );
+            glDisable( GL_DEPTH_TEST );
+
+            glBindTexture( GL_TEXTURE_2D, Glide.LFBTexture );
+            glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, Glide.WindowWidth, ysize, GL_RGBA,
+                GL_UNSIGNED_BYTE, tempBuf + ( miny * Glide.WindowWidth ) );
+
+            glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
             glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
                         ? GL_BACK : GL_FRONT );
 
-            glRasterPos2i( minx,  miny + ysize );
+            glBegin( GL_QUADS );
+                glColor3f( 1.0f, 1.0f, 1.0f );
 
-            if ( ! Glide.DstBuffer.PixelPipeline )
-            {
-                if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-                {
-                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-                }
-                else
-                {
-                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
-                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
-                }
-            }
-            else
-            {
-                glEnable( GL_SCISSOR_TEST );
-                if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-                {
-                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, (void *)tempBuf );
-                }
-                else
-                {
-                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
-                    glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
-                }
-                glDisable( GL_SCISSOR_TEST );
-            }
+                glTexCoord2f( (float)minx/1024.0f, 0.0f );
+                glVertex2f( (float)minx, (float)miny );
+
+                glTexCoord2f((float)maxx/1024.0f, 0.0f );
+                glVertex2f( (float)maxx, (float)miny );
+
+                glTexCoord2f( (float)maxx/1024.0f, (float)ysize/1024.0f );
+                glVertex2f( (float)maxx, (float)maxy );
+
+                glTexCoord2f( (float)minx/1024.0f, (float)ysize/1024.0f );
+                glVertex2f( (float)minx, (float)maxy );
+            glEnd( );
+
+            glPopAttrib( );
             glDrawBuffer( OpenGL.RenderBuffer );
-
-            /* PHBG: don't think this resetting of blend state is needed */
-            if ( OpenGL.Blend )
-            {
-                glEnable( GL_BLEND );
-            }
 
             if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
             {

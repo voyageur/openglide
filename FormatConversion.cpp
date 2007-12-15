@@ -29,6 +29,17 @@ void Convert565Kto8888( FxU16 *Buffer1, FxU16 key, FxU32 *Buffer2, FxU32 Pixels 
     }
 }
 
+void Convert8888to565(FxU32 *Src, FxU16 *Dst, FxU32 Pixels )
+{
+    while ( Pixels-- )
+    {
+        *Dst++ = ( FxU16 ) ( ( *Src & 0x00F80000 ) >> 8 |
+                ( *Src & 0x0000FC00 ) >> 5 |
+                ( *Src & 0x000000F8 ) >> 3 );
+        Src++;
+    }
+}
+
 FxU64 Mask565_5551_1 = __UINT64_C(0xFFC0FFC0FFC0FFC0);
 FxU64 Mask565_5551_2 = __UINT64_C(0x001F001F001F001F);
 FxU64 Mask565_5551_3 = __UINT64_C(0x0001000100010001);

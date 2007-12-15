@@ -206,6 +206,7 @@ struct GlideStruct
     GlideState              State;
     BufferStruct            SrcBuffer;
     BufferStruct            DstBuffer;
+    GLuint                  LFBTexture;
     int                     TextureMemory;
 };
 

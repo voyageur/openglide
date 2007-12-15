@@ -8,6 +8,7 @@ void Convert565to8888( FxU16 *Buffer1, FxU32 *Buffer2, FxU32 Pixels );
 void Convert565Kto8888( FxU16 *Buffer1, FxU16 key, FxU32 *Buffer2, FxU32 Pixels );
 void Convert565to5551( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels );
 void Convert5551to565( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels );
+void Convert8888to565( FxU32 *Src, FxU16 *Dst, FxU32 Pixels );
 void Convert4444to4444special( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels );
 void Convert1555to5551( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels );
 void ConvertA8toAP88( FxU8 *Buffer1, FxU16 *Buffer2, FxU32 Pixels );
