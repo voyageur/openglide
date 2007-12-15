@@ -92,7 +92,7 @@ struct RenderStruct
 };
 
 typedef float (*ALPHAFACTORFUNCPROC)( float LocalAlpha, float OtherAlpha );
-typedef void  (*COLORFACTORFUNCPROC)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+typedef void  (FASTCALL *COLORFACTORFUNCPROC)( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 typedef void  (*COLORFUNCTIONPROC)( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 
 //**************************************************************
@@ -122,14 +122,14 @@ float AlphaFactorOneMinusLocal( float LocalAlpha, float OtherAlpha );
 float AlphaFactorOneMinusOther( float LocalAlpha, float OtherAlpha );
 float AlphaFactorOne( float LocalAlpha, float OtherAlpha );
 
-void ColorFactor3Zero( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3Local( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3LocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3OneMinusLocal( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3OneMinusLocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3OtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3OneMinusOtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
-void ColorFactor3One( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3Zero( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3Local( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3LocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3OneMinusLocal( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3OneMinusLocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3OtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3OneMinusOtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
+void FASTCALL ColorFactor3One( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha );
 
 void ColorFunctionZero( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );
 void ColorFunctionLocal( TColorStruct * pC, TColorStruct * pC2, TColorStruct * Local, TColorStruct * Other );

@@ -16,8 +16,8 @@
 #include <windows.h>
 #include <io.h>
 
-#define __uint64 unsigned __int64
-#define __UINT64_C(c) c
+#define FASTCALL __fastcall
+#define OG_memcpy MMXCopyMemory
 
 #define VARARGDECL(t) t _cdecl
 typedef int (__stdcall *ExtFn)();

@@ -23,9 +23,18 @@
 #define ZeroMemory(d,l) memset(d,0,l)
 #define CopyMemory(d,s,l) memcpy(d,s,l)
 #define max(x,y) ((x) < (y) ? (y) : (x))
-#define __int64  int64_t
-#define __uint64 uint64_t
-#define __fastcall __attribute__((__fastcall__))
+
+#if HAVE_MMX
+# if SIZEOF_INT_P == 4
+#  define FASTCALL __attribute__((__fastcall__))
+# else
+#  define FASTCALL
+# endif
+#define OG_memcpy MMXCopyMemory
+#else
+#define FASTCALL
+#define OG_memcpy memcpy
+#endif
 
 #define VARARGDECL(t) extern "C" t
 typedef void (*ExtFn)();

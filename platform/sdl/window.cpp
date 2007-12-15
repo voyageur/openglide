@@ -26,9 +26,9 @@
 
 static struct
 {
-    FxU16 red[ 256 ];
-    FxU16 green[ 256 ];
-    FxU16 blue[ 256 ];
+    Uint16 red[ 256 ];
+    Uint16 green[ 256 ];
+    Uint16 blue[ 256 ];
 } old_ramp;
 
 static bool ramp_stored  = false;

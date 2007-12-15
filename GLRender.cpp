@@ -1564,14 +1564,14 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
 
 // Color Factor functions
 
-void __fastcall ColorFactor3Zero( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3Zero( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = Result->ag = Result->ab = 0.0f;
     Result->br = Result->bg = Result->bb = 0.0f;
     Result->cr = Result->cg = Result->cb = 0.0f;
 }
 
-void __fastcall ColorFactor3Local( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3Local( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = ColorComponent->ar;
     Result->ag = ColorComponent->ag;
@@ -1584,21 +1584,21 @@ void __fastcall ColorFactor3Local( TColorStruct *Result, TColorStruct *ColorComp
     Result->cb = ColorComponent->cb;
 }
 
-void __fastcall ColorFactor3OtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3OtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = Result->ag = Result->ab = OtherAlpha->aa;
     Result->br = Result->bg = Result->bb = OtherAlpha->ba;
     Result->cr = Result->cg = Result->cb = OtherAlpha->ca;
 }
 
-void __fastcall ColorFactor3LocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3LocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = Result->ag = Result->ab = ColorComponent->aa;
     Result->br = Result->bg = Result->bb = ColorComponent->ba;
     Result->cr = Result->cg = Result->cb = ColorComponent->ca;
 }
 
-void __fastcall ColorFactor3OneMinusLocal( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3OneMinusLocal( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = 1.0f - ColorComponent->ar;
     Result->ag = 1.0f - ColorComponent->ag;
@@ -1611,21 +1611,21 @@ void __fastcall ColorFactor3OneMinusLocal( TColorStruct *Result, TColorStruct *C
     Result->cb = 1.0f - ColorComponent->cb;
 }
 
-void __fastcall ColorFactor3OneMinusOtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3OneMinusOtherAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = Result->ag = Result->ab = 1.0f - OtherAlpha->aa;
     Result->br = Result->bg = Result->bb = 1.0f - OtherAlpha->ba;
     Result->cr = Result->cg = Result->cb = 1.0f - OtherAlpha->ca;
 }
 
-void __fastcall ColorFactor3OneMinusLocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3OneMinusLocalAlpha( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = Result->ag = Result->ab = 1.0f - ColorComponent->aa;
     Result->br = Result->bg = Result->bb = 1.0f - ColorComponent->ba;
     Result->cr = Result->cg = Result->cb = 1.0f - ColorComponent->ca;
 }
 
-void __fastcall ColorFactor3One( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
+void FASTCALL ColorFactor3One( TColorStruct *Result, TColorStruct *ColorComponent, TColorStruct *OtherAlpha )
 {
     Result->ar = Result->ag = Result->ab = 1.0f;
     Result->br = Result->bg = Result->bb = 1.0f;

@@ -414,6 +414,7 @@ bool GenerateErrorFile( void )
     }
     fclose( ErrorFile );
 
+    NumberOfErrors++;
     Error(  OGL_LOG_SEPARATE );
     Error(  "OpenGLide Error File\n");
     Error(  OGL_LOG_SEPARATE );
