@@ -73,8 +73,7 @@ grLfbLock( GrLock_t dwType,
                               Glide.WindowWidth, Glide.WindowHeight, 
                               GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
                               (void *)tempBuf );
-                MMXConvert5551to565( tempBuf, Glide.DstBuffer.Address, Glide.WindowTotalPixels );
-//                Convert5551to565( tempBuf, (DWORD*)Glide.DstBuffer.Address, Glide.WindowTotalPixels );
+                Convert5551to565( tempBuf, (FxU32*)Glide.DstBuffer.Address, Glide.WindowTotalPixels );
             }
 
             for ( j = 0; j < Glide.WindowHeight; j++ )
@@ -99,8 +98,7 @@ grLfbLock( GrLock_t dwType,
                               Glide.WindowWidth, Glide.WindowHeight, 
                               GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
                               (void *)tempBuf );
-                MMXConvert5551to565( tempBuf, Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
-//                Convert5551to565( tempBuf, (DWORD*)Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
+                Convert5551to565( tempBuf, (FxU32*)Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
             }
         }    
         Glide.SrcBuffer.Lock            = true;
@@ -191,8 +189,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                               xsize, ysize, 
                               GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, 
                               (void *)tempBuf );
-                MMXConvert5551to565( tempBuf, tempBuf, xsize * ysize );
-//                Convert5551to565( tempBuf, (DWORD*)tempBuf, xsize * ysize );
+                Convert5551to565( tempBuf, (FxU32*)tempBuf, xsize * ysize );
             }
 
             for ( y = 0; y < ysize; y++ )
@@ -227,8 +224,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                 }
                 else
                 {
-                    MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
-//                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
+                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
                 }
             }
@@ -241,8 +237,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                 }
                 else
                 {
-                    MMXConvert565to5551( tempBuf, tempBuf, xsize * ysize );
-//                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
+                    Convert565to5551( tempBuf, tempBuf, xsize * ysize );
                     glDrawPixels( xsize, ysize, GL_RGB, GL_UNSIGNED_SHORT_5_5_5_1_EXT, (void *)tempBuf );
                 }
                 glDisable( GL_SCISSOR_TEST );

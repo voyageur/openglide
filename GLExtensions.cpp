@@ -313,12 +313,16 @@ void ValidateUserConfig( void )
     }
     else
     {
+#ifdef HAVE_MMX
         char szError[ 256 ];
         sprintf( szError, "Severe Problem: MMX is required for OpenGLide!" );
         Error( szError );
         GlideMsg( szError );
         ReportError( szError );
         exit( 1 );
+#else
+        InternalConfig.MMXEnable    = false;
+#endif
     }
 
     GLExtensions( );

@@ -431,6 +431,7 @@ bool GenerateErrorFile( void )
 // Detect if Processor has MMX Instructions
 int DetectMMX( void )
 {
+#ifdef HAVE_MMX
     FxU32 Result;
 
 #ifdef _MSC_VER
@@ -447,6 +448,7 @@ int DetectMMX( void )
 #endif
 
 #ifdef __GNUC__
+#if SIZEOF_INT_P == 4
     asm ("push %%ebx;"
          "mov  $1, %%eax;"
          "CPUID;"
@@ -455,14 +457,29 @@ int DetectMMX( void )
          : /* No inputs */
          : "%eax", "%ecx", "cc" /* Clobbers */
         );
+#else
+    asm ("push %%rbx;"
+         "mov  $1, %%rax;"
+         "CPUID;"
+         "pop  %%rbx;"
+         : "=d" (Result) /* Outputs */
+         : /* No inputs */
+         : "%rax", "%rcx", "cc" /* Clobbers */
+        );
+#endif
 #endif
 
     return Result & 0x00800000;
+#else
+    return 0;
+#endif
 }
 
 // Copy Blocks of Memory Using MMX
 void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes )
 {
+#ifdef HAVE_MMX
+
 #ifdef _MSC_VER
     __asm
     {
@@ -485,151 +502,17 @@ start:  sub ECX, 8
          "movq  (%1,%0), %%mm0;"
          "movq  %%mm0, (%2,%0);"
          "MMXCopyMemory_start:"
+#if SIZEOF_INT_P == 4
          "subl  $8, %0;"
+#else
+         "subq  $8, %0;"
+#endif
          "jae   MMXCopyMemory_copying;"
          : /* No outputs */
-         : "r" (NumberOfBytes), "r" (Src), "r" (Dst) /* Inputs */
+         : "r" ((FxU)NumberOfBytes), "r" (Src), "r" (Dst) /* Inputs */
          : "%mm0", "memory" /* Clobbers */
         );
 #endif
-}
 
-void MMXSetShort( void *Dst, short Value, FxU32 NumberOfBytes )
-{
-#ifdef _MSC_VER
-    __asm
-    {
-        xor EAX, EAX
-        mov ECX, NumberOfBytes
-        mov AX, Value
-        mov EDX, Dst
-        movd MM0, EAX
-        PUNPCKLWD MM0, MM0
-        PUNPCKLWD MM0, MM0
-        jmp start
-copying:
-        MOVQ [EDX+ECX], MM0
-start:  sub ECX, 8
-        jae copying
-        EMMS
-    }
-#endif
-
-#ifdef __GNUC__
-    asm ("movd  %1, %%mm0;"
-         "PUNPCKLWD %%mm0, %%mm0;"
-         "PUNPCKLWD %%mm0, %%mm0;"
-         "jmp   MMXSetShort_start;"
-         "MMXSetShort_copying:"
-         "movq  %%mm0, (%2,%0);"
-         "MMXSetShort_start:"
-         "subl  $8, %0;"
-         "jae   MMXSetShort_copying;"
-         : /* No outputs */
-         : "r" (NumberOfBytes), "r" ((long) Value), "r" (Dst) /* Inputs */
-         : "%mm0", "memory" /* Clobbers */
-        );
-#endif
-}
-
-void MMXCopyByteFlip( void *Dst, void *Src, FxU32 NumberOfBytes )
-{
-#ifdef _MSC_VER
-    __asm
-    {       
-      mov ESI, Src
-      mov EDI, Dst
-      mov ECX, NumberOfBytes
-
-                // find the number of pixels that fit in blocks
-      mov EAX, ECX
-      and ECX, ~0xff
-      sub EAX, ECX
-      push EAX
-      test ECX,ECX
-      jz mcbf_breakc
-                // init. for inner loop
-      lea ESI, [ESI + ECX]
-      lea EDI, [EDI + ECX - 8]
-      neg ECX
-align 16
-    mcbf_loopc:
-      movq MM0, [ESI + ECX]
-      movq MM1, MM0
-      psrlw MM0, 8
-      add ECX, 8
-      psllw MM1, 8
-      por MM1, MM0
-      movq [EDI + ECX], MM1
-      jnz mcbf_loopc
-      add EDI, 8
-      emms
-    mcbf_breakc:
-      pop ECX
-      test ECX, ECX
-      jz mcbf_breakd
-      and ECX, ~1
-      lea ESI, [ESI + ECX]
-      lea EDI, [EDI + ECX]
-      neg ECX
-    mcbf_loopd:     // trailing data, one pixel at a time
-      mov AL, [ESI + ECX]
-      mov [EDI + ECX + 1], AL 
-      mov DL, [ESI + ECX + 1]
-      mov [EDI + ECX], DL
-      add ECX, 2
-      jnz mcbf_loopd
-    mcbf_breakd:
-    }
-#endif
-
-#ifdef __GNUC__
-    asm ("movl  %%ecx, %%eax;"
-         "movl  $~0xff, %%ecx;"
-         "subl  %%ecx, %%eax;"
-         "push  %%eax;"
-         "test  %%ecx, %%ecx;"
-         "jz    MMXCopyByteFlip_breakc;"
-         /* init. for inner loop */
-         "leal  (%%esi,%%ecx), %%esi;"
-         "leal  -8(%%edi,%%ecx), %%edi;"
-         "neg   %%ecx;"
-
-       ".align 16;"
-       "MMXCopyByteFlip_loopc:"
-         "movq  (%%esi,%%ecx), %%mm0;"
-         "movq  %%mm0, %%mm1;"
-         "psrlw $8, %%mm0;"
-         "addl  $8, %%ecx;"
-         "psllw $8, %%mm1;"
-         "por   %%mm0, %%mm1;"
-         "movq  %%mm1, (%%edi,%%ecx);"
-         "jnz   MMXCopyByteFlip_loopc;"
-         "addl  $8, %%edi;"
-         "emms;"
-
-       "MMXCopyByteFlip_breakc:"
-         "pop   %%ecx;"
-         "test  %%ecx, %%ecx;"
-         "jz    MMXCopyByteFlip_breakd;"
-         "andl  $~1, %%ecx;"
-         "leal  (%%esi,%%ecx), %%esi;"
-         "leal  (%%edi,%%ecx), %%edi;"
-         "neg   %%ecx;"
-
-       /* trailing data, one pixel at a time */
-       "MMXCopyByteFlip_loopd:"
-         "movb  (%%esi,%%ecx), %%al;"
-         "movb  %%al, 1(%%edi,%%ecx);"
-         "movb  1(%%esi,%%ecx), %%dl;"
-         "movb  %%dl, (%%edi,%%ecx);"
-         "addl  $2, %%ecx;"
-         "jnz   MMXCopyByteFlip_loopd;"
-         
-       "MMXCopyByteFlip_breakd:"
-         : /* No outputs */
-         : "c" (NumberOfBytes), "S" (Src), "D" (Dst) /* Inputs */
-         : "%eax", "%edx", "%mm0", "%mm1", "memory" /* Clobbers */
-        );
 #endif
 }

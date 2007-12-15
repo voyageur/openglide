@@ -46,8 +46,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "HAVE_MMX" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -74,8 +74,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /FR /YX /FD /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "HAVE_MMX" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x416 /d "_DEBUG"
@@ -101,9 +101,9 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Glidos"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
+# ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /D "HAVE_MMX" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -132,9 +132,9 @@ LINK32=link.exe
 # PROP Intermediate_Dir "SDL_Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
+# ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /D "C_USE_SDL" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /D "C_USE_SDL" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -144,9 +144,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib SDL.lib SDLmain.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
 # SUBTRACT BASE LINK32 /debug
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib SDL.lib SDLmain.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
 # SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "Glide2x - Win32 SDL Debug"
@@ -163,8 +163,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "SDL_Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /FR /YX /FD /c
-# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /FR /YX /FD /c
+# ADD BASE CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /D "C_USE_SDL" /FR /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MDd /W3 /Gm /GX /ZI /Od /I "." /I "platform/windows" /D "WIN32" /D "_DEBUG" /D "DEBUG" /D "_WINDOWS" /D "CPPDLL" /D "HAVE_MMX" /D "C_USE_SDL" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x416 /d "_DEBUG"
@@ -173,8 +173,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib opengl32.lib glu32.lib ddraw.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib opengl32.lib glu32.lib ddraw.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib opengl32.lib glu32.lib ddraw.lib SDL.lib SDLmain.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib opengl32.lib glu32.lib ddraw.lib SDL.lib SDLmain.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "Glide2x - Win32 SDL Glidos"
 
@@ -190,9 +190,9 @@ LINK32=link.exe
 # PROP Intermediate_Dir "SDL_Glidos"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /YX /FD /c
+# ADD BASE CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /D "HAVE_MMX" /D "C_USE_SDL" /YX /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /YX /FD /c
+# ADD CPP /nologo /G6 /Gr /MD /W3 /vd0 /O2 /Ob2 /I "." /I "platform/windows" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "CPPDLL" /D "CONSTANT_LUMINOSITY_ALPHA_TEXTURE" /D "HAVE_MMX" /D "C_USE_SDL" /YX /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
@@ -202,9 +202,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib SDL.lib SDLmain.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
 # SUBTRACT BASE LINK32 /debug
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib shell32.lib opengl32.lib glu32.lib SDL.lib SDLmain.lib /nologo /subsystem:windows /dll /pdb:none /machine:I386
 # SUBTRACT LINK32 /debug
 
 !ENDIF 
