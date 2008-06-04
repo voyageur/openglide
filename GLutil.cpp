@@ -220,7 +220,7 @@ FxU32 GetTexSize( const int Lod, const int aspectRatio, const int format )
     return nSquareLod[ format > GR_TEXFMT_RSVD1 ][ aspectRatio ][ Lod ];
 }
 
-char * FindConfig( char *IniFile, char *IniConfig )
+static char * FindConfig( const char *IniFile, const char *IniConfig )
 {
     // Cannot return pointer to local buffer, unless
     // static.
