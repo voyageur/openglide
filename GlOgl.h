@@ -14,10 +14,10 @@
 #define __GLOGL_H__
 
 //#define OGL_ALL
-//#define OGL_PARTDONE
-//#define OGL_NOTDONE
+#define OGL_PARTDONE
+#define OGL_NOTDONE
 //#define OGL_DEBUG
-//#define OGL_CRITICAL
+#define OGL_CRITICAL
 //#define OPENGL_DEBUG
 //#define OGL_PROFILING
 //#define OGL_UTEX
@@ -59,9 +59,9 @@
 #define RDTSC(v)    asm volatile ("rdtsc;" : "=A" (v) : : "%eax", "%edx")
 #endif
 
-#define ERRORFILE               "OpenGLid.err"
-#define GLIDEFILE               "OpenGLid.log"
-#define INIFILE                 "OpenGLid.ini"
+#define ERRORFILE               "/home/swhite/tmp/OpenGLid.err"
+#define GLIDEFILE               "/home/swhite/tmp/OpenGLid.log"
+#define INIFILE                 "/home/swhite/tmp/OpenGLid.ini"
 
 #define OGL_LOG_SEPARATE        "--------------------------------------------------------\n"
 
@@ -303,8 +303,8 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
 #endif
 
 // Genral Prototypes
-VARARGDECL(void) GlideMsg( char *szString, ... );
-VARARGDECL(void) Error( char *szString, ... );
+VARARGDECL(void) GlideMsg( const char *szString, ... );
+VARARGDECL(void) Error( const char *szString, ... );
 void GLErro( char *Funcao );
 void ConvertColor4B( GrColor_t GlideColor, FxU32 &C );
 void ConvertColorB( GrColor_t GlideColor, FxU8 &R, FxU8 &G, FxU8 &B, FxU8 &A );

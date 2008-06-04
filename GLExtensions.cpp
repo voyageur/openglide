@@ -30,7 +30,7 @@ enum enExtensionType
 
 struct stExtensionSupport
 {
-    char *          name;
+    const char *    name;
     enExtensionType type;
     bool *          userVar;
     bool *          internalVar;
