@@ -60,7 +60,7 @@ void InitialiseOpenGLWindow(FxU32 wnd, int x, int y, int width, int height)
         {
             GLX_RGBA,
             GLX_DOUBLEBUFFER,
-            GLX_DEPTH_SIZE, DefaultDepthOfScreen(ScreenOfDisplay(dpy, scrnum)),
+            GLX_DEPTH_SIZE, DefaultDepth(dpy, scrnum),
             None
         };
         visinfo = glXChooseVisual(dpy, scrnum, attrib);
