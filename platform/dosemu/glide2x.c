@@ -8,11 +8,13 @@
 #define VERSION 11
 
 #ifdef  defined(__DJGPP__)
+/*******************************************************************************************************/
+/* DJGPP WRAPPERS */
+
 #undef  FX_ENTRY
 #undef  FX_CALL
 #define FX_ENTRY __attribute__((visibility("default")))
 #define FX_CALL  __attribute__((__stdcall__))
-#endif
 
 #define __fptr(type) \
 struct fptr_##type##_t \
@@ -22,9 +24,6 @@ struct fptr_##type##_t \
     unsigned short segment; \
     unsigned int   offset; \
 }
-
-/*******************************************************************************************************/
-/* WRAPPERS */
 
 #define __faddr(addr) asm ("mov %1, %%eax; add %%eax, %0": "=g"(addr): "m"(fptr.offset), "0"(addr): "%eax")
 
@@ -58,59 +57,6 @@ FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
             :"m"(fptr.segment), "m"(vxd.offset), "m"(fptr.entry)); \
             /*:"m"(fptr.segment), "m"(fptr.entry),  "g"(CMD_##func));*/ \
     } {
-
-#define DECLARE_STUB(func,ret,...) \
-FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
-{ \
-    printf ("%s\n", __func__); {
-
-#define ENDDECLARE }}
-
-#define DECLARE_THUNK0(func,ret) \
-    DECLARE_THUNK(func,ret)
-#define DECLARE_THUNK1(func,ret,t1,v1) \
-    DECLARE_THUNK(func,ret,t1 v1)
-#define DECLARE_THUNK2(func,ret,t1,v1,t2,v2) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2)
-#define DECLARE_THUNK3(func,ret,t1,v1,t2,v2,t3,v3) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3)
-#define DECLARE_THUNK4(func,ret,t1,v1,t2,v2,t3,v3,t4,v4) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4)
-#define DECLARE_THUNK5(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5)
-#define DECLARE_THUNK6(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6)
-#define DECLARE_THUNK7(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7)
-#define DECLARE_THUNK8(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8)
-#define DECLARE_THUNK15(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10,t11,v11,t12,v12,t13,v13,t14,v14,t15,v15) \
-    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8,t9 v9,t10 v10,t11 v11,t12 v12,t13 v13,t14 v14,t15 v15)
-
-#define DECLARE_STUB0(func,ret) \
-    DECLARE_STUB(func,ret)
-#define DECLARE_STUB1(func,ret,t1,v1) \
-    DECLARE_STUB(func,ret,t1 v1)
-#define DECLARE_STUB2(func,ret,t1,v1,t2,v2) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2)
-#define DECLARE_STUB3(func,ret,t1,v1,t2,v2,t3,v3) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3)
-#define DECLARE_STUB4(func,ret,t1,v1,t2,v2,t3,v3,t4,v4) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4)
-#define DECLARE_STUB5(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5)
-#define DECLARE_STUB6(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6)
-#define DECLARE_STUB7(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7)
-#define DECLARE_STUB8(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8)
-#define DECLARE_STUB10(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8,t9 v9,t10 v10)
-#define DECLARE_STUB12(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10,t11,v11,t12,v12) \
-    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8,t9 v9,t10 v10,t11 v11,t12 v12)
-
-#define RETURNI(v) return v
 
 static struct vxd_driver
 {
@@ -176,6 +122,145 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
     *segment = vxd.segment;
     return func;
 }
+
+#endif /* __DJGPP__ */
+
+
+
+#ifdef __WATCOM__
+/*******************************************************************************************************/
+/* WATCOM WRAPPERS */
+
+#undef FX_CALL
+#define FX_CALL __stdcall
+#undef FX_ENTRY
+#define FX_ENTRY __declspec(dllexport)
+
+#define __fptr(type) \
+    static void          *fptr_entry = 0; \
+    static type##_t      *fptr_thunk; \
+    static unsigned short fptr_segment; \
+    static unsigned int   fptr_offset
+
+#define __faddr(addr)
+
+#define __fcall(...) \
+    (*(fptr_thunk)) (__VA_ARGS__)
+
+#define DECLARE_THUNK(func,ret,...) \
+typedef ret (__cdecl func##_t) (__VA_ARGS__); \
+FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
+{ \
+    __fptr(func); \
+    if (!fptr_entry) \
+    { \
+        fptr_entry = entry (CMD_##func, &fptr_segment, &fptr_offset); \
+        /*assert (fptr_entry);*/ \
+        _asm { \
+            _asm push eax \
+            _asm call l1 \
+            _asm pop  eax \
+            _asm push cs \
+            _asm push eax \
+            _asm mov  ax,fptr_segment \
+            _asm push eax \
+            _asm push vxd_offset \
+            _asm mov  eax,fptr_entry \
+            _asm retf \
+            _asm l1: \
+            _asm mov  eax,fptr_thunk \
+            _asm pop  [eax] \
+            _asm pop  eax \
+        }; \
+    } {
+
+static const    char * const vxd_name    = "OPENGLD1";
+static unsigned short        vxd_segment = 0;
+static unsigned int          vxd_offset  = 0;
+
+static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *offset)
+{
+    void *func;
+
+    if (!(vxd_segment || vxd_offset))
+    {
+        _asm {
+             push ebx
+             push es
+             push edi
+             mov edi, vxd_name;
+             mov eax, 1684h
+             mov ebx, 0
+             int 2fh
+             mov vxd_segment, es
+             mov vxd_offset, edi
+             pop edi
+             pop es
+             pop ebx
+        };
+/*        assert (vxd_segment || vxd_offset); */
+    }
+    *offset  = vxd_offset;
+    *segment = vxd_segment;
+    return (void*)cmd;
+}
+
+#endif /* __WATCOM__ */
+
+
+
+#define DECLARE_STUB(func,ret,...) \
+FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
+{ \
+    printf ("%s\n", __func__); {
+
+#define ENDDECLARE }}
+
+#define DECLARE_THUNK0(func,ret) \
+    DECLARE_THUNK(func,ret)
+#define DECLARE_THUNK1(func,ret,t1,v1) \
+    DECLARE_THUNK(func,ret,t1 v1)
+#define DECLARE_THUNK2(func,ret,t1,v1,t2,v2) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2)
+#define DECLARE_THUNK3(func,ret,t1,v1,t2,v2,t3,v3) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3)
+#define DECLARE_THUNK4(func,ret,t1,v1,t2,v2,t3,v3,t4,v4) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4)
+#define DECLARE_THUNK5(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5)
+#define DECLARE_THUNK6(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6)
+#define DECLARE_THUNK7(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7)
+#define DECLARE_THUNK8(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8)
+#define DECLARE_THUNK15(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10,t11,v11,t12,v12,t13,v13,t14,v14,t15,v15) \
+    DECLARE_THUNK(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8,t9 v9,t10 v10,t11 v11,t12 v12,t13 v13,t14 v14,t15 v15)
+
+#define DECLARE_STUB0(func,ret) \
+    DECLARE_STUB(func,ret)
+#define DECLARE_STUB1(func,ret,t1,v1) \
+    DECLARE_STUB(func,ret,t1 v1)
+#define DECLARE_STUB2(func,ret,t1,v1,t2,v2) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2)
+#define DECLARE_STUB3(func,ret,t1,v1,t2,v2,t3,v3) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3)
+#define DECLARE_STUB4(func,ret,t1,v1,t2,v2,t3,v3,t4,v4) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4)
+#define DECLARE_STUB5(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5)
+#define DECLARE_STUB6(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6)
+#define DECLARE_STUB7(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7)
+#define DECLARE_STUB8(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8)
+#define DECLARE_STUB10(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8,t9 v9,t10 v10)
+#define DECLARE_STUB12(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10,t11,v11,t12,v12) \
+    DECLARE_STUB(func,ret,t1 v1,t2 v2,t3 v3,t4 v4,t5 v5,t6 v6,t7 v7,t8 v8,t9 v9,t10 v10,t11 v11,t12 v12)
+
+#define RETURNI(v) return v
 
 /*******************************************************************************************************/
 
