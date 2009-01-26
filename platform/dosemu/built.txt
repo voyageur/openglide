@@ -1,0 +1,75 @@
+Building the code for dosemu.
+
+This original code was designed for compiling with djgpp.
+Whilst being able to create an executable for DOS that
+could communicate through to the openglide code, I was
+unsuccessfull in creating a dll for DOS games written
+in DOS4GW.
+
+Investigation into this reveals that the dll for those
+games requires a compiler that can compile OS/2 libraries
+and so far only open Watcom seems to do this.
+
+The assembly was re-worked to allow use in Watcom.  DJGPP
+allowed use of inline assembly with local labels, a
+feature I was using to push return addresses onto the
+stack.  So far Watcom does not support this, preventing
+the use of direct calls to each of the glide functions.
+
+Instead for Watcom I opted for an indirect call that
+passed an index number of the function to be called
+in the openglide library.
+
+Watcom build files:
+
+make.bat
+
+del glide2x.obj
+wcl386 -c -bt=dos -3r -s glide2x.c
+wlink @glide2x.lnk
+
+glide2x.lnk
+
+formatt os2 le dll
+name glide2x.dll
+file glide2x.obj
+option map
+option nodefault
+option description 'Glide Router'
+
+The thunks.i file is included into both the Linux and DOS builds.
+The macros are defined in the file that includes thinks.i and
+is different in either case.  The macros contain code for
+marshalling and un-marshalling all the parameters to/from the
+DOS environment.
+
+At the time of writing tombraider successfully starts up in
+DOSEMU making calls into the Linux openglide library.  Openglide
+support is added via a plugin to DOSEMU using an extension to
+the vxd framework.  Currently the emulation does crash, the
+problem being opening of the X display for glide.  The call
+results in:
+
+THUNK_GRGLIDEINIT-done
+THUNK_GRSSTQUERYHARDWARE-done
+THUNK_GRSSTSELECT-done       
+THUNK_GRSSTWINOPEN-done      
+ERROR: Fault in dosemu code, in_dpmi=1
+ERROR: cpu exception in dosemu code outside of DPMI client!
+trapno: 0x0e  errorcode: 0x00000006  cr2: 0x8500cf10       
+eip: 0x00000007  esp: 0xbfcbd330  eflags: 0x00010206       
+cs: 0x0073  ds: 0x007b  es: 0x007b  ss: 0x007b             
+Page fault: write instruction to linear address: 0x8500cf10
+CPU was in user mode                                       
+Exception was caused by non-available page                 
+ERROR: Fault handler re-entered! signal=11 _trapno=0xE     
+ERROR: cpu exception in dosemu code outside of DPMI client!
+trapno: 0x0e  errorcode: 0x00000005  cr2: 0xfffffffd       
+eip: 0x08087827  esp: 0xbfcccfe0  eflags: 0x00010283       
+cs: 0x0073  ds: 0x007b  es: 0x007b  ss: 0x007b             
+Page fault: read instruction to linear address: 0xfffffffd 
+CPU was in user mode                                       
+Exception was caused by insufficient privilege             
+
+The cause of this problem is unknown and currently under
+investigation.
