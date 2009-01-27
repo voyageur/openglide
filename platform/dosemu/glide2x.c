@@ -127,7 +127,7 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
 
 
 
-#ifdef __WATCOM__
+#ifdef __WATCOMC__
 /*******************************************************************************************************/
 /* WATCOM WRAPPERS */
 
@@ -205,7 +205,7 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
     return (void*)cmd;
 }
 
-#endif /* __WATCOM__ */
+#endif /* __WATCOMC__ */
 
 
 
