@@ -257,7 +257,6 @@ void GetOptions( void )
 {
     FILE        * IniFile;
     char        * Pointer;
-    extern char * OpenGLideVersion;
     char        Path[ 256 ];
 
     UserConfig.FogEnable                    = true;

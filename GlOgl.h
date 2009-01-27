@@ -281,7 +281,7 @@ struct ConfigStruct
 };
 
 // Extern variables
-extern char *               OpenGLideVersion;
+extern const char *         OpenGLideVersion;
 extern double               ClockFreq;
 extern GlideStruct          Glide;                  // Glide Internal
 extern OpenGLStruct         OpenGL;                 // OpenGL equivalents
