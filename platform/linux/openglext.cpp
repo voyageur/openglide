@@ -9,9 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "sdk2_3dfx.h"
 
 #ifndef C_USE_SDL
 #define GLX_GLXEXT_PROTOTYPES

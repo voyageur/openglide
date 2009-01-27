@@ -35,10 +35,6 @@
  #define OGL_COMBINE
 #endif
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "platform.h"
 #include "platform/window.h"
 

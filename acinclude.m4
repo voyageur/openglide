@@ -170,8 +170,8 @@ AH_TOP([
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
-#ifndef __3DFX_H__
-#define __3DFX_H__
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
 ])
 
 AH_BOTTOM([
@@ -224,32 +224,5 @@ typedef FxI32           FxBool;
 typedef float           FxFloat;
 typedef double          FxDouble;
 
-/*
-** color types
-*/
-typedef FxU32                        FxColor_t;
-typedef struct { float r, g, b, a; } FxColor4;
-
-/*
-** fundamental types
-*/
-#define FXTRUE    1
-#define FXFALSE   0
-
-/*
-** helper macros
-*/
-#define FXUNUSED( a ) ((void)(a))
-#define FXBIT( i )    ( 1L << (i) )
-
-#ifdef WIN32
-#define DLLEXPORT extern "C" __declspec(dllexport)
-#define FX_ENTRY DLLEXPORT
-#define FX_CALL __stdcall
-#else
-#define FX_ENTRY
-#define FX_CALL
-#endif
-
-#endif // __3DFX_H__
+#endif // __CONFIG_H__
 ])

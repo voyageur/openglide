@@ -5,7 +5,7 @@ m4_define([LIBAGE],0)
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(libglide2x,2.LIBCUR.LIBREV)
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(sdk2_unix.h)
 AC_CONFIG_SRCDIR(Makefile.am)
 
 dnl libtool-style version-info number

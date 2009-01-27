@@ -20,6 +20,9 @@
 #ifndef __3DFX_H__
 #define __3DFX_H__
 
+#if defined(__unix__)
+#include "sdk2_unix.h"
+#else
 /*
 ** basic data types
 */
@@ -27,11 +30,12 @@ typedef unsigned char   FxU8;
 typedef signed   char   FxI8;
 typedef unsigned short  FxU16;
 typedef signed   short  FxI16;
-typedef signed   long   FxI32;
-typedef unsigned long   FxU32;
+typedef signed   int    FxI32;
+typedef unsigned int    FxU32;
 typedef int             FxBool;
 typedef float           FxFloat;
 typedef double          FxDouble;
+#endif
 
 /*
 ** color types

@@ -1,15 +1,12 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-
-#if SIZEOF_INT_P == 4
-#define OP "l"
-#else
-#define OP "q"
-#endif
-
-#endif
-
 #include "FormatConversion.h"
+
+#ifdef __GNUC__
+#   if SIZEOF_INT_P == 4
+#   define OP "l"
+#   else
+#   define OP "q"
+#   endif
+#endif
 
 #if defined _MSC_VER
 #define __UINT64_C(x) x
@@ -430,11 +427,11 @@ copying:
     asm ("movq  %3, %%mm7;"
          "movq  %4, %%mm6;"
          "movq  %5, %%mm5;"
-         "movq  %6, %%mm4;"
+         "movq  Mask565R, %%mm4;"
          ".align 16;"
          "MMXConvert565to8888_copying:"
          "movq  (%1), %%mm0;"
-         "add" OP " $8, %1;"
+         "addl $8, %1;"
          "movq  %%mm0, %%mm2;"
          "movq  %%mm0, %%mm1;"
          "pand  %%mm4, %%mm0;" /* Mask R */
@@ -455,14 +452,14 @@ copying:
          "punpckhbw %%mm1, %%mm2;"
 
          "movq  %%mm2, (%2);"  /* Storing Unpacked */
-         "add" OP " $16, %2;"
+         "addl $16, %2;"
          "movq  %%mm0, -8(%2);"
-         "sub" OP " $4, %0;"
+         "subl $4, %0;"
          "jg    MMXConvert565to8888_copying;"
          "EMMS;"
          : /* No outputs */
          : "r" ((FxU)NumberOfPixels), "r" (Src), "r" (Dst), /*Inputs */
-           "m" (Mask565A), "m" (Mask565B), "m" (Mask565G), "m" (Mask565R)
+           "m" (Mask565A), "m" (Mask565B), "m" (Mask565G)
          : "%mm0", "%mm1", "%mm2", "%mm3", "%mm4", "%mm5",
            "%mm6", "%mm7", "memory" /* Clobbers */
         );
