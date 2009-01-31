@@ -1,3 +1,14 @@
+diff -Naur dosemu-pristine/compiletime-settings dosemu/compiletime-settings
+--- dosemu-pristine/compiletime-settings        2009-01-31 13:34:07.000000000 +0000
++++ dosemu/compiletime-settings2       2009-01-31 13:35:02.000000000 +0000
+@@ -22,6 +22,7 @@
+   plugin_translate on
+   plugin_commands on
+   plugin_demo off
++  plugin_openglide on
+   target_bits auto
+   target_cpu auto
+   prefix /usr/local
 diff -Naur dosemu-pristine/src/arch/linux/async/signal.c dosemu/src/arch/linux/async/signal.c
 --- dosemu-pristine/src/arch/linux/async/signal.c	2009-01-30 22:55:56.000000000 +0000
 +++ dosemu/src/arch/linux/async/signal.c	2009-01-30 22:59:12.000000000 +0000
