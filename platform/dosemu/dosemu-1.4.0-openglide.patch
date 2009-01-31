@@ -40,7 +40,7 @@ diff -Naur dosemu-pristine/src/dosext/dpmi/dpmisel.h dosemu/src/dosext/dpmi/dpmi
 diff -Naur dosemu-pristine/src/dosext/dpmi/dpmisel.S dosemu/src/dosext/dpmi/dpmisel.S
 --- dosemu-pristine/src/dosext/dpmi/dpmisel.S	2009-01-30 22:55:56.000000000 +0000
 +++ dosemu/src/dosext/dpmi/dpmisel.S	2009-01-30 22:59:05.000000000 +0000
-@@ -198,6 +198,17 @@
+@@ -198,6 +198,18 @@
  	hlt
  	lret
  /* ======================= Addr = dpmi_sel():014A */
@@ -53,6 +53,7 @@ diff -Naur dosemu-pristine/src/dosext/dpmi/dpmisel.S dosemu/src/dosext/dpmi/dpmi
 +	hlt
 +/* ======================= Addr = dpmi_sel():014F */
 +	.globl	DPMI_VXD_thunks_end
++DPMI_VXD_thunks_end:
 +	lret
 +/* ======================= Addr = dpmi_sel():0150 */
  	.globl	DPMI_VXD_end
