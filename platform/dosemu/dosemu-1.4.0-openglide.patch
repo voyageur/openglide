@@ -1,0 +1,1155 @@
+diff -Naur dosemu-pristine/src/arch/linux/async/signal.c dosemu/src/arch/linux/async/signal.c
+--- dosemu-pristine/src/arch/linux/async/signal.c	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/arch/linux/async/signal.c	2009-01-30 22:59:12.000000000 +0000
+@@ -188,8 +188,9 @@
+         would affect dosemu: if only seems to affect sigwait()
+ 	and sem_post(), and we (most probably) don't use these */
+   /* So use the kernel sigaction */
+-    sa.sa_flags |= SA_RESTORER;
+-    sa.sa_restorer = restore;
++//    sa.sa_flags |= SA_RESTORER;
++//    sa.sa_restorer = restore;
++    sa.sa_restorer = NULL;
+   }
+   dosemu_sigaction(sig, &sa, NULL);
+ #endif
+diff -Naur dosemu-pristine/src/arch/linux/Makefile.main dosemu/src/arch/linux/Makefile.main
+--- dosemu-pristine/src/arch/linux/Makefile.main	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/arch/linux/Makefile.main	2009-01-30 22:59:13.000000000 +0000
+@@ -79,7 +79,7 @@
+ 
+ $(BINPATH)/bin/$(DOSBIN): emu.o $(LIBS_)
+ 	$(LD) $(LDFLAGS) -o $@ emu.o \
+-	   -Wl,--whole-archive $(LIBS_) -Wl,--no-whole-archive $(LIBS)
++	   -Wl,--whole-archive $(LIBS_) -Wl,--no-whole-archive $(LIBS) -lglide2x
+ 	@nm $(BINPATH)/bin/$(DOSBIN) | grep -v '\(compiled\)\|\(\.o$$\)\|\( a \)' | \
+ 		sort > $(BINPATH)/bin/dosemu.map
+ 	@ln -sf $(DOSBIN) $(BINPATH)/bin/dos
+diff -Naur dosemu-pristine/src/dosext/dpmi/dpmisel.h dosemu/src/dosext/dpmi/dpmisel.h
+--- dosemu-pristine/src/dosext/dpmi/dpmisel.h	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/dosext/dpmi/dpmisel.h	2009-01-30 22:59:05.000000000 +0000
+@@ -48,6 +48,8 @@
+ extern unsigned char	DPMI_VXD_ENABLE[];
+ extern unsigned char	DPMI_VXD_APM[];
+ extern unsigned char	DPMI_VXD_VTDAPI[];
++extern unsigned char    DPMI_VXD_thunks_start[];
++extern unsigned char    DPMI_VXD_thunks_end[];
+ extern unsigned char	DPMI_VXD_end[];
+ 
+ extern unsigned char	MSDOS_spm_start[];
+diff -Naur dosemu-pristine/src/dosext/dpmi/dpmisel.S dosemu/src/dosext/dpmi/dpmisel.S
+--- dosemu-pristine/src/dosext/dpmi/dpmisel.S	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/dosext/dpmi/dpmisel.S	2009-01-30 22:59:05.000000000 +0000
+@@ -198,6 +198,17 @@
+ 	hlt
+ 	lret
+ /* ======================= Addr = dpmi_sel():014A */
++	.globl	DPMI_VXD_thunks_start
++DPMI_VXD_thunks_start:
++	hlt
++	hlt
++	hlt
++	hlt
++	hlt
++/* ======================= Addr = dpmi_sel():014F */
++	.globl	DPMI_VXD_thunks_end
++	lret
++/* ======================= Addr = dpmi_sel():0150 */
+ 	.globl	DPMI_VXD_end
+ DPMI_VXD_end:
+ 
+diff -Naur dosemu-pristine/src/dosext/dpmi/vxd.c dosemu/src/dosext/dpmi/vxd.c
+--- dosemu-pristine/src/dosext/dpmi/vxd.c	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/dosext/dpmi/vxd.c	2009-01-30 22:59:05.000000000 +0000
+@@ -35,7 +35,14 @@
+ #include <sys/types.h>
+ #include <unistd.h>
+ 
++/* FIXME: Compiler says below causes thunks to be of variable size, so wont compile.
++ * This isn't the case
++#define VXD_THUNKS (HLT_OFF(DPMI_VXD_thunks_end) - HLT_OFF(DPMI_VXD_thunks_start))*/
++#define VXD_THUNKS 5
++
+ static UINT W32S_offset = 0;
++static struct vxd_client *vxds = 0;
++static struct vxd_client *thunks[VXD_THUNKS] = {0};
+ 
+ void get_VXD_entry( struct sigcontext *scp )
+ {
+@@ -108,9 +115,38 @@
+ 	    _edi = DPMI_SEL_OFF(DPMI_VXD_VTDAPI);
+ 	    break;
+ 	default:
++        {
++            unsigned int i = _LWORD(ebx);
++            struct vxd_client *vxd = vxds;
++
++            while (vxd)
++            {
++                /* Am not sure whether we check only 0 or all for es:di.  Examples
++                 * I found all use 0 */
++                if (vxd->bx == i)
++                {
++                    if (i == 0)
++                    {   /* Is this safe enough, can we get an access violation here?
++                         * Note under DOS we have a full address that can access any memory in
++                         * the DOS adress space.  Like wise here all available address should
++                         * be in the DOS address space.  That being the case do we really worry
++                         * about es:di == 0 */
++                        if (memcmp ((void *)SEL_ADR(_es, _edi), vxd->name, sizeof (vxd->name)))
++                        {
++                            vxd = vxd->next;
++                            continue;
++                        }
++                    }
++                    _es = dpmi_sel();
++                    _edi = DPMI_SEL_OFF(DPMI_VXD_thunks_start) + vxd->thunk;
++                    return;
++                }
++		vxd = vxd->next;
++            }
+ 	    D_printf("DPMI: ERROR: Unsupported VxD\n");
+ 	    /* no entry point */
+ 	    _es = _edi = 0;
++        }
+     }
+ }
+ 
+@@ -1822,7 +1858,14 @@
+ 
+ void vxd_call(struct sigcontext *scp)
+ {
+-    if (_eip==1+DPMI_SEL_OFF(DPMI_VXD_VMM)) {
++    if ((_eip>=1+DPMI_SEL_OFF(DPMI_VXD_thunks_start)) &&
++        (_eip<1+DPMI_SEL_OFF(DPMI_VXD_thunks_end))) {
++      struct vxd_client *vxd =
++        thunks[_eip - (1+DPMI_SEL_OFF(DPMI_VXD_thunks_start))];
++        if (vxd)
++          vxd->entry (scp);
++      _eip = DPMI_SEL_OFF(DPMI_VXD_thunks_end);
++    } else if (_eip==1+DPMI_SEL_OFF(DPMI_VXD_VMM)) {
+       D_printf("DPMI: VMM VxD called, ax=%#x\n", _LWORD(eax));
+       VXD_VMM(scp);
+ 
+@@ -1875,3 +1918,39 @@
+       VXD_TimerAPI(scp);
+     }
+ }
++
++/* FIXME: return error here if vxd cannot be registered? */
++void register_vxd_client (struct vxd_client *vxd)
++{
++    /* This may not be fully correct.  Online examples show
++     * bx == 0 as being undefined and therefore es:di point
++     * to a vxd name.  For bx != 0 it appears to be a
++     * specific function.
++     */
++    unsigned int i = vxd->bx;
++    if (i != 0)
++    {
++        struct vxd_client *vxd = vxds;
++        while (vxd)
++	{
++            if (vxd->bx == i)
++                return; /* ERROR, already registered */
++            vxd = vxd->next;
++        }
++    }
++
++    /* Find a free thunk */
++    for (i = 0; i < VXD_THUNKS; i++)
++    {
++        if (!thunks[i])
++        {
++            vxd->thunk = i;
++            thunks[i] = vxd;
++            vxd->next = vxds;
++            vxds = vxd;
++            return; /* OK */
++        }
++    }
++
++    return; /* ERROR, no thunk */
++}
+diff -Naur dosemu-pristine/src/dosext/dpmi/vxd.h dosemu/src/dosext/dpmi/vxd.h
+--- dosemu-pristine/src/dosext/dpmi/vxd.h	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/dosext/dpmi/vxd.h	2009-01-30 22:59:05.000000000 +0000
+@@ -6,3 +6,14 @@
+ 
+ void get_VXD_entry( struct sigcontext *scp );
+ void vxd_call(struct sigcontext *scp);
++
++struct vxd_client
++{
++  char               name[8];
++  unsigned short     bx;
++  void             (*entry)(struct sigcontext *scp);
++  unsigned short     thunk;
++  struct vxd_client *next;
++};
++
++void register_vxd_client (struct vxd_client *vxd);
+diff -Naur dosemu-pristine/src/dosext/mfs/lfn.c dosemu/src/dosext/mfs/lfn.c
+--- dosemu-pristine/src/dosext/mfs/lfn.c	2009-01-30 22:55:56.000000000 +0000
++++ dosemu/src/dosext/mfs/lfn.c	2009-01-30 22:59:04.000000000 +0000
+@@ -581,7 +581,7 @@
+ }
+ 
+ 
+-static int build_posix_path(char *dest, const char *src, int allowwildcards)
++int build_posix_path(char *dest, const char *src, int allowwildcards)
+ {
+ 	char filename[PATH_MAX];
+ 	int dd;
+diff -Naur dosemu-pristine/src/OpenGLid.ini dosemu/src/OpenGLid.ini
+--- dosemu-pristine/src/OpenGLid.ini	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/OpenGLid.ini	2009-01-30 22:59:24.000000000 +0000
+@@ -0,0 +1,23 @@
++Configuration File for OpenGLide
++
++Info:
++Priority goes from 0(HIGH) to 5(IDLE)
++Texture Memory goes from 2 to 32
++Frame Buffer Memory goes from 2 to 16
++All other fields are boolean with 1(TRUE) and 0(FALSE)
++
++Version=0.09rc8
++
++[Options]
++WrapperPriority=2
++CreateWindow=0
++InitFullScreen=0
++EnableMipMaps=0
++IgnorePaletteChange=0
++Wrap565to5551=1
++EnablePrecisionFix=1
++EnableMultiTextureEXT=1
++EnablePaletteEXT=1
++EnableVertexArrayEXT=0
++TextureMemorySize=16
++FrameBufferMemorySize=8
+diff -Naur dosemu-pristine/src/plugin/openglide/config/plugin_close.h dosemu/src/plugin/openglide/config/plugin_close.h
+--- dosemu-pristine/src/plugin/openglide/config/plugin_close.h	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/config/plugin_close.h	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,18 @@
++/* 
++ * (C) Copyright 1992, ..., 2005 the "DOSEMU-Development-Team".
++ *
++ * for details see file COPYING in the DOSEMU distribution
++ */
++
++/*
++ * This is file plugin_close.h for use within the src/plugin/<name>/
++ *
++ * It should contain a valid call to the init function of the plug-in such as
++ *
++ *       my_plugin_close();
++ * 
++ * This routine should do _nothing_, if its counterpart my_plugin_init()
++ * did decide to disable the plugin.
++ */
++
++openglide_plugin_close();
+diff -Naur dosemu-pristine/src/plugin/openglide/config/plugin_config.h dosemu/src/plugin/openglide/config/plugin_config.h
+--- dosemu-pristine/src/plugin/openglide/config/plugin_config.h	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/config/plugin_config.h	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,20 @@
++/* 
++ * (C) Copyright 1992, ..., 2005 the "DOSEMU-Development-Team".
++ *
++ * for details see file COPYING in the DOSEMU distribution
++ */
++
++/*
++ * This is file plugin_config.h for use within the src/plugin/<name>/
++ *
++ * It should contain public prototypes for the hook routines
++ * (init, close, inte6, ioselect and poll)
++ * and config.h - like configuration statements
++ *
++ */
++
++/* Increment this when the interface changes */
++#define OPENGLIDE_PLUGIN_VERSION     1
++
++extern void openglide_plugin_init(void);
++extern void openglide_plugin_close(void);
+diff -Naur dosemu-pristine/src/plugin/openglide/config/plugin_dirs dosemu/src/plugin/openglide/config/plugin_dirs
+--- dosemu-pristine/src/plugin/openglide/config/plugin_dirs	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/config/plugin_dirs	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1 @@
++./
+diff -Naur dosemu-pristine/src/plugin/openglide/config/plugin_init.h dosemu/src/plugin/openglide/config/plugin_init.h
+--- dosemu-pristine/src/plugin/openglide/config/plugin_init.h	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/config/plugin_init.h	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,16 @@
++/* 
++ * (C) Copyright 1992, ..., 2005 the "DOSEMU-Development-Team".
++ *
++ * for details see file COPYING in the DOSEMU distribution
++ */
++
++/*
++ * This is file plugin_init.h for use within the src/plugin/<name>/
++ *
++ * It should contain a valid call to the init function of the plug-in such as
++ *
++ *       my_plugin_init();
++ *
++ */
++
++openglide_plugin_init();
+diff -Naur dosemu-pristine/src/plugin/openglide/glide2x.h dosemu/src/plugin/openglide/glide2x.h
+--- dosemu-pristine/src/plugin/openglide/glide2x.h	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/glide2x.h	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,74 @@
++#ifndef _glide2x_h_
++#define _glide2x_h_
++
++#define CMD_GRGLIDEINIT (0)
++#define CMD_GRSSTQUERYHARDWARE (1)
++#define CMD_GRSSTSELECT (2)
++#define CMD_GRSSTWINOPEN (3)
++#define CMD_GRDEPTHBUFFERMODE (4)
++#define CMD_GRDEPTHBUFFERFUNCTION (5)
++#define CMD_GRDEPTHMASK (6)
++#define CMD_GRTEXCOMBINEFUNCTION (7)
++#define CMD_GRCONSTANTCOLORVALUE (8)
++#define CMD_GUALPHASOURCE (9)
++#define CMD_GRCHROMAKEYMODE (10)
++#define CMD_GRCHROMAKEYVALUE (11)
++#define CMD_GRGAMMACORRECTIONVALUE (12)
++#define CMD_GRTEXDOWNLOADTABLE (13)
++#define CMD_GUTEXMEMRESET (14)
++#define CMD_GU3DFGETINFO (15)
++#define CMD_GU3DFLOAD (16)
++#define CMD_GUTEXALLOCATEMEMORY (17)
++#define CMD_GUTEXDOWNLOADMIPMAP (18)
++#define CMD_GRBUFFERCLEAR (19)
++#define CMD_GUCOLORCOMBINEFUNCTION (20)
++#define CMD_GUTEXSOURCE (21)
++#define CMD_GRDRAWPOLYGONVERTEXLIST (22)
++#define CMD_GRBUFFERSWAP (23)
++#define CMD_GRTEXFILTERMODE (24)
++#define CMD_GRSSTWINCLOSE (25)
++#define CMD_GRDEPTHBIASLEVEL (26)
++#define CMD_GRCOLORCOMBINE (27)
++#define CMD_GRALPHABLENDFUNCTION (28)
++#define CMD_GRDRAWLINE (29)
++#define CMD_GRCONSTANTCOLORVALUE4 (30)
++#define CMD_GRGLIDESHUTDOWN (31)
++#define CMD_GRAADRAWLINE (32)
++#define CMD_GRRENDERBUFFER (33)
++#define CMD_GRTEXDOWNLOADMIPMAP (34)
++#define CMD_GRTEXSOURCE (35)
++#define CMD_GRDRAWTRIANGLE (36)
++#define CMD_GRDISABLEALLEFFECTS (36)
++#define CMD_GRTEXMIPMAPMODE (37)
++#define CMD_GRTEXLODBIASVALUE (38)
++#define CMD_GRTEXCLAMPMODE (39)
++#define CMD_GRALPHACOMBINE (40)
++#define CMD_GRFOGMODE (41)
++#define CMD_GRALPHATESTFUNCTION (42)
++#define CMD_GRCLIPWINDOW (43)
++#define CMD_GRCULLMODE (44)
++#define CMD_GRFOGCOLORVALUE (45)
++#define CMD_GRFOGTABLE (46)
++#define CMD_GRCOLORMASK (47)
++#define CMD_GRLFBLOCK (48)
++#define CMD_GRTEXDETAILCONTROL (49)
++#define CMD_GRHINTS (50)
++#define CMD_GUDRAWTRIANGLEWITHCLIP (51)
++#define CMD_GUFOGGENERATEEXP (52)
++#define CMD_GRTEXCOMBINE (53)
++#define CMD_GRBUFFERNUMPENDING (54)
++#define CMD_GRGLIDEGETSTATE (55)
++#define CMD_GRGLIDEGETVERSION (56)
++#define CMD_GRGLIDESHAMELESSPLUG (57)
++#define CMD_GRLFBUNLOCK (58)
++#define CMD_GRSSTSTATUS (59)
++#define CMD_GRTEXCALCMEMREQUIRED (60)
++#define CMD_GUTEXCOMBINEFUNCTION (61)
++#define CMD_GRTEXDOWNLOADMIPMAPLEVEL (62)
++#define CMD_GRTEXMAXADDRESS (63)
++#define CMD_GRTEXMINADDRESS (64)
++#define CMD_GUTEXMEMQUERYAVAIL (65)
++#define CMD_GRTEXTEXTUREMEMREQUIRED (66)
++#define CMD_MAX (67)
++
++#endif /* _glide2x_h_ */
+diff -Naur dosemu-pristine/src/plugin/openglide/Makefile dosemu/src/plugin/openglide/Makefile
+--- dosemu-pristine/src/plugin/openglide/Makefile	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/Makefile	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,23 @@
++#
++# (C) Copyright 1992, ..., 2005 the "DOSEMU-Development-Team".
++#
++# for details see file COPYING in the DOSEMU distribution
++#
++
++top_builddir=../../..
++include $(top_builddir)/Makefile.conf
++
++
++CFILES=$(notdir $(wildcard $(srcdir)/*.c))
++
++SFILES=
++ALL=$(CFILES) $(SFILES)
++
++OBJS=$(CFILES:.c=.o)
++DEPENDS=$(CFILES:.c=.d)
++
++include $(REALTOPDIR)/src/Makefile.common
++
++all: lib -lglide2x
++
++install: all
+diff -Naur dosemu-pristine/src/plugin/openglide/openglide.c dosemu/src/plugin/openglide/openglide.c
+--- dosemu-pristine/src/plugin/openglide/openglide.c	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/openglide.c	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,349 @@
++#include <stdio.h>
++#include <string.h>
++#include <limits.h>
++#include </home/swhite/root/include/openglide/sdk2_glide.h>
++#include "glide2x.h"
++
++#include "config.h"
++#include "cpu.h"
++#include "memory.h"
++
++#define DOSEMU
++
++extern int build_posix_path(char *dest, const char *src, int allowwildcards);
++extern unsigned long SEL_ADR(unsigned short sel, unsigned long reg);
++
++#define SDK_GRGLIDEINIT                  grGlideInit
++#define SDK_GRSSTQUERYHARDWARE           grSstQueryHardware
++#define SDK_GRSSTSELECT                  grSstSelect
++#define SDK_GRSSTWINOPEN                 grSstWinOpen
++#define SDK_GRDEPTHBUFFERMODE            grDepthBufferMode
++#define SDK_GRDEPTHBUFFERFUNCTION        grDepthBufferFunction
++#define SDK_GRDEPTHMASK                  grDepthMask
++#define SDK_GRTEXCOMBINEFUNCTION         grTexCombineFunction
++#define SDK_GRCONSTANTCOLORVALUE         grConstantColorValue
++#define SDK_GUALPHASOURCE                guAlphaSource
++#define SDK_GRCHROMAKEYMODE              grChromakeyMode
++#define SDK_GRCHROMAKEYVALUE             grChromakeyValue
++#define SDK_GRGAMMACORRECTIONVALUE       grGammaCorrectionValue
++#define SDK_GRTEXDOWNLOADTABLE           grTexDownloadTable
++#define SDK_GUTEXMEMRESET                guTexMemReset
++#define SDK_GU3DFGETINFO                 gu3dfGetInfo
++#define SDK_GU3DFLOAD                    gu3dfLoad
++#define SDK_GUTEXALLOCATEMEMORY          guTexAllocateMemory
++#define SDK_GUTEXDOWNLOADMIPMAP          guTexDownloadMipMap
++#define SDK_GRBUFFERCLEAR                grBufferClear
++#define SDK_GUCOLORCOMBINEFUNCTION       guColorCombineFunction
++#define SDK_GUTEXSOURCE                  guTexSource
++#define SDK_GRDRAWPOLYGONVERTEXLIST      grDrawPolygonVertexList
++#define SDK_GRBUFFERSWAP                 grBufferSwap
++#define SDK_GRTEXFILTERMODE              grTexFilterMode
++#define SDK_GRSSTWINCLOSE                grSstWinClose
++#define SDK_GRDEPTHBIASLEVEL             grDepthBiasLevel
++#define SDK_GRCOLORCOMBINE               grColorCombine
++#define SDK_GRALPHABLENDFUNCTION         grAlphaBlendFunction
++#define SDK_GRDRAWLINE                   grDrawLine
++#define SDK_GRCONSTANTCOLORVALUE4        grConstantColorValue4
++#define SDK_GRGLIDESHUTDOWN              grGlideShutdown
++#define SDK_GRAADRAWLINE                 grAADrawLine
++#define SDK_GRRENDERBUFFER               grRenderBuffer
++#define SDK_GRTEXDOWNLOADMIPMAP          grTexDownloadMipMap
++#define SDK_GRTEXSOURCE                  grTexSource
++#define SDK_GRDRAWTRIANGLE               grDrawTriangle
++#define SDK_GRDISABLEALLEFFECTS          grDisableAllEffects
++#define SDK_GRTEXMIPMAPMODE              grTexMipMapMode
++#define SDK_GRTEXLODBIASVALUE            grTexLodBiasValue
++#define SDK_GRTEXCLAMPMODE               grTexClampMode
++#define SDK_GRALPHACOMBINE               grAlphaCombine
++#define SDK_GRFOGMODE                    grFogMode
++#define SDK_GRALPHATESTFUNCTION          grAlphaTestFunction
++#define SDK_GRCLIPWINDOW                 grClipWindow
++#define SDK_GRCULLMODE                   grCullMode
++#define SDK_GRFOGCOLORVALUE              grFogColorValue
++#define SDK_GRFOGTABLE                   grFogTable
++#define SDK_GRCOLORMASK                  grColorMask
++#define SDK_GRLFBLOCK                    grLfbLock
++#define SDK_GRTEXDETAILCONTROL           grTexDetailControl
++#define SDK_GRHINTS                      grHints
++#define SDK_GUDRAWTRIANGLEWITHCLIP       guDrawTriangleWithClip
++#define SDK_GUFOGGENERATEEXP             guFogGenerateExp
++#define SDK_GRTEXCOMBINE                 grTexCombine
++#define SDK_GRBUFFERNUMPENDING           grBufferNumPending
++#define SDK_GRGLIDEGETSTATE              grGlideGetState
++#define SDK_GRGLIDEGETVERSION            grGlideGetVersion
++#define SDK_GRGLIDESHAMELESSPLUG         grGlideShamelessPlug
++#define SDK_GRLFBUNLOCK                  grLfbUnlock
++#define SDK_GRSSTSTATUS                  grSstStatus
++#define SDK_GRTEXCALCMEMREQUIRED         grTexCalcMemRequired
++#define SDK_GUTEXCOMBINEFUNCTION         guTexCombineFunction
++#define SDK_GRTEXDOWNLOADMIPMAPLEVEL     grTexDownloadMipMapLevel
++#define SDK_GRTEXMAXADDRESS              grTexMaxAddress
++#define SDK_GRTEXMINADDRESS              grTexMinAddress
++#define SDK_GUTEXMEMQUERYAVAIL           guTexMemQueryAvail
++#define SDK_GRTEXTEXTUREMEMREQUIRED      grTexTextureMemRequired
++
++#define THUNK(func) THUNK_##func
++
++#define ENDDECLARE }}
++
++#define DECLARE_THUNK0(func,ret) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (void) = &SDK_##func; \
++{ printf (__func__);
++
++#define DECLARE_THUNK1(func,ret,t1,v1) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK2(func,ret,t1,v1,t2,v2) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK3(func,ret,t1,v1,t2,v2,t3,v3) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK4(func,ret,t1,v1,t2,v2,t3,v3,t4,v4) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3, t4) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; t4 v4; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++        v4 = (t4) DWORD(THUNK_stack[3]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK5(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3, t4, t5) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; t4 v4; t5 v5; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++        v4 = (t4) DWORD(THUNK_stack[3]); \
++        v5 = (t5) DWORD(THUNK_stack[4]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK6(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3, t4, t5, t6) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; t4 v4; t5 v5; t6 v6; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++        v4 = (t4) DWORD(THUNK_stack[3]); \
++        v5 = (t5) DWORD(THUNK_stack[4]); \
++        v6 = (t6) DWORD(THUNK_stack[5]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK7(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3, t4, t5, t6, t7) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; t4 v4; t5 v5; t6 v6; t7 v7; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++        v4 = (t4) DWORD(THUNK_stack[3]); \
++        v5 = (t5) DWORD(THUNK_stack[4]); \
++        v6 = (t6) DWORD(THUNK_stack[5]); \
++        v7 = (t7) DWORD(THUNK_stack[6]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK8(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3, t4, t5, t6, t7, t8) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; t4 v4; t5 v5; t6 v6; t7 v7; t8 v8; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++        v4 = (t4) DWORD(THUNK_stack[3]); \
++        v5 = (t5) DWORD(THUNK_stack[4]); \
++        v6 = (t6) DWORD(THUNK_stack[5]); \
++        v7 = (t7) DWORD(THUNK_stack[6]); \
++        v8 = (t8) DWORD(THUNK_stack[7]); \
++    } { printf (__func__);
++
++#define DECLARE_THUNK15(func,ret,t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8,t9,v9,t10,v10,t11,v11,t12,v12,t13,v13,t14,v14,t15,v15) \
++static void THUNK(func)(struct sigcontext *scp) { \
++    static ret FX_CALL (*THUNK_sdk) (t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15) = &SDK_##func; \
++    unsigned long THUNK_offset = (unsigned long)LINEAR2UNIX(SEL_ADR(_ss, _esp)) - _esp; \
++    t1 v1; t2 v2; t3 v3; t4 v4; t5 v5; t6 v6; t7 v7; t8 v8; t9 v9; \
++    t10 v10; t11 v11; t12 v12; t13 v13; t14 v14; t15 v15; \
++    {   unsigned long *THUNK_stack = (unsigned long *)_esp + 2; \
++        __faddr(THUNK_stack); \
++        v1 = (t1) DWORD(THUNK_stack[0]); \
++        v2 = (t2) DWORD(THUNK_stack[1]); \
++        v3 = (t3) DWORD(THUNK_stack[2]); \
++        v4 = (t4) DWORD(THUNK_stack[3]); \
++        v5 = (t5) DWORD(THUNK_stack[4]); \
++        v6 = (t6) DWORD(THUNK_stack[5]); \
++        v7 = (t7) DWORD(THUNK_stack[6]); \
++        v8 = (t8) DWORD(THUNK_stack[7]); \
++        v9 = (t9) DWORD(THUNK_stack[8]); \
++        v10 = (t10) DWORD(THUNK_stack[9]); \
++        v11 = (t11) DWORD(THUNK_stack[10]); \
++        v12 = (t12) DWORD(THUNK_stack[11]); \
++        v13 = (t13) DWORD(THUNK_stack[12]); \
++        v14 = (t14) DWORD(THUNK_stack[13]); \
++        v15 = (t15) DWORD(THUNK_stack[14]); \
++    } { printf (__func__);
++
++#define RETURNI(v) _eax = v;
++
++#define __faddr(addr) asm volatile ("mov %1, %%eax; add %%eax, %0": "=g"(addr): "m"(THUNK_offset), "0"(addr): "%eax")
++
++#define __fcall(...) \
++    (*THUNK_sdk) (__VA_ARGS__)
++
++#include "thunks.i"
++#include "../../../src/dosext/dpmi/vxd.h"
++
++static struct vxd_client vxd;
++static void (*thunks[CMD_MAX]) (struct sigcontext *scp);
++
++
++static void openglide_plugin_entry (struct sigcontext *scp)
++{
++    unsigned char offset = (unsigned char) _eax;
++
++    if ((_eax < CMD_MAX) && thunks[offset])
++    {
++        //fprintf(stderr, "PLUGIN: openglide_plugin_entry called %u\n", offset);
++        (*thunks[offset])(scp);
++	printf ("-done\n");
++        return;
++    }
++
++    if (_eax >= CMD_MAX)
++        fprintf(stderr, "PLUGIN: openglide_plugin_entry cmd out of range %lu (max %u)\n", _eax, CMD_MAX);
++    else
++        fprintf(stderr, "PLUGIN: openglide_plugin_entry cmd %u undefined\n", offset);
++}
++
++void openglide_plugin_init(void)
++{
++    memcpy (vxd.name, "OPENGLD1", sizeof (vxd.name));
++    vxd.bx    = 0;
++    vxd.entry = &openglide_plugin_entry;
++
++    memset (thunks, 0, sizeof (thunks));
++    /* Configure thunks (Note this can be removed when
++     * thunks can be directly registered and called */
++    thunks[CMD_GRGLIDEINIT]               = &THUNK(GRGLIDEINIT);
++    thunks[CMD_GRSSTQUERYHARDWARE]        = &THUNK(GRSSTQUERYHARDWARE);
++    thunks[CMD_GRSSTSELECT]               = &THUNK(GRSSTSELECT);
++    thunks[CMD_GRSSTWINOPEN]              = &THUNK(GRSSTWINOPEN);
++    thunks[CMD_GRDEPTHBUFFERMODE]         = &THUNK(GRDEPTHBUFFERMODE);
++    thunks[CMD_GRDEPTHBUFFERFUNCTION]     = &THUNK(GRDEPTHBUFFERFUNCTION);
++    thunks[CMD_GRDEPTHMASK]               = &THUNK(GRDEPTHMASK);
++    thunks[CMD_GRTEXCOMBINEFUNCTION]      = &THUNK(GRTEXCOMBINEFUNCTION);
++    thunks[CMD_GRCONSTANTCOLORVALUE]      = &THUNK(GRCONSTANTCOLORVALUE);
++    thunks[CMD_GUALPHASOURCE]             = &THUNK(GUALPHASOURCE);
++    thunks[CMD_GRCHROMAKEYMODE]           = &THUNK(GRCHROMAKEYMODE);
++    thunks[CMD_GRCHROMAKEYVALUE]          = &THUNK(GRCHROMAKEYVALUE);
++    thunks[CMD_GRGAMMACORRECTIONVALUE]    = &THUNK(GRGAMMACORRECTIONVALUE);
++    thunks[CMD_GRTEXDOWNLOADTABLE]        = &THUNK(GRTEXDOWNLOADTABLE);
++    thunks[CMD_GUTEXMEMRESET]             = &THUNK(GUTEXMEMRESET);
++    thunks[CMD_GU3DFGETINFO]              = &THUNK(GU3DFGETINFO);
++    thunks[CMD_GU3DFLOAD]                 = &THUNK(GU3DFLOAD);
++    thunks[CMD_GUTEXALLOCATEMEMORY]       = &THUNK(GUTEXALLOCATEMEMORY);
++    thunks[CMD_GUTEXDOWNLOADMIPMAP]       = &THUNK(GUTEXDOWNLOADMIPMAP);
++    thunks[CMD_GRBUFFERCLEAR]             = &THUNK(GRBUFFERCLEAR);
++    thunks[CMD_GUCOLORCOMBINEFUNCTION]    = &THUNK(GUCOLORCOMBINEFUNCTION);
++    thunks[CMD_GUTEXSOURCE]               = &THUNK(GUTEXSOURCE);
++    thunks[CMD_GRDRAWPOLYGONVERTEXLIST]   = &THUNK(GRDRAWPOLYGONVERTEXLIST);
++    thunks[CMD_GRBUFFERSWAP]              = &THUNK(GRBUFFERSWAP);
++    thunks[CMD_GRTEXFILTERMODE]           = &THUNK(GRTEXFILTERMODE);
++    thunks[CMD_GRSSTWINCLOSE]             = &THUNK(GRSSTWINCLOSE);
++    thunks[CMD_GRDEPTHBIASLEVEL]          = &THUNK(GRDEPTHBIASLEVEL);
++    thunks[CMD_GRCOLORCOMBINE]            = &THUNK(GRCOLORCOMBINE);
++    thunks[CMD_GRALPHABLENDFUNCTION]      = &THUNK(GRALPHABLENDFUNCTION);
++    thunks[CMD_GRDRAWLINE]                = &THUNK(GRDRAWLINE);
++    thunks[CMD_GRCONSTANTCOLORVALUE4]     = &THUNK(GRCONSTANTCOLORVALUE4);
++    thunks[CMD_GRGLIDESHUTDOWN]           = &THUNK(GRGLIDESHUTDOWN);
++    thunks[CMD_GRAADRAWLINE]              = &THUNK(GRAADRAWLINE);
++    thunks[CMD_GRRENDERBUFFER]            = &THUNK(GRRENDERBUFFER);
++    thunks[CMD_GRTEXDOWNLOADMIPMAP]       = &THUNK(GRTEXDOWNLOADMIPMAP);
++    thunks[CMD_GRTEXSOURCE]               = &THUNK(GRTEXSOURCE);
++    thunks[CMD_GRDRAWTRIANGLE]            = &THUNK(GRDRAWTRIANGLE);
++    thunks[CMD_GRDISABLEALLEFFECTS]       = &THUNK(GRDISABLEALLEFFECTS);
++    thunks[CMD_GRTEXMIPMAPMODE]           = &THUNK(GRTEXMIPMAPMODE);
++    thunks[CMD_GRTEXLODBIASVALUE]         = &THUNK(GRTEXLODBIASVALUE);
++    thunks[CMD_GRTEXCLAMPMODE]            = &THUNK(GRTEXCLAMPMODE);
++    thunks[CMD_GRALPHACOMBINE]            = &THUNK(GRALPHACOMBINE);
++    thunks[CMD_GRFOGMODE]                 = &THUNK(GRFOGMODE);
++    thunks[CMD_GRALPHATESTFUNCTION]       = &THUNK(GRALPHATESTFUNCTION);
++    thunks[CMD_GRCLIPWINDOW]              = &THUNK(GRCLIPWINDOW);
++    thunks[CMD_GRCULLMODE]                = &THUNK(GRCULLMODE);
++    thunks[CMD_GRFOGCOLORVALUE]           = &THUNK(GRFOGCOLORVALUE);
++    thunks[CMD_GRFOGTABLE]                = &THUNK(GRFOGTABLE);
++    thunks[CMD_GRCOLORMASK]               = &THUNK(GRCOLORMASK);
++    thunks[CMD_GRLFBLOCK]                 = &THUNK(GRLFBLOCK);
++    thunks[CMD_GRTEXDETAILCONTROL]        = &THUNK(GRTEXDETAILCONTROL);
++    thunks[CMD_GRHINTS]                   = &THUNK(GRHINTS);
++    thunks[CMD_GUDRAWTRIANGLEWITHCLIP]    = &THUNK(GUDRAWTRIANGLEWITHCLIP);
++    thunks[CMD_GUFOGGENERATEEXP]          = &THUNK(GUFOGGENERATEEXP);
++    thunks[CMD_GRTEXCOMBINE]              = &THUNK(GRTEXCOMBINE);
++    thunks[CMD_GRBUFFERNUMPENDING]        = &THUNK(GRBUFFERNUMPENDING);
++    thunks[CMD_GRGLIDEGETSTATE]           = &THUNK(GRGLIDEGETSTATE);
++    thunks[CMD_GRGLIDEGETVERSION]         = &THUNK(GRGLIDEGETVERSION);
++    thunks[CMD_GRGLIDESHAMELESSPLUG]      = &THUNK(GRGLIDESHAMELESSPLUG);
++    thunks[CMD_GRLFBUNLOCK]               = &THUNK(GRLFBUNLOCK);
++    thunks[CMD_GRSSTSTATUS]               = &THUNK(GRSSTSTATUS);
++    thunks[CMD_GRTEXCALCMEMREQUIRED]      = &THUNK(GRTEXCALCMEMREQUIRED);
++    thunks[CMD_GUTEXCOMBINEFUNCTION]      = &THUNK(GUTEXCOMBINEFUNCTION);
++    thunks[CMD_GRTEXDOWNLOADMIPMAPLEVEL]  = &THUNK(GRTEXDOWNLOADMIPMAPLEVEL);
++    thunks[CMD_GRTEXMAXADDRESS]           = &THUNK(GRTEXMAXADDRESS);
++    thunks[CMD_GRTEXMINADDRESS]           = &THUNK(GRTEXMINADDRESS);
++    thunks[CMD_GUTEXMEMQUERYAVAIL]        = &THUNK(GUTEXMEMQUERYAVAIL);
++    thunks[CMD_GRTEXTEXTUREMEMREQUIRED]   = &THUNK(GRTEXTEXTUREMEMREQUIRED);
++
++    register_vxd_client (&vxd);
++
++#if 0
++    fprintf(stderr, "PLUGIN: openglide_plugin_init called\n");
++#endif
++}
++
++void openglide_plugin_close(void)
++{
++#if 0
++    fprintf(stderr, "PLUGIN: openglide_plugin_close called\n");
++#endif
++}
+diff -Naur dosemu-pristine/src/plugin/openglide/thunks.i dosemu/src/plugin/openglide/thunks.i
+--- dosemu-pristine/src/plugin/openglide/thunks.i	1970-01-01 01:00:00.000000000 +0100
++++ dosemu/src/plugin/openglide/thunks.i	2009-01-30 22:59:19.000000000 +0000
+@@ -0,0 +1,392 @@
++DECLARE_THUNK2(GU3DFGETINFO, FxBool, const char*, filename, Gu3dfInfo*, file_info)
++    FxBool ret;
++    __faddr (filename);
++    __faddr (file_info);
++
++#ifdef DOSEMU
++    {
++        char path[PATH_MAX];
++        if (build_posix_path (path, filename, 0) < 0)
++            ret = FXFALSE;
++        else
++            ret = __fcall (path, file_info);
++    }
++#else
++    ret = __fcall (filename, file_info);
++#endif
++
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK2(GU3DFLOAD, FxBool, const char*, filename, Gu3dfInfo*, file_info)
++    FxBool ret;
++    __faddr (filename);
++    __faddr (file_info);
++
++#ifdef DOSEMU
++    {
++        char path[PATH_MAX];
++        if (build_posix_path (path, filename, 0) < 0)
++            ret = FXFALSE;
++        else
++            ret = __fcall (path, file_info);
++    }
++#else
++    ret = __fcall (filename, file_info);
++#endif
++
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK2(GRAADRAWLINE, void, const GrVertex*, v1, const GrVertex*, v2)
++    __faddr (v1);
++    __faddr (v2);
++    __fcall (v1, v2);
++ENDDECLARE
++
++DECLARE_THUNK1(GUALPHASOURCE, void, GrAlphaSource_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK4(GRALPHABLENDFUNCTION, void, GrAlphaBlendFnc_t, a, GrAlphaBlendFnc_t, b,
++                                     GrAlphaBlendFnc_t, c, GrAlphaBlendFnc_t, d)
++    __fcall (a, b, c, d);
++ENDDECLARE
++
++DECLARE_THUNK5(GRALPHACOMBINE, void, GrCombineFunction_t, a, GrCombineFactor_t, b,
++                               GrCombineLocal_t, c, GrCombineOther_t, d, FxBool, e)
++    __fcall (a, b, c, d, e);
++ENDDECLARE
++
++DECLARE_THUNK1(GRALPHATESTFUNCTION, void, GrCmpFnc_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK3(GRBUFFERCLEAR, void, GrColor_t, a, GrAlpha_t, b, FxU16, c)
++    __fcall (a, b, c);
++ENDDECLARE
++
++DECLARE_THUNK0(GRBUFFERNUMPENDING, int)
++    int ret;
++    ret = __fcall ();
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK1(GRBUFFERSWAP, void, int, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRCHROMAKEYMODE, void, GrChromakeyMode_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRCHROMAKEYVALUE, void, GrColor_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK4(GRCLIPWINDOW, void, FxU32, a, FxU32, b, FxU32, c, FxU32, d)
++    __fcall (a, b, c, d);
++ENDDECLARE
++
++DECLARE_THUNK5(GRCOLORCOMBINE, void, GrCombineFunction_t, a, GrCombineFactor_t, b,
++                               GrCombineLocal_t, c, GrCombineOther_t, d, FxBool, e)
++    __fcall (a, b, c, d, e);
++ENDDECLARE
++
++DECLARE_THUNK1(GUCOLORCOMBINEFUNCTION, void, GrColorCombineFnc_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK2(GRCOLORMASK, void, FxBool, a, FxBool, b)
++    __fcall (a, b);
++ENDDECLARE
++
++DECLARE_THUNK1(GRCONSTANTCOLORVALUE, void, GrColor_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK4(GRCONSTANTCOLORVALUE4, void, float, a, float, b, float, c, float, d)
++    __fcall (a, b, c, d);
++ENDDECLARE
++
++DECLARE_THUNK1(GRCULLMODE, void, GrCullMode_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRDEPTHBIASLEVEL, void, FxI16, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRDEPTHBUFFERFUNCTION, void, GrCmpFnc_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRDEPTHBUFFERMODE, void, GrDepthBufferMode_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRDEPTHMASK, void, FxBool, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK0(GRDISABLEALLEFFECTS, void)
++    __fcall ();
++ENDDECLARE
++
++DECLARE_THUNK2(GRDRAWLINE, void, const GrVertex*, v1, const GrVertex*, v2)
++    __faddr (v1);
++    __faddr (v2);
++    __fcall (v1, v2);
++ENDDECLARE
++
++DECLARE_THUNK2(GRDRAWPOLYGONVERTEXLIST, void, int, nverts, const GrVertex*, vlist)
++    __faddr (vlist);
++    __fcall (nverts, vlist);
++ENDDECLARE
++
++DECLARE_THUNK3(GRDRAWTRIANGLE, void, const GrVertex*, v1, const GrVertex*, v2,
++                               const GrVertex*, v3)
++    __faddr (v1);
++    __faddr (v2);
++    __faddr (v3);
++    __fcall (v1, v2, v3);
++ENDDECLARE
++
++DECLARE_THUNK3(GUDRAWTRIANGLEWITHCLIP, void, const GrVertex*, v1, const GrVertex*, v2,
++                                       const GrVertex*, v3)
++    __faddr (v1);
++    __faddr (v2);
++    __faddr (v3);
++    __fcall (v1, v2, v3);
++ENDDECLARE
++
++DECLARE_THUNK1(GRFOGCOLORVALUE, void, GrColor_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK2(GUFOGGENERATEEXP, void, GrFog_t*, table, float, density)
++    __faddr (table);
++    __fcall (table, density);
++ENDDECLARE
++
++DECLARE_THUNK1(GRFOGMODE, void, GrFogMode_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRFOGTABLE, void, const GrFog_t*, ft)
++    __faddr (ft);
++    __fcall (ft);
++ENDDECLARE
++
++DECLARE_THUNK1(GRGAMMACORRECTIONVALUE, void, float, a)
++    __faddr (a);
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRGLIDEGETSTATE, void, GrState*, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRGLIDEGETVERSION, void, char*, version)
++    __faddr (version);
++    __fcall (version);
++ENDDECLARE
++
++DECLARE_THUNK0(GRGLIDEINIT, void)
++    __fcall ();
++ENDDECLARE
++
++DECLARE_THUNK1(GRGLIDESHAMELESSPLUG, void, int, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK0(GRGLIDESHUTDOWN, void)
++    __fcall ();
++ENDDECLARE
++
++DECLARE_THUNK2(GRHINTS, void, GrHint_t, a, FxU32, b)
++    __fcall (a, b);
++ENDDECLARE
++
++DECLARE_THUNK6(GRLFBLOCK, FxBool,
++                          GrLock_t,           type,
++                          GrBuffer_t,         buffer,
++                          GrLfbWriteMode_t,   writeMode,
++                          GrOriginLocation_t, origin,
++                          FxBool,             pixelPipeline,
++                          GrLfbInfo_t*,       info)
++    FxBool ret;
++    __faddr (info);
++    ret = __fcall (type, buffer, writeMode, origin, pixelPipeline, info);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK2(GRLFBUNLOCK, FxBool, GrLock_t, type, GrBuffer_t, buffer)
++    FxBool ret;
++    ret = __fcall (type, buffer);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK1(GRRENDERBUFFER, void, GrBuffer_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK1(GRSSTQUERYHARDWARE, FxBool, GrHwConfiguration*, hwConfig)
++    FxBool ret;
++    __faddr (hwConfig);
++    ret = __fcall (hwConfig);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK1(GRSSTSELECT, void, int, which_sst)
++    __fcall (which_sst);
++ENDDECLARE
++
++DECLARE_THUNK7(GRSSTWINOPEN, FxBool, FxU32, a, GrScreenResolution_t, b,
++                             GrScreenRefresh_t, c, GrColorFormat_t, d,
++                             GrOriginLocation_t, e, int, f, int, g)
++    FxBool ret;
++    ret = __fcall (a, b, c, d, e, f, g);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK0(GRSSTWINCLOSE, void)
++    __fcall ();
++ENDDECLARE
++
++DECLARE_THUNK0(GRSSTSTATUS, FxU32)
++    FxU32 ret;
++    ret = __fcall ();
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK15(GUTEXALLOCATEMEMORY, GrMipMapId_t,
++                                     GrChipID_t, tmu, FxU8, odd_even_mask,
++                                     int, width, int, height, GrTextureFormat_t, fmt,
++                                     GrMipMapMode_t, mm_mode, GrLOD_t, smallest_lod,
++                                     GrLOD_t, largest_lod, GrAspectRatio_t, aspect,
++                                     GrTextureClampMode_t, s_clamp_mode,
++                                     GrTextureClampMode_t, t_clamp_mode,
++                                     GrTextureFilterMode_t, minfilter_mode,
++                                     GrTextureFilterMode_t, magfilter_mode,
++                                     float, lod_bias, FxBool, trilinear)
++    GrMipMapId_t ret;
++    ret = __fcall (tmu, odd_even_mask, width, height, fmt,
++                   mm_mode, smallest_lod, largest_lod, aspect,
++                   s_clamp_mode, t_clamp_mode, minfilter_mode,
++                   magfilter_mode, lod_bias, trilinear);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK4(GRTEXCALCMEMREQUIRED, FxU32, GrLOD_t, lodmin, GrLOD_t, lodmax, GrAspectRatio_t, aspect, GrTextureFormat_t, fmt)
++    FxU32 ret;
++    ret = __fcall (lodmin, lodmax, aspect, fmt);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK3(GRTEXCLAMPMODE, void, GrChipID_t, a, GrTextureClampMode_t, b,
++                               GrTextureClampMode_t, c)
++    __fcall (a, b, c);
++ENDDECLARE
++
++DECLARE_THUNK7(GRTEXCOMBINE, void, GrChipID_t, a, GrCombineFunction_t, b,
++                             GrCombineFactor_t, c, GrCombineFunction_t, d,
++                             GrCombineFactor_t, e, FxBool, f, FxBool, g)
++    __fcall (a, b, c, d, e, f, g);
++ENDDECLARE
++
++DECLARE_THUNK2(GRTEXCOMBINEFUNCTION, void, GrChipID_t, a, GrTextureCombineFnc_t, b)
++    __fcall (a, b);
++ENDDECLARE
++
++DECLARE_THUNK2(GUTEXCOMBINEFUNCTION, void, GrChipID_t, a, GrTextureCombineFnc_t, b)
++    __fcall (a, b);
++ENDDECLARE
++
++DECLARE_THUNK4(GRTEXDETAILCONTROL, void, GrChipID_t, a, int, b, FxU8, c, float, d)
++    __fcall (a, b, c, d);
++ENDDECLARE
++
++DECLARE_THUNK4(GRTEXDOWNLOADMIPMAP, void, GrChipID_t, tmu, FxU32, startAddress,
++                                    FxU32, evenOdd, GrTexInfo*, info)
++    __faddr (info);
++    __fcall (tmu, startAddress, evenOdd, info);
++ENDDECLARE
++
++DECLARE_THUNK8(GRTEXDOWNLOADMIPMAPLEVEL, void,
++                                         GrChipID_t,        tmu,
++                                         FxU32,             startAddress,
++                                         GrLOD_t,           thisLod,
++                                         GrLOD_t,           largeLod,
++                                         GrAspectRatio_t,   aspectRatio,
++                                         GrTextureFormat_t, format,
++                                         FxU32,             evenOdd,
++                                         void*,             data)
++    __fcall (tmu, startAddress, thisLod, largeLod, aspectRatio, format, evenOdd, data);
++ENDDECLARE
++
++DECLARE_THUNK3(GUTEXDOWNLOADMIPMAP, void, GrMipMapId_t, mmid, const void*, src,
++                                    const GuNccTable*, table)
++    __faddr (src);
++    __faddr (table);
++    __fcall (mmid, src, table);
++ENDDECLARE
++
++DECLARE_THUNK3(GRTEXDOWNLOADTABLE, void, GrChipID_t, tmu, GrTexTable_t, type,
++                                   void*, data)
++    __faddr (data);
++    __fcall (tmu, type, data);
++ENDDECLARE
++
++DECLARE_THUNK3(GRTEXFILTERMODE, void, GrChipID_t, a, GrTextureFilterMode_t, b,
++                                GrTextureFilterMode_t, c)
++    __fcall (a, b, c);
++ENDDECLARE
++
++DECLARE_THUNK2(GRTEXLODBIASVALUE, void, GrChipID_t, a, float, b)
++    __fcall (a, b);
++ENDDECLARE
++
++DECLARE_THUNK1(GRTEXMAXADDRESS, FxU32, GrChipID_t, a)
++    FxU32 ret;
++    ret = __fcall (a);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK1(GRTEXMINADDRESS, FxU32, GrChipID_t, a)
++    FxU32 ret;
++    ret = __fcall (a);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK1(GUTEXMEMQUERYAVAIL, FxU32, GrChipID_t, a)
++    FxU32 ret;
++    ret = __fcall (a);
++    RETURNI (ret);
++ENDDECLARE
++
++DECLARE_THUNK0(GUTEXMEMRESET, void)
++    __fcall ();
++ENDDECLARE
++
++DECLARE_THUNK3(GRTEXMIPMAPMODE, void, GrChipID_t, tmu, GrMipMapMode_t, mode,
++                                FxBool, lodBlend)
++    __fcall (tmu, mode, lodBlend);
++ENDDECLARE
++
++DECLARE_THUNK4(GRTEXSOURCE, void, GrChipID_t, tmu, FxU32, startAddress,
++                            FxU32, evenOdd, GrTexInfo*, info)
++    __faddr (info);
++    __fcall (tmu, startAddress, evenOdd, info);
++ENDDECLARE
++
++DECLARE_THUNK1(GUTEXSOURCE, void, GrMipMapId_t, a)
++    __fcall (a);
++ENDDECLARE
++
++DECLARE_THUNK2(GRTEXTEXTUREMEMREQUIRED, FxU32, FxU32, evenOdd, GrTexInfo*, info)
++    FxU32 ret;
++    __faddr (info);
++    ret = __fcall (evenOdd, info);
++    RETURNI (ret);
++ENDDECLARE
