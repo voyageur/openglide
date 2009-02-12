@@ -49,6 +49,7 @@ void InitialiseOpenGLWindow(FxU32 wnd, int x, int y, int width, int height)
     }
 
     scrnum = DefaultScreen(dpy);
+    // win = (Window)wnd;
     root = RootWindow(dpy, scrnum);
 
     {
@@ -174,13 +175,27 @@ bool SetScreenMode(int &width, int &height)
         XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
         return true;
     }
+
+    if (vidModes)
+    {
+        XFree(vidmodes);
+        vidmodes=0;
+    }
+
     return false;
 }
 
 void ResetScreenMode()
 {
     if (mode_changed)
+    {
         XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
+        if (vidModes)
+        {
+            XFree(vidmodes);
+            vidmodes=0;
+	}
+    }
 }
 
 void SwapBuffers()
