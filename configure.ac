@@ -94,7 +94,7 @@ case "$host" in
         CXXFLAGS="$CXXFLAGS -D__unix__ -D$osflag -I\$(top_srcdir)/platform/linux $X_CFLAGS"
         LIBS="$LIBS -lGL -lGLU"
         if test x$have_sdl_lib != xyes ; then
-            $X_EXTRA_LIBS="$X_EXTRA_LIBS -lXxf86vm"
+            X_EXTRA_LIBS="$X_EXTRA_LIBS -lXxf86vm"
         fi
         ;;
     *netbsd*)
