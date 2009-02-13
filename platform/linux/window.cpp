@@ -176,7 +176,7 @@ bool SetScreenMode(int &width, int &height)
         return true;
     }
 
-    if (vidModes)
+    if (vidmodes)
     {
         XFree(vidmodes);
         vidmodes=0;
@@ -190,7 +190,7 @@ void ResetScreenMode()
     if (mode_changed)
     {
         XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
-        if (vidModes)
+        if (vidmodes)
         {
             XFree(vidmodes);
             vidmodes=0;
