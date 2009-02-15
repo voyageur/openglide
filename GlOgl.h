@@ -55,9 +55,9 @@
 #define RDTSC(v)    asm volatile ("rdtsc;" : "=A" (v) : : "%eax", "%edx")
 #endif
 
-#define ERRORFILE               "/home/swhite/tmp/OpenGLid.err"
-#define GLIDEFILE               "/home/swhite/tmp/OpenGLid.log"
-#define INIFILE                 "/home/swhite/tmp/OpenGLid.ini"
+#define ERRORFILE               "OpenGLid.err"
+#define GLIDEFILE               "OpenGLid.log"
+#define INIFILE                 "OpenGLid.ini"
 
 #define OGL_LOG_SEPARATE        "--------------------------------------------------------\n"
 
