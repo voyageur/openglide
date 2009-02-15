@@ -13,11 +13,11 @@
 #ifndef __GLOGL_H__
 #define __GLOGL_H__
 
-#define OGL_ALL
-#define OGL_PARTDONE
-#define OGL_NOTDONE
+//#define OGL_ALL
+//#define OGL_PARTDONE
+//#define OGL_NOTDONE
 //#define OGL_DEBUG
-#define OGL_CRITICAL
+//#define OGL_CRITICAL
 //#define OPENGL_DEBUG
 //#define OGL_PROFILING
 //#define OGL_UTEX
