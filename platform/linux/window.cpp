@@ -204,8 +204,6 @@ void ResetScreenMode()
 
 void SwapBuffers()
 {
-    if ( Glide.DstBuffer.Buffer != GR_BUFFER_BACKBUFFER )
-        return;
     GLenum type = GL_UNSIGNED_SHORT_5_5_5_1_EXT;
 
     // Will need to change this later
