@@ -390,3 +390,8 @@ DECLARE_THUNK2(GRTEXTEXTUREMEMREQUIRED, FxU32, FxU32, evenOdd, GrTexInfo*, info)
     ret = __fcall (evenOdd, info);
     RETURNI (ret);
 ENDDECLARE
+
+DECLARE_THUNK5(GRSPLASH, void, int, a, int, b, int, c, int, d, int, e)
+    _fcall (a, b, c, d, e);
+ENDDECLARE
+

@@ -300,9 +300,6 @@ ENDDECLARE
 DECLARE_STUB6(_GRTEXDOWNLOAD_DEFAULT_32_WIDES, void, int, a, int, b, int, c, int, d, int, e, int, f)
 ENDDECLARE
 
-DECLARE_STUB5(GRSPLASH, void, int, a, int, b, int, c, int, d, int, e)
-ENDDECLARE
-
 DECLARE_STUB1(GUENDIANSWAPWORDS, void, int, a)
 ENDDECLARE
 
