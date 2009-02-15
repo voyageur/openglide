@@ -1,6 +1,10 @@
 #include "FormatConversion.h"
 
 #ifdef __GNUC__
+#   ifdef HAVE_CONFIG_H
+#   include "config.h"
+#   endif
+
 #   if SIZEOF_INT_P == 4
 #   define OP "l"
 #   else
