@@ -318,34 +318,34 @@ void GetOptions( void )
         Pointer = FindConfig( Path, "Version" );
         if ( Pointer && !strcmp( Pointer, OpenGLideVersion ) )
         {
-            Pointer = FindConfig( Path, "CreateWindow" );
-            UserConfig.CreateWindow = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "InitFullScreen" );
-            UserConfig.InitFullScreen = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "EnableMipMaps" );
-            UserConfig.EnableMipMaps = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "IgnorePaletteChange" );
-            UserConfig.IgnorePaletteChange = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "EnablePrecisionFix" );
-            UserConfig.PrecisionFix = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "EnableMultiTextureEXT" );
-            UserConfig.ARB_multitexture = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "EnablePaletteEXT" );
-            UserConfig.EXT_paletted_texture = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "EnableVertexArrayEXT" );
-            UserConfig.EXT_vertex_array = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "TextureMemorySize" );
-            UserConfig.TextureMemorySize = atoi( Pointer );
-            Pointer = FindConfig( Path, "WrapperPriority" );
-            UserConfig.Priority = atoi( Pointer );
-            Pointer = FindConfig( Path, "Wrap565to5551" );
-            UserConfig.Wrap565to5551 = atoi( Pointer ) ? true : false;
-            Pointer = FindConfig( Path, "FrameBufferMemorySize" );
-            UserConfig.FrameBufferMemorySize = atoi( Pointer );
-            Pointer = FindConfig( Path, "NoSplash");
-            UserConfig.NoSplash = atoi( Pointer ) ? true : false;;
-            Pointer = FindConfig( Path, "ShamelessPlug");
-            UserConfig.ShamelessPlug = atoi( Pointer ) ? true : false;;
+            if ( (Pointer = FindConfig(Path, "CreateWindow")) )
+                UserConfig.CreateWindow = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "InitFullScreen")) )
+                UserConfig.InitFullScreen = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "EnableMipMaps")) )
+                UserConfig.EnableMipMaps = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "IgnorePaletteChange")) )
+                UserConfig.IgnorePaletteChange = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "EnablePrecisionFix")) )
+                UserConfig.PrecisionFix = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "EnableMultiTextureEXT")) )
+                UserConfig.ARB_multitexture = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "EnablePaletteEXT")) )
+                UserConfig.EXT_paletted_texture = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "EnableVertexArrayEXT")) )
+                UserConfig.EXT_vertex_array = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "TextureMemorySize")) )
+                UserConfig.TextureMemorySize = atoi( Pointer );
+            if ( (Pointer = FindConfig(Path, "WrapperPriority")) )
+                UserConfig.Priority = atoi( Pointer );
+            if ( (Pointer = FindConfig(Path, "Wrap565to5551")) )
+                UserConfig.Wrap565to5551 = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "FrameBufferMemorySize")) )
+                UserConfig.FrameBufferMemorySize = atoi( Pointer );
+            if ( (Pointer = FindConfig(Path, "NoSplash")) )
+                UserConfig.NoSplash = atoi( Pointer ) ? true : false;;
+            if ( (Pointer = FindConfig(Path, "ShamelessPlug")) )
+                UserConfig.ShamelessPlug = atoi( Pointer ) ? true : false;;
         }
         else
         {
