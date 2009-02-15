@@ -13,7 +13,7 @@
 #ifndef __GLOGL_H__
 #define __GLOGL_H__
 
-//#define OGL_ALL
+#define OGL_ALL
 #define OGL_PARTDONE
 #define OGL_NOTDONE
 //#define OGL_DEBUG
@@ -296,7 +296,7 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
     // Profiling variables
     extern FxI64            InitialTick;
     extern FxI64            FinalTick;
-    extern int              Frame;
+    extern FxU32            Frame;
     extern double           Fps;
     extern double           FpsAux;
 #endif

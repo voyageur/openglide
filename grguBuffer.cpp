@@ -17,15 +17,6 @@
 
 #include "platform/window.h"
 
-// extern variables
-extern FxI64            InitialTick,
-                        FinalTick;
-extern int              Frame;
-extern double           Fps, 
-                        FpsAux, 
-                        ClockFreq;
-
-
 // extern functions
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );
 

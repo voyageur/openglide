@@ -50,7 +50,7 @@ PGUTexture       UTextures;
     // Profiling variables
     FxI64           InitialTick;
     FxI64           FinalTick;
-    DWORD           Frame;
+    FxU32           Frame;
     double          Fps;
     double          FpsAux;
 #endif
