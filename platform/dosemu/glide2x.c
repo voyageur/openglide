@@ -1,15 +1,14 @@
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "glide.h"
 #include "glide2x.h"
 
 #define VERSION 11
 
-#ifdef  defined(__DJGPP__)
+#if defined(__DJGPP__)
 /*******************************************************************************************************/
 /* DJGPP WRAPPERS */
+
+#include <assert.h>
+#include <stdio.h>
 
 #undef  FX_ENTRY
 #undef  FX_CALL
@@ -127,7 +126,7 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
 
 
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__)
 /*******************************************************************************************************/
 /* WATCOM WRAPPERS */
 
@@ -135,6 +134,7 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
 #define FX_CALL __stdcall
 #undef FX_ENTRY
 #define FX_ENTRY __declspec(dllexport)
+#define float FxU32
 
 #define __fptr(type) \
     static void          *fptr_entry = 0; \
@@ -212,7 +212,7 @@ static void *entry (unsigned int cmd, unsigned short *segment, unsigned int *off
 #define DECLARE_STUB(func,ret,...) \
 FX_ENTRY ret FX_CALL func (__VA_ARGS__) \
 { \
-    printf ("%s\n", __func__); {
+    {
 
 #define ENDDECLARE }}
 
