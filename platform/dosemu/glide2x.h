@@ -69,6 +69,7 @@
 #define CMD_GRTEXMINADDRESS (64)
 #define CMD_GUTEXMEMQUERYAVAIL (65)
 #define CMD_GRTEXTEXTUREMEMREQUIRED (66)
-#define CMD_MAX (67)
+#define CMD_GRSPLASH (67)
+#define CMD_MAX (68)
 
 #endif /* _glide2x_h_ */
