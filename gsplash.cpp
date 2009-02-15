@@ -19,6 +19,9 @@
  **
  ** $Header$
  ** $Log$
+ ** Revision 1.2  2009/02/15 11:02:03  s_a_white
+ ** Remove debug messages
+ **
  ** Revision 1.1  2009/02/15 09:36:55  s_a_white
  ** Add splash screen
  **
@@ -232,7 +235,6 @@ static void createTextures( void ) {
   info       = ( Gu3dfInfo * )shadow_3dfinfo_raw;
   info->data = ( void * )shadow_3dfinfo_image;
   downloadTexture( &shadowImage, info );
-  return;
 }
 
 static void vecMatMult( float *dstVec, float *srcVec, float *matrix ) {
@@ -884,6 +886,19 @@ grSplash (float x, float y, float w, float h, FxU32 _frame)
     drawFaces( frame, 1 );
   }
     
+  /* Get rid of the remnants on teh screen just in case
+   * the app doesn't do it itself yet
+   * assumes that the screen is clear.
+   */
+  if (_frame == 0) {
+    int i;
+
+    for(i = 0; i < Glide.NumBuffers; i++) {
+      grBufferClear(0x00000000, 0, GR_WDEPTHVALUE_FARTHEST);
+      grBufferSwap(0);
+    }
+  }
+
   /*
    * Clean up after yourself!
    */
