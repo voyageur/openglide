@@ -19,6 +19,9 @@
  **
  ** $Header$
  ** $Log$
+ ** Revision 1.1  2009/02/15 09:36:55  s_a_white
+ ** Add splash screen
+ **
  ** Revision 1.1.1.1  1999/12/07 21:48:52  joseph
  ** Initial checkin into SourceForge.
  **
@@ -715,7 +718,7 @@ grSplash (float x, float y, float w, float h, FxU32 _frame)
   };
   GrFog_t fogTable[GR_FOG_TABLE_SIZE];
   int fadeInFrames, fadeOutFrames;
-printf ("splash1\n");
+ 
   /* Check Screen Dimensions and Check Avail of Depth Buffer */
   if ( (x > Glide.WindowWidth) || 
       ((x+w) > Glide.WindowWidth) ||
@@ -732,7 +735,7 @@ printf ("splash1\n");
       return;
     }
   }
-printf ("splash2\n");
+
   if ( (Glide.State.OriginInformation == GR_ORIGIN_UPPER_LEFT) ) {
     y = (( Glide.WindowHeight - 1.0f ) - (h-1.0f) ) - y;
   }
