@@ -5,7 +5,7 @@ m4_define([LIBAGE],0)
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(libglide2x,2.LIBCUR.LIBREV)
-AM_CONFIG_HEADER(sdk2_unix.h)
+AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(Makefile.am)
 
 dnl libtool-style version-info number
@@ -34,6 +34,13 @@ AC_CHECK_SIZEOF(unsigned int)
 AC_CHECK_SIZEOF(unsigned long)
 AC_CHECK_SIZEOF(unsigned long long)
 AC_CHECK_SIZEOF(int *)
+
+AC_SUBST(SIZEOF_UNSIGNED_CHAR,$ac_cv_sizeof_unsigned_char)
+AC_SUBST(SIZEOF_UNSIGNED_SHORT,$ac_cv_sizeof_unsigned_short)
+AC_SUBST(SIZEOF_UNSIGNED_INT,$ac_cv_sizeof_unsigned_int)
+AC_SUBST(SIZEOF_UNSIGNED_LONG,$ac_cv_sizeof_unsigned_long)
+AC_SUBST(SIZEOF_UNSIGNED_LONG_LONG,$ac_cv_sizeof_unsigned_long_long)
+AC_SUBST(SIZEOF_INT_P,$ac_cv_sizeof_int_p)
 
 dnl Check for the X11 library
 AC_PATH_XTRA
@@ -111,6 +118,7 @@ esac
 
 AC_OUTPUT(
 Makefile \
+sdk2_unix.h \
 platform/Makefile \
 platform/linux/Makefile \
 platform/sdl/Makefile \
