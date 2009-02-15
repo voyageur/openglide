@@ -19,6 +19,9 @@
  **
  ** $Header$
  ** $Log$
+ ** Revision 1.5  2009/02/15 22:44:46  s_a_white
+ ** Fix debug message
+ **
  ** Revision 1.4  2009/02/15 21:54:46  s_a_white
  ** Add banner support (shameless plug) and user configuration options for
  ** this and the splash screen
@@ -916,6 +919,13 @@ grSplash (float x, float y, float w, float h, FxU32 _frame)
    */
   grGlideSetState(&oldState);
 
+  /*
+   * Openglide does not restore origin.  Looking through the
+   * real glide code only the SST96 build restores the origin
+   * by making an api call.  Other builds look like they don't,
+   * although they may restore the variable
+   */
+  grSstOrigin(((GlideState*)&oldState)->OriginInformation);
 }
 
 
