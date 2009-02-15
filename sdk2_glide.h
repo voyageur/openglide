@@ -50,7 +50,7 @@ typedef FxU32 GrColor_t;
 typedef FxU8  GrAlpha_t;
 typedef FxU32 GrMipMapId_t;
 typedef FxU8  GrFog_t;
-typedef void (FX_CALL *GrProc)();
+typedef void (FX_CALL *GrProc)(void);
 
 /*
 ** -----------------------------------------------------------------------
@@ -1026,7 +1026,7 @@ grSstResetPerfStats(void);
 #endif /* !GLIDE3_ALPHA */
 
 FX_ENTRY void FX_CALL
-grResetTriStats();
+grResetTriStats(void);
 
 FX_ENTRY void FX_CALL
 grTriStats(FxU32 *trisProcessed, FxU32 *trisDrawn);
