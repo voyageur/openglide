@@ -1,13 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
-bin_PROGRAMS = test 
-
-test_SOURCES = test12.c tlib.c linutil.c
-
-test_LDADD = ./libglide2x.la
-#test_LDADD = -L/usr/lib -lglide2x -lm
-
 SUBDIRS=platform
+EXTRA_DIST=splash.dat
 
 lib_LTLIBRARIES = libglide2x.la
 
@@ -43,6 +37,7 @@ FormatConversion.cpp \
 grguBuffer.cpp \
 grguColorAlpha.cpp \
 GLutil.cpp \
+gsplash.cpp \
 \
 FormatConversion.h \
 glext.h \

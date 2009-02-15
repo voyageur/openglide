@@ -191,6 +191,7 @@ grHints( GrHint_t hintType, FxU32 hintMask )
 }
 
 //*************************************************
+/*
 FX_ENTRY void FX_CALL
 grSplash( float x, float y, float width, float height, FxU32 frame )
 {
@@ -199,6 +200,7 @@ grSplash( float x, float y, float width, float height, FxU32 frame )
         x, y, width, height, frame );
 #endif
 }
+*/
 
 //*************************************************
 FX_ENTRY void FX_CALL 
