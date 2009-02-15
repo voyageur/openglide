@@ -174,7 +174,7 @@ grSstQueryBoards( GrHwConfiguration *hwConfig )
 
 //*************************************************
 FX_ENTRY FxBool FX_CALL
-grSstWinOpen(   FxU32 hwnd,
+grSstWinOpen(   FxU hwnd,
                 GrScreenResolution_t res,
                 GrScreenRefresh_t ref,
                 GrColorFormat_t cformat,

@@ -35,7 +35,7 @@ static bool                  vidmode_ext  = false;
 static XF86VidModeModeInfo **vidmodes;
 static bool                  mode_changed = false;
 
-void InitialiseOpenGLWindow(FxU32 wnd, int x, int y, int width, int height)
+void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     Window root;
     XVisualInfo *visinfo;

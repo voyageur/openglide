@@ -975,7 +975,7 @@ grSstIsBusy( void );
 
 FX_ENTRY FxBool FX_CALL 
 grSstWinOpen(
-          FxU32                hWnd,
+          FxU                  hWnd,
           GrScreenResolution_t screen_resolution,
           GrScreenRefresh_t    refresh_rate,
           GrColorFormat_t      color_format,

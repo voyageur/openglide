@@ -73,7 +73,7 @@ void InitMainVariables( void )
     GetOptions( );
 }
 
-bool InitWindow( FxU32 hWnd )
+bool InitWindow( FxU hWnd )
 {
     InitialiseOpenGLWindow( hWnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
 

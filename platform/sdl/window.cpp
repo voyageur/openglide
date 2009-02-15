@@ -29,7 +29,7 @@ static struct
 
 static bool ramp_stored  = false;
 
-void InitialiseOpenGLWindow(FxU32 wnd, int x, int y, int width, int height)
+void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     if(!SDL_WasInit(SDL_INIT_VIDEO) && SDL_Init(SDL_INIT_VIDEO))
     {

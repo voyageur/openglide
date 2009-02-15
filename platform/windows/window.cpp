@@ -32,7 +32,7 @@ static struct
 static BOOL ramp_stored  = false;
 static BOOL mode_changed = false;
 
-void InitialiseOpenGLWindow(FxU32 wnd, int x, int y, int width, int height)
+void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     PIXELFORMATDESCRIPTOR   pfd;
     int                     PixFormat;

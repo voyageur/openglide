@@ -35,6 +35,8 @@ typedef unsigned int    FxU32;
 typedef int             FxBool;
 typedef float           FxFloat;
 typedef double          FxDouble;
+typedef FxU32           FxU;
+typedef FxI32           FxI;
 #endif
 
 /*

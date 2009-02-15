@@ -309,7 +309,7 @@ GrColor_t ConvertConstantColor( float R, float G, float B, float A );
 bool GenerateErrorFile( void );
 bool ClearAndGenerateLogFile( void );
 void CloseLogFile( void );
-bool InitWindow( FxU32 hWnd );
+bool InitWindow( FxU hWnd );
 void InitOpenGL( void );
 void GetOptions( void );
 void InitMainVariables( void );
