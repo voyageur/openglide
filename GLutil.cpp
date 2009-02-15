@@ -280,11 +280,15 @@ void GetOptions( void )
 
     UserConfig.Priority                     = 2;
 
+    // Maintain existing behaviour
+    UserConfig.NoSplash                     = true;
+    UserConfig.ShamelessPlug                = false;
+
     strcpy( Path, INIFILE );
 
     GlideMsg( "Configuration file is %s\n", Path );
     
-    if ( access( Path, 00 ) == -1 )
+    if ( access( Path, 0 ) == -1 )
     {
         IniFile = fopen( Path, "w" );
         fprintf( IniFile, "Configuration File for OpenGLide\n\n" );
@@ -338,6 +342,10 @@ void GetOptions( void )
             UserConfig.Wrap565to5551 = atoi( Pointer ) ? true : false;
             Pointer = FindConfig( Path, "FrameBufferMemorySize" );
             UserConfig.FrameBufferMemorySize = atoi( Pointer );
+            Pointer = FindConfig( Path, "NoSplash");
+            UserConfig.NoSplash = atoi( Pointer ) ? true : false;;
+            Pointer = FindConfig( Path, "ShamelessPlug");
+            UserConfig.ShamelessPlug = atoi( Pointer ) ? true : false;;
         }
         else
         {

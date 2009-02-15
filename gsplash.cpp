@@ -19,6 +19,9 @@
  **
  ** $Header$
  ** $Log$
+ ** Revision 1.3  2009/02/15 11:42:26  s_a_white
+ ** Merge some changes from newer glide
+ **
  ** Revision 1.2  2009/02/15 11:02:03  s_a_white
  ** Remove debug messages
  **
@@ -721,6 +724,11 @@ grSplash (float x, float y, float w, float h, FxU32 _frame)
   GrFog_t fogTable[GR_FOG_TABLE_SIZE];
   int fadeInFrames, fadeOutFrames;
  
+#ifdef OGL_DONE
+    GlideMsg( "grSplash( %-4.2f, %-4.2f, %-4.2f, %-4.2f, %lu )\n",
+        x, y, width, height, frame );
+#endif
+
   /* Check Screen Dimensions and Check Avail of Depth Buffer */
   if ( (x > Glide.WindowWidth) || 
       ((x+w) > Glide.WindowWidth) ||

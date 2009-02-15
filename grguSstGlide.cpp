@@ -151,9 +151,11 @@ grGlideGetState( GrState *state )
 FX_ENTRY void FX_CALL
 grGlideShamelessPlug( const FxBool on )
 {
-#ifdef OGL_NOTDONE
+#ifdef OGL_DONE
     GlideMsg( "grGlideShamelessPlug( %d )\n", on );
 #endif
+    if (!UserConfig.ShamelessPlug)
+        InternalConfig.ShamelessPlug = on;
 }
 
 //*************************************************
@@ -315,6 +317,19 @@ grSstWinOpen(   FxU hwnd,
 #endif
 
     glFinish( );
+
+    // Show the splash screen? (code copied from the linux driver src)
+    if (InternalConfig.NoSplash == false)
+    {
+        grSplash(0.0f, 0.0f, 
+            static_cast<float>(Glide.WindowWidth),
+            static_cast<float>(Glide.WindowHeight),
+            0);
+        // The splash screen is displayed once, and because the
+        // internal config is reinitialised each time grWinOpen()
+        // is called, the value must be reset in the user config
+        InternalConfig.NoSplash = true;
+    }
 
     return FXTRUE;
 }

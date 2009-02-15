@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS=platform
-EXTRA_DIST=splash.dat
+EXTRA_DIST=splash.dat banner.dat
 
 lib_LTLIBRARIES = libglide2x.la
 
@@ -38,6 +38,7 @@ grguBuffer.cpp \
 grguColorAlpha.cpp \
 GLutil.cpp \
 gsplash.cpp \
+gbanner.cpp \
 \
 FormatConversion.h \
 glext.h \

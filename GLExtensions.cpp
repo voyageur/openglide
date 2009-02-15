@@ -198,6 +198,9 @@ void ResetInternalConfig( void )
 
     InternalConfig.MMXEnable                    = false;
     InternalConfig.CreateWindow                 = false;
+
+    InternalConfig.NoSplash                     = false;
+    InternalConfig.ShamelessPlug                = false;
 }
 
 void ValidateUserConfig( void )
@@ -209,6 +212,7 @@ void ValidateUserConfig( void )
     InternalConfig.EnableMipMaps                = UserConfig.EnableMipMaps;
     InternalConfig.IgnorePaletteChange          = UserConfig.IgnorePaletteChange;
     InternalConfig.Wrap565to5551                = UserConfig.Wrap565to5551;
+    InternalConfig.ShamelessPlug                = UserConfig.ShamelessPlug;
     
     if ( ( UserConfig.TextureMemorySize >= OGL_MIN_TEXTURE_BUFFER ) && 
          ( UserConfig.TextureMemorySize <= OGL_MAX_TEXTURE_BUFFER ) )

@@ -278,6 +278,9 @@ struct ConfigStruct
     bool    EXT_paletted_texture;
     bool    EXT_vertex_array;
     bool    EXT_blend_func_separate;
+
+    bool    NoSplash;
+    bool    ShamelessPlug;
 };
 
 // Extern variables
