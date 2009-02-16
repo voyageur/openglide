@@ -212,6 +212,7 @@ void ValidateUserConfig( void )
     InternalConfig.EnableMipMaps                = UserConfig.EnableMipMaps;
     InternalConfig.IgnorePaletteChange          = UserConfig.IgnorePaletteChange;
     InternalConfig.Wrap565to5551                = UserConfig.Wrap565to5551;
+    InternalConfig.NoSplash                     = UserConfig.NoSplash;
     InternalConfig.ShamelessPlug                = UserConfig.ShamelessPlug;
     
     if ( ( UserConfig.TextureMemorySize >= OGL_MIN_TEXTURE_BUFFER ) && 
