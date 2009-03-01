@@ -15,10 +15,11 @@
 
 #ifdef C_USE_SDL
 
+#include <stdlib.h>
+#include <math.h>
+
 #include "SDL.h"
 #include "SDL_opengl.h"
-
-#include <math.h>
 
 #include "GlOgl.h"
 
@@ -35,10 +36,40 @@ static bool ramp_stored  = false;
 
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
-    if(!SDL_WasInit(SDL_INIT_VIDEO) && SDL_Init(SDL_INIT_VIDEO))
+    if(!SDL_WasInit(SDL_INIT_VIDEO))
     {
-        GlideMsg("Can't init SDL %s",SDL_GetError());
-        return;
+        bool err = false;
+        char *oldWindowId = 0;
+
+        if (wnd)
+        {   // Set SDL window ID
+            char windowId[40];
+            sprintf (windowId, "SDL_WINDOWID=%ld", (long)wnd);
+            oldWindowId = getenv("SDL_WINDOWID");
+            if (oldWindowId)
+                oldWindowId = strdup(oldWindowId);
+            putenv(windowId);
+        }
+
+        if (SDL_Init(SDL_INIT_VIDEO))
+        {
+            GlideMsg("Can't init SDL %s",SDL_GetError());
+            err = true;
+        }
+
+        if (wnd)
+        {   // Restore old value
+            if (!oldWindowId)
+                putenv("SDL_WINDOWID");
+            else
+            {
+                setenv("SDL_WINDOWID", oldWindowId, 1);
+                free (oldWindowId);
+            }
+        }
+
+        if (err)
+            return;
     }
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
