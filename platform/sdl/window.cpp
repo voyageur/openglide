@@ -33,10 +33,12 @@ static struct
 } old_ramp;
 
 static bool ramp_stored  = false;
+static bool wasInit      = false;
 
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
-    if(!SDL_WasInit(SDL_INIT_VIDEO))
+    wasInit = SDL_WasInit(SDL_INIT_VIDEO);
+    if(!wasInit)
     {
         bool err = false;
         char *oldWindowId = 0;
@@ -90,6 +92,8 @@ void FinaliseOpenGLWindow( void)
 {
     if ( ramp_stored )
         SDL_SetGammaRamp(old_ramp.red, old_ramp.green, old_ramp.blue);
+    if (!wasInit)
+        SDL_Quit();
 }
 
 void SetGamma(float value)
