@@ -38,6 +38,7 @@ static GLXContext            ctx          = NULL;
 static bool                  vidmode_ext  = false;
 static XF86VidModeModeInfo **vidmodes;
 static bool                  mode_changed = false;
+static FxU16                *aux_buffer   = 0;
 
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
@@ -117,6 +118,12 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     ctx = glXCreateContext(dpy, visinfo, NULL, True);
 
     glXMakeCurrent(dpy, win, ctx);
+
+    GLint buffers = 0;
+    glGetIntegerv(GL_AUX_BUFFERS, &buffers);
+
+    if (!buffers)
+        aux_buffer = (FxU16*) malloc (sizeof(FxU16) * width * height);
 }
 
 void FinaliseOpenGLWindow( void)
@@ -133,6 +140,7 @@ void FinaliseOpenGLWindow( void)
     ctx = NULL;
     dpy = NULL;
     win = 0;
+    aux_buffer = 0;
 }
 
 void SetGamma(float value)
@@ -200,41 +208,54 @@ void ResetScreenMode()
             vidmodes=0;
 	}
     }
+    if (aux_buffer)
+        free (aux_buffer);
 }
 
 void SwapBuffers()
-{
-    GLenum type = GL_UNSIGNED_SHORT_5_5_5_1_EXT;
-
-    // Will need to change this later
-    static FxU32 tempBuf[ 2048 * 2048 ];
-
-    if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-        type = GL_UNSIGNED_SHORT_5_6_5;
-
-    // What a pain.  Under Glide front/back buffers are swapped.
-    // Under linux X copies the back to front buffer and the
+{   // What a pain.  Under Glide front/back buffers are swapped.
+    // Under Linux GL copies the back to front buffer and the
     // back buffer becomes underfined.  So we have to copy the
     // front buffer manually to the back (probably noticable
     // performance hit).  NOTE the restored image looks quantised.
+    // Verify the screen mode used...
     glDisable( GL_BLEND );
     glDisable( GL_TEXTURE_2D );
+    
+    if (aux_buffer)
+    {
+        GLenum type = GL_UNSIGNED_SHORT_5_5_5_1_EXT;
 
-    glReadBuffer( GL_FRONT );
-    glReadPixels( 0, 0, 
-                  Glide.WindowWidth, Glide.WindowHeight,
-                  GL_RGB, type, (void *)tempBuf );
+        if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
+            type = GL_UNSIGNED_SHORT_5_6_5;
 
-    glXSwapBuffers( dpy, win );
+        glReadBuffer( GL_FRONT );
+        glReadPixels( 0, 0, 
+                      Glide.WindowWidth, Glide.WindowHeight,
+                      GL_RGB, type, (void *)aux_buffer );
 
-    glDrawBuffer( GL_BACK );
-    glRasterPos2i(0, Glide.WindowHeight - 1);
-    glDrawPixels( Glide.WindowWidth, Glide.WindowHeight, GL_RGB,
-                  type, (void *)tempBuf );
+        glXSwapBuffers( dpy, win );
+
+        glDrawBuffer( GL_BACK );
+        glRasterPos2i(0, Glide.WindowHeight - 1);
+        glDrawPixels( Glide.WindowWidth, Glide.WindowHeight, GL_RGB,
+                      type, (void *)aux_buffer );
+    }
+    else
+    {
+        glReadBuffer(GL_FRONT); 
+        glDrawBuffer(GL_AUX0);
+        glRasterPos2i(0, Glide.WindowHeight - 1);
+        glCopyPixels(0, 0, Glide.WindowWidth, Glide.WindowHeight, GL_COLOR);
+	glXSwapBuffers(dpy, win);
+        glReadBuffer(GL_AUX0);
+        glDrawBuffer(GL_BACK);
+        glRasterPos2i(0, Glide.WindowHeight - 1);
+        glCopyPixels(0, 0, Glide.WindowWidth, Glide.WindowHeight, GL_COLOR);
+    }
 
     if ( OpenGL.Blend )
         glEnable( GL_BLEND );
-
     glDrawBuffer( OpenGL.RenderBuffer );
 }
 
