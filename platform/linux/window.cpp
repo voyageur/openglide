@@ -57,6 +57,27 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     // win = (Window)wnd;
     root = RootWindow(dpy, scrnum);
 
+#if 0
+// Experiment with GLX 1.3 and the GLX_OML_swap_method extension
+// Unable to verify operation as not supported by my video card
+// If supported glXSwapBuffer can be called with no copying required
+    {
+        int attrib[] =
+        {
+            GLX_RGBA,
+            GLX_DOUBLEBUFFER,
+            GLX_DEPTH_SIZE, DefaultDepth(dpy, scrnum),
+            GLX_SWAP_EXCHANGE_OML,
+            None
+        };
+
+        int elements = 0;
+        GLXFBConfig *fbc = glXChooseFBConfig(dpy, DefaultScreen(dpy), attrib, &elements);
+        visinfo = glXGetVisualFromFBConfig(dpy, *fbc);
+    }
+#endif
+
+    if (visinfo)
     {
         int attrib[] =
         {
@@ -213,7 +234,8 @@ void ResetScreenMode()
 }
 
 void SwapBuffers()
-{   // What a pain.  Under Glide front/back buffers are swapped.
+{
+    // What a pain.  Under Glide front/back buffers are swapped.
     // Under Linux GL copies the back to front buffer and the
     // back buffer becomes underfined.  So we have to copy the
     // front buffer manually to the back (probably noticable
