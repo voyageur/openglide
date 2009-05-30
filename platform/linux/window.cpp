@@ -43,7 +43,7 @@ static FxU16                *aux_buffer   = 0;
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     Window root;
-    XVisualInfo *visinfo;
+    XVisualInfo *visinfo = 0;
     XSetWindowAttributes attr;
     unsigned long mask;
 
@@ -77,7 +77,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     }
 #endif
 
-    if (visinfo)
+    if (!visinfo)
     {
         int attrib[] =
         {
