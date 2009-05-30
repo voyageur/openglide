@@ -22,6 +22,7 @@
 
 #include "GlOgl.h"
 
+#include "platform/openglext.h"
 #include "platform/window.h"
 
 #define _strtime(s) {time_t t = time(0); strftime(s, 99, "%H:%M:%S", localtime (&t));}
@@ -31,6 +32,8 @@
 		    PointerMotionMask | ButtonMotionMask )
 #define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | StructureNotifyMask )
 
+typedef enum {bmCopy = 0, bmAux, bmExchange} BufferMethod;
+
 static Display              *dpy          = NULL;
 static int                   scrnum;
 static Window                win;
@@ -38,7 +41,10 @@ static GLXContext            ctx          = NULL;
 static bool                  vidmode_ext  = false;
 static XF86VidModeModeInfo **vidmodes;
 static bool                  mode_changed = false;
-static FxU16                *aux_buffer   = 0;
+static GLfloat              *aux_buffer;
+static BufferMethod          buffer_method;
+
+bool OGLIsExtensionSupported( const char * extension );
 
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
@@ -57,23 +63,41 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     // win = (Window)wnd;
     root = RootWindow(dpy, scrnum);
 
-#if 0
-// Experiment with GLX 1.3 and the GLX_OML_swap_method extension
-// Unable to verify operation as not supported by my video card
-// If supported glXSwapBuffer can be called with no copying required
-    {
-        int attrib[] =
-        {
-            GLX_RGBA,
-            GLX_DOUBLEBUFFER,
-            GLX_DEPTH_SIZE, DefaultDepth(dpy, scrnum),
-            GLX_SWAP_EXCHANGE_OML,
-            None
-        };
+    buffer_method = bmCopy;
 
-        int elements = 0;
-        GLXFBConfig *fbc = glXChooseFBConfig(dpy, DefaultScreen(dpy), attrib, &elements);
-        visinfo = glXGetVisualFromFBConfig(dpy, *fbc);
+#if defined(GLX_VERSION_1_3) && defined(GLX_OML_swap_method)
+    // Experiment with GLX 1.3 and the GLX_OML_swap_method extension
+    // Unable to verify operation as not supported by my video card
+    // If supported glXSwapBuffer can be called with no copying required
+    {
+        typedef GLXFBConfig * (*GLXCHOOSEFBCONFIGPROC) (Display *dpy, int screen, const int *attrib_list, int *nelements);
+        typedef XVisualInfo * (*GLXGETVISUALFROMFBCONFIGPROC) (Display *dpy, GLXFBConfig config);
+
+        GLXCHOOSEFBCONFIGPROC glXChooseFBConfig =
+            (GLXCHOOSEFBCONFIGPROC) OGLGetProcAddress ("glXChooseFBConfig");
+        GLXGETVISUALFROMFBCONFIGPROC glXGetVisualFromFBConfig =
+            (GLXGETVISUALFROMFBCONFIGPROC) OGLGetProcAddress ("glXGetVisualFromFBConfig");
+
+        if (glXChooseFBConfig && glXGetVisualFromFBConfig)
+        {
+            int attrib[] =
+            {
+                GLX_RGBA,
+                GLX_DOUBLEBUFFER,
+                GLX_DEPTH_SIZE, DefaultDepth(dpy, scrnum),
+                GLX_SWAP_EXCHANGE_OML,
+                None
+            };
+
+            int elements = 0;
+            GLXFBConfig *fbc = glXChooseFBConfig(dpy, DefaultScreen(dpy), attrib, &elements);
+            if (elements)
+            {
+                visinfo = glXGetVisualFromFBConfig(dpy, *fbc);
+                if (visinfo)
+                    buffer_method = bmExchange;
+            }
+        }
     }
 #endif
 
@@ -140,11 +164,17 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 
     glXMakeCurrent(dpy, win, ctx);
 
-    GLint buffers = 0;
-    glGetIntegerv(GL_AUX_BUFFERS, &buffers);
+    aux_buffer = 0;
+    if (buffer_method == bmCopy)
+    {
+        GLint buffers = 0;
+        glGetIntegerv(GL_AUX_BUFFERS, &buffers);
 
-    if (!buffers)
-        aux_buffer = (FxU16*) malloc (sizeof(FxU16) * width * height);
+        if (buffers)
+            buffer_method = bmAux;
+        else
+            aux_buffer = (GLfloat*) malloc (sizeof(*aux_buffer) * width * height * 3/*RGB*/);
+    }
 }
 
 void FinaliseOpenGLWindow( void)
@@ -161,7 +191,6 @@ void FinaliseOpenGLWindow( void)
     ctx = NULL;
     dpy = NULL;
     win = 0;
-    aux_buffer = 0;
 }
 
 void SetGamma(float value)
@@ -235,6 +264,12 @@ void ResetScreenMode()
 
 void SwapBuffers()
 {
+    if (buffer_method == bmExchange)
+    {
+        glXSwapBuffers( dpy, win );
+        return;
+    }
+
     // What a pain.  Under Glide front/back buffers are swapped.
     // Under Linux GL copies the back to front buffer and the
     // back buffer becomes underfined.  So we have to copy the
@@ -244,26 +279,7 @@ void SwapBuffers()
     glDisable( GL_BLEND );
     glDisable( GL_TEXTURE_2D );
     
-    if (aux_buffer)
-    {
-        GLenum type = GL_UNSIGNED_SHORT_5_5_5_1_EXT;
-
-        if ( InternalConfig.OGLVersion > OGL_VER_1_1 )
-            type = GL_UNSIGNED_SHORT_5_6_5;
-
-        glReadBuffer( GL_FRONT );
-        glReadPixels( 0, 0, 
-                      Glide.WindowWidth, Glide.WindowHeight,
-                      GL_RGB, type, (void *)aux_buffer );
-
-        glXSwapBuffers( dpy, win );
-
-        glDrawBuffer( GL_BACK );
-        glRasterPos2i(0, Glide.WindowHeight - 1);
-        glDrawPixels( Glide.WindowWidth, Glide.WindowHeight, GL_RGB,
-                      type, (void *)aux_buffer );
-    }
-    else
+    if (buffer_method == bmAux)
     {
         glReadBuffer(GL_FRONT); 
         glDrawBuffer(GL_AUX0);
@@ -274,6 +290,27 @@ void SwapBuffers()
         glDrawBuffer(GL_BACK);
         glRasterPos2i(0, Glide.WindowHeight - 1);
         glCopyPixels(0, 0, Glide.WindowWidth, Glide.WindowHeight, GL_COLOR);
+    }
+    else if (buffer_method == bmCopy)
+    {
+        if (!aux_buffer) // For testing
+            glXSwapBuffers( dpy, win );
+        else
+        {
+            GLenum type = GL_FLOAT;
+
+            glReadBuffer( GL_FRONT );
+            glReadPixels( 0, 0, 
+                          Glide.WindowWidth, Glide.WindowHeight,
+                          GL_RGB, type, (void *)aux_buffer );
+
+            glXSwapBuffers( dpy, win );
+
+            glDrawBuffer( GL_BACK );
+            glRasterPos2i(0, Glide.WindowHeight - 1);
+            glDrawPixels( Glide.WindowWidth, Glide.WindowHeight, GL_RGB,
+                          type, (void *)aux_buffer );
+        }
     }
 
     if ( OpenGL.Blend )
