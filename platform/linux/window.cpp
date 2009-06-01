@@ -175,6 +175,8 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         else
             aux_buffer = (GLfloat*) malloc (sizeof(*aux_buffer) * width * height * 3/*RGB*/);
     }
+
+    UserConfig.PrecisionFix = false;
 }
 
 void FinaliseOpenGLWindow( void)
