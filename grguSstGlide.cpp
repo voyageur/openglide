@@ -60,7 +60,9 @@ grGlideInit( void )
         Error( "Cannot allocate enough memory for Texture Buffer in User setting, using default" );
     }
 
-    Glide.TexMemoryMaxPosition  = (FxU32)Glide.TextureMemory;
+    Glide.TexMemoryMaxPosition   = (FxU32)Glide.TextureMemory;
+    InternalConfig.NoSplash      = UserConfig.NoSplash;
+    InternalConfig.ShamelessPlug = UserConfig.ShamelessPlug;
 }
 
 //*************************************************
