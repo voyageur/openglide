@@ -47,6 +47,7 @@ grGlideInit( void )
     Fps = FpsAux = Frame = 0;
 #endif
 
+    GetOptions ();
     OpenGL.GlideInit = true;
 
     RenderInitialize( );
