@@ -311,6 +311,7 @@ void GetOptions( void )
         fprintf( IniFile, "EnableVertexArrayEXT=%d\n", UserConfig.EXT_vertex_array );
         fprintf( IniFile, "TextureMemorySize=%d\n", UserConfig.TextureMemorySize );
         fprintf( IniFile, "FrameBufferMemorySize=%d\n", UserConfig.FrameBufferMemorySize );
+        fprintf( IniFile, "NoSplash=%d\n", UserConfig.NoSplash );
         fclose( IniFile );
     }
     else
