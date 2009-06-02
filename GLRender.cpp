@@ -59,8 +59,7 @@ static void             *pt1,
 static float            atmuoow;
 static float            btmuoow;
 static float            ctmuoow;
-static float            w, 
-                        aoow, 
+static float            aoow, 
                         boow, 
                         coow;
 static float            hAspect, 
@@ -558,9 +557,9 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
     else
     if ( OpenGL.DepthBufferType )
     {
-        pV->az = a->ooz * D1OVER65536;
-        pV->bz = b->ooz * D1OVER65536;
-        pV->cz = c->ooz * D1OVER65536;
+        pV->az = a->ooz * D1OVER65535;
+        pV->bz = b->ooz * D1OVER65535;
+        pV->cz = c->ooz * D1OVER65535;
     }
     else
     {
@@ -570,19 +569,20 @@ void RenderAddTriangle( const GrVertex *a, const GrVertex *b, const GrVertex *c,
         * games use these silly values, they probably don't
         * use z buffering anyway.
         */
-        if ( a->oow > 1.0 )
+        if ( a->oow > 1.0f )
         {
-            pV->az = pV->bz = pV->cz = 0.9f;
+            pV->az = pV->bz = pV->cz = 1.0f;
         }
         else 
         if ( InternalConfig.PrecisionFix )
-        {
-            w = 1.0f / a->oow;
-            pV->az = 8.9375f - (float( ( (*(FxU32 *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
-            w = 1.0f / b->oow;
-            pV->bz = 8.9375f - (float( ( (*(FxU32 *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
-            w = 1.0f / c->oow;
-            pV->cz = 8.9375f - (float( ( (*(FxU32 *)&w >> 11) & 0xFFFFF ) * D1OVER65536) );
+        {   // Fix precision to 16 integer bits.
+            FxU16 w;
+            w      = (FxU16)((a->oow / D1OVER65535) + 0.5f);
+            pV->az = (float)w * D1OVER65535;
+            w      = (FxU16)((b->oow / D1OVER65535) + 0.5f);
+            pV->bz = (float)w * D1OVER65535;
+            w      = (FxU16)((c->oow / D1OVER65535) + 0.5f);
+            pV->cz = (float)w * D1OVER65535;
         }
         else
         {
@@ -1045,8 +1045,8 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
     else 
     if ( OpenGL.DepthBufferType )
     {
-        pV->az = a->ooz * D1OVER65536;
-        pV->bz = b->ooz * D1OVER65536;
+        pV->az = a->ooz * D1OVER65535;
+        pV->bz = b->ooz * D1OVER65535;
     }
     else
     {
@@ -1056,17 +1056,18 @@ void RenderAddLine( const GrVertex *a, const GrVertex *b, bool unsnap )
         * games use these silly values, they probably don't
         * use z buffering anyway.
         */
-        if ( a->oow > 1.0 )
+        if ( a->oow > 1.0f )
         {
-            pV->az = pV->bz = pV->cz = 0.9f;
+            pV->az = pV->bz = 1.0f;
         }
         else 
         if ( InternalConfig.PrecisionFix )
-        {
-            w = 1.0f / a->oow;
-            pV->az = 1.0f - (float(((*(FxU32 *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
-            w = 1.0f / b->oow;
-            pV->bz = 1.0f - (float(((*(FxU32 *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
+        {   // Fix precision to 16 integer bits.
+            FxU16 w;
+            w      = (FxU16)((a->oow / D1OVER65535) + 0.5f);
+            pV->az = (float)w * D1OVER65535;
+            w      = (FxU16)((b->oow / D1OVER65535) + 0.5f);
+            pV->bz = (float)w / D1OVER65535;
         }
         else
         {
@@ -1449,14 +1450,19 @@ void RenderAddPoint( const GrVertex *a, bool unsnap )
     else 
     if ( OpenGL.DepthBufferType )
     {
-        pV->az = a->ooz * D1OVER65536;
+        pV->az = a->ooz * D1OVER65535;
     }
     else
     {
-        if ( InternalConfig.PrecisionFix )
+        if ( a->oow > 1.0f )
         {
-            w = 1.0f / a->oow;
-            pV->az = 1.0f - (float(((*(FxU32 *)&w >> 11) & 0xFFFFF) - (127 << 12)) * D1OVER65536);
+            pV->az = 1.0f;
+        }
+        else 
+        if ( InternalConfig.PrecisionFix )
+        {   // Fix precision to 16 integer bits.
+            FxU16 w = (FxU16)((a->oow / D1OVER65535) + 0.5f);
+            pV->az  = (float)w * D1OVER65535;
         }
         else
         {
