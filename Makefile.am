@@ -1,10 +1,8 @@
 AUTOMAKE_OPTIONS = foreign
 
-bin_PROGRAMS = test 
-
-test_SOURCES = test12.c tlib.c linutil.c
-
-test_LDADD = ./libglide2x.la
+#bin_PROGRAMS = test 
+#test_SOURCES = test12.c tlib.c linutil.c
+#test_LDADD = ./libglide2x.la
 #test_LDADD = -L/usr/lib -lglide2x -lm
 
 SUBDIRS=platform
@@ -32,7 +30,6 @@ grguTex.cpp \
 grguLfb.cpp \
 GLRender.cpp \
 OGLFogTables.cpp \
-OGLMiscTables.cpp \
 OGLTextureTables.cpp \
 OGLColorAlphaTables.cpp \
 TexDB.cpp \
