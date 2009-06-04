@@ -185,11 +185,9 @@ struct GlideStruct
 {
     int                     ActiveVoodoo;
     // Frame Buffer Stuff
-    int                     WindowWidth;
-    int                     WindowHeight;
-    int                     WindowTotalPixels;
-    GrScreenResolution_t    Resolution;
-    GrScreenRefresh_t       Refresh;
+    FxU32                   WindowWidth;
+    FxU32                   WindowHeight;
+    FxU32                   WindowTotalPixels; 
     int                     NumBuffers;
     int                     AuxBuffers;
     // States and Constants
@@ -210,8 +208,8 @@ struct OpenGLStruct
 {
     bool                    GlideInit;
     bool                    WinOpen;
-    int                     WindowWidth;
-    int                     WindowHeight;
+    GLsizei                 WindowWidth;
+    GLsizei                 WindowHeight;
     GLfloat                 Gamma;
     GLfloat                 AlphaReferenceValue;
     GLenum                  AlphaTestFunction;

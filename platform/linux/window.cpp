@@ -176,7 +176,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
             aux_buffer = (GLfloat*) malloc (sizeof(*aux_buffer) * width * height * 3/*RGB*/);
     }
 
-    UserConfig.PrecisionFix = false;
+//    UserConfig.PrecisionFix = false;
 }
 
 void FinaliseOpenGLWindow( void)
@@ -285,13 +285,13 @@ void SwapBuffers()
     {
         glReadBuffer(GL_FRONT); 
         glDrawBuffer(GL_AUX0);
-        glRasterPos2i(0, Glide.WindowHeight - 1);
-        glCopyPixels(0, 0, Glide.WindowWidth, Glide.WindowHeight, GL_COLOR);
+        glRasterPos2i(0, OpenGL.WindowHeight - 1);
+        glCopyPixels(0, 0, OpenGL.WindowWidth, OpenGL.WindowHeight, GL_COLOR);
 	glXSwapBuffers(dpy, win);
         glReadBuffer(GL_AUX0);
         glDrawBuffer(GL_BACK);
-        glRasterPos2i(0, Glide.WindowHeight - 1);
-        glCopyPixels(0, 0, Glide.WindowWidth, Glide.WindowHeight, GL_COLOR);
+        glRasterPos2i(0, OpenGL.WindowHeight - 1);
+        glCopyPixels(0, 0, OpenGL.WindowWidth, OpenGL.WindowHeight, GL_COLOR);
     }
     else if (buffer_method == bmCopy)
     {
@@ -303,14 +303,14 @@ void SwapBuffers()
 
             glReadBuffer( GL_FRONT );
             glReadPixels( 0, 0, 
-                          Glide.WindowWidth, Glide.WindowHeight,
+                          OpenGL.WindowWidth, OpenGL.WindowHeight,
                           GL_RGB, type, (void *)aux_buffer );
 
             glXSwapBuffers( dpy, win );
 
             glDrawBuffer( GL_BACK );
-            glRasterPos2i(0, Glide.WindowHeight - 1);
-            glDrawPixels( Glide.WindowWidth, Glide.WindowHeight, GL_RGB,
+            glRasterPos2i(0, OpenGL.WindowHeight - 1);
+            glDrawPixels( OpenGL.WindowWidth, OpenGL.WindowHeight, GL_RGB,
                           type, (void *)aux_buffer );
         }
     }

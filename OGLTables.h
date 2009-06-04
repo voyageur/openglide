@@ -11,12 +11,6 @@ typedef struct
     float w;
 } OGLAspect;
 
-typedef struct 
-{
-    int width;
-    int height;
-} OGLWindow;
-
 typedef struct
 {
     int width;
@@ -55,9 +49,5 @@ extern OGLColorTable colorCombineTable[ 14 ][ 17 ];
 extern FxU32 intStartEnd[ GR_FOG_TABLE_SIZE + 1 ];
 extern FxU32 intEndMinusStart[ GR_FOG_TABLE_SIZE ];
 extern float tableIndexToW[ GR_FOG_TABLE_SIZE ];
-
-// OGLMiscTables.cpp
-extern OGLWindow windowDimensions[ 16 ];
-extern int windowRefresh[ 9 ];
 
 #endif

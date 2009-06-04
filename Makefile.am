@@ -1,5 +1,12 @@
 AUTOMAKE_OPTIONS = foreign
 
+bin_PROGRAMS = test 
+
+test_SOURCES = test12.c tlib.c linutil.c
+
+test_LDADD = ./libglide2x.la
+#test_LDADD = -L/usr/lib -lglide2x -lm
+
 SUBDIRS=platform
 EXTRA_DIST=splash.dat banner.dat
 
@@ -38,7 +45,6 @@ grguBuffer.cpp \
 grguColorAlpha.cpp \
 GLutil.cpp \
 gsplash.cpp \
-gbanner.cpp \
 \
 FormatConversion.h \
 glext.h \
@@ -53,7 +59,7 @@ TexDB.h
 # We substitute the libtool-specific library version in configure.in.
 libglide2x_la_LDFLAGS = -no-undefined -version-info $(LIBVERSION) $(X_PRE_LIBS) $(X_LIBS) $(X_EXTRA_LIBS) $(DLLFLAGS)
 
-INCLUDES=-g3 -O0
+INCLUDES=
 
 libglide2x_la_LIBADD = ./platform/linux/libplatform.la ./platform/sdl/libsdl.la
 

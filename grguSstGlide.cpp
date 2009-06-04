@@ -5,6 +5,58 @@
 #include "PGTexture.h"
 #include "OGLTables.h"
 
+static bool InterpretScreenResolution(GrScreenResolution_t eResolution, FxU32 &width, FxU32 &height)
+{
+    if ( eResolution > GR_RESOLUTION_400x300 )
+        return false;
+
+    static const FxU32 windowDimensions[16][2] =
+    {
+        {  320,  200 }, // GR_RESOLUTION_320x200
+        {  320,  240 }, // GR_RESOLUTION_320x240
+        {  400,  256 }, // GR_RESOLUTION_400x256
+        {  512,  384 }, // GR_RESOLUTION_512x384
+        {  640,  200 }, // GR_RESOLUTION_640x200
+        {  640,  350 }, // GR_RESOLUTION_640x350
+        {  640,  400 }, // GR_RESOLUTION_640x400
+        {  640,  480 }, // GR_RESOLUTION_640x480
+        {  800,  600 }, // GR_RESOLUTION_800x600
+        {  960,  720 }, // GR_RESOLUTION_960x720
+        {  856,  480 }, // GR_RESOLUTION_856x480:
+        {  512,  256 }, // GR_RESOLUTION_512x256:
+        { 1024,  768 }, // GR_RESOLUTION_1024x768:
+        { 1280, 1024 }, // GR_RESOLUTION_1280x1024:
+        { 1600, 1200 }, // GR_RESOLUTION_1600x1200:
+        {  400,  300 }  // GR_RESOLUTION_400x300:
+    };
+
+    width  = windowDimensions[eResolution][0];
+    height = windowDimensions[eResolution][1];
+    return true;
+}
+
+static bool InterpretScreenRefresh(GrScreenRefresh_t eRefresh, GLuint &refresh)
+{
+    if ( eRefresh > GR_REFRESH_120Hz )
+        return false;
+
+    static const GLuint windowRefresh[9] =
+    {
+         60, // GR_REFRESH_60Hz
+         70, // GR_REFRESH_70Hz
+         72, // GR_REFRESH_72Hz
+         75, // GR_REFRESH_75Hz
+         80, // GR_REFRESH_80Hz
+         90, // GR_REFRESH_90Hz
+        100, // GR_REFRESH_100Hz
+         85, // GR_REFRESH_85Hz
+        120  // GR_REFRESH_120Hz
+    };
+    
+    refresh = windowRefresh[eRefresh];
+    return true;
+};
+
 
 //*************************************************
 //* Returns the current Glide Version
@@ -192,29 +244,26 @@ grSstWinOpen(   FxU hwnd,
         grSstWinClose( );
     }
 
-    Glide.Resolution = res;
-
+    if (!InterpretScreenResolution(res, Glide.WindowWidth, Glide.WindowHeight))
+    {
 #ifdef OGL_DEBUG
-    if ( Glide.Resolution > GR_RESOLUTION_400x300 )
-    {
         Error( "grSstWinOpen: res = GR_RESOLUTION_NONE\n" );
-        return FXFALSE;
-    }
-    if ( Glide.Refresh > GR_REFRESH_120Hz )
-    {
-        Error( "grSstWinOpen: Refresh Incorrect\n" );
-        return FXFALSE;
-    }
 #endif
+        return FXFALSE;
+    }
 
-    Glide.WindowWidth = windowDimensions[ Glide.Resolution ].width;
-    Glide.WindowHeight = windowDimensions[ Glide.Resolution ].height;
-    OpenGL.WindowWidth = Glide.WindowWidth;
+    if (!InterpretScreenRefresh(ref, OpenGL.Refresh))
+    {
+#ifdef OGL_DEBUG
+        Error( "grSstWinOpen: Refresh Incorrect\n" );
+#endif
+        return FXFALSE;
+    }
+
+    OpenGL.WindowWidth  = Glide.WindowWidth;
     OpenGL.WindowHeight = Glide.WindowHeight;
     Glide.WindowTotalPixels = Glide.WindowWidth * Glide.WindowHeight;
 
-    Glide.Refresh = ref;
-    OpenGL.Refresh = windowRefresh[ Glide.Refresh ];
     OpenGL.WaitSignal = (int)( 1000 / OpenGL.Refresh );
 
     // Initing OpenGL Window

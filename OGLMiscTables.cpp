@@ -1,7 +1,11 @@
 
 #include "OGLTables.h"
 
-
+/* Move to grguSstGlide, since only use there.
+ * These are unsafe as all users have to
+ * take care not to buffer overrun.  Is better
+ * to have a safe accessing function e.g
+ * (InterpretScreenResolution, etc).
 OGLWindow windowDimensions[ 16 ] =
 {
     {  320,  200 }, // GR_RESOLUTION_320x200
@@ -34,3 +38,4 @@ int windowRefresh[ 9 ] =
      85, // GR_REFRESH_85Hz
     120  // GR_REFRESH_120Hz
 };
+*/
