@@ -179,7 +179,6 @@ DECLARE_THUNK1(GRFOGTABLE, void, const GrFog_t*, ft)
 ENDDECLARE
 
 DECLARE_THUNK1(GRGAMMACORRECTIONVALUE, void, float, a)
-    __faddr (a);
     __fcall (a);
 ENDDECLARE
 
