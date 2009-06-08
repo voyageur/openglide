@@ -15,6 +15,8 @@
 
 #ifndef C_USE_SDL
 
+#include <math.h>
+#include <vector>
 #include <stdio.h>
 #include <unistd.h>
 #include <GL/glx.h>
@@ -34,15 +36,17 @@
 
 typedef enum {bmCopy = 0, bmAux, bmExchange} BufferMethod;
 
-static Display              *dpy          = NULL;
-static int                   scrnum;
-static Window                win;
-static GLXContext            ctx          = NULL;
-static bool                  vidmode_ext  = false;
-static XF86VidModeModeInfo **vidmodes;
-static bool                  mode_changed = false;
-static GLfloat              *aux_buffer;
-static BufferMethod          buffer_method;
+static Display                  *dpy          = NULL;
+static int                       scrnum;
+static Window                    win;
+static GLXContext                ctx          = NULL;
+static bool                      vidmode_ext  = false;
+static XF86VidModeModeInfo     **vidmodes;
+static bool                      mode_changed = false;
+static GLfloat                  *aux_buffer;
+static BufferMethod              buffer_method;
+
+static std::vector<unsigned short> gammaRamp;
 
 bool OGLIsExtensionSupported( const char * extension );
 
@@ -127,6 +131,24 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     if (vidmode_ext && UserConfig.InitFullScreen)
         mode_changed = SetScreenMode( width, height );
 
+    try
+    {
+        int size;
+        if (XF86VidModeGetGammaRampSize(dpy, scrnum, &size))
+        {
+            gammaRamp.resize (size * 4);
+            unsigned short *red   = &gammaRamp[0] + size;
+            unsigned short *green = red   + size;
+            unsigned short *blue  = green + size;
+
+            if (!XF86VidModeGetGammaRamp(dpy, scrnum, size, red, green, blue))
+                gammaRamp.clear ();
+       }
+    }
+    catch (...)
+    {
+    }
+
     // window attributes
     attr.background_pixel = 0;
     attr.border_pixel = 0;
@@ -176,13 +198,14 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
             aux_buffer = (GLfloat*) malloc (sizeof(*aux_buffer) * width * height * 3/*RGB*/);
     }
 
-//    UserConfig.PrecisionFix = false;
+    UserConfig.PrecisionFix = false;
 }
 
 void FinaliseOpenGLWindow( void)
 {
     if (dpy)
     {
+        RestoreGamma ();
         if (ctx)
             glXDestroyContext(dpy, ctx);
         if (win)
@@ -193,14 +216,47 @@ void FinaliseOpenGLWindow( void)
     ctx = NULL;
     dpy = NULL;
     win = 0;
+    gammaRamp.clear ();
 }
 
 void SetGamma(float value)
 {
+    if (gammaRamp.size())
+    {
+//        XColor xcmap[256];
+        int    size  = (int)(gammaRamp.size() / 4);
+        double max   = (size - 1);
+        double gamma = value;
+        unsigned short *ramp = &gammaRamp[0];
+
+        /* Calculate the appropriate palette for the given gamma ramp */
+        for ( int i = 0; i < size; i++ )
+        {   // Better represantation of glides 8 bit gamma (init/initvg/gamma.c : sst1InitGammaRGB)
+            unsigned int v =
+                ((unsigned int)( (max * pow( (double)i / max, 1.0 / gamma )) + 0.5) << 8) | (unsigned int)i;
+/*
+            xcmap[i].pixel = SDL_MapRGB(this->screen->format, i, i, i);
+            xcmap[i].red   = v;
+            xcmap[i].green = v;
+            xcmap[i].blue  = v;
+            xcmap[i].flags = (DoRed|DoGreen|DoBlue);
+*/
+            ramp[i] = (unsigned short)v;
+        }
+        XF86VidModeSetGammaRamp(dpy, scrnum, size, ramp, ramp, ramp);
+    }
 }
 
 void RestoreGamma()
 {
+    if (gammaRamp.size())
+    {
+        int size = (int)(gammaRamp.size() / 4);
+        unsigned short *red   = &gammaRamp[0] + size;
+        unsigned short *green = red   + size;
+        unsigned short *blue  = green + size;
+        XF86VidModeSetGammaRamp(dpy, scrnum, size, red, green, blue);
+    }
 }
 
 bool SetScreenMode(int &width, int &height)
