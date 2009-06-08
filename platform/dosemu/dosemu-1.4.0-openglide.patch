@@ -10,6 +10,28 @@ diff -Naur dosemu-pristine/compiletime-settings dosemu/compiletime-settings
    target_cpu auto
    prefix /usr/local
 diff -Naur dosemu-pristine/src/arch/linux/async/signal.c dosemu/src/arch/linux/async/signal.c
+--- dosemu-pristine/src/emu.c 2009-01-30 23:40:39.000000000 +0000
++++ dosemu/src/emu.c        2009-05-27 07:03:29.000000000 +0100
+@@ -319,7 +319,7 @@
+ emulate(int argc, char **argv)
+ #endif
+ {
+-    char *signalstack[16384];
++    char *signalstack[sizeof(*cstack)/sizeof(char*)];
+     int e;
+
+     srand(time(NULL));
+--- dosemu-pristine/src/include/emu.h 2009-01-30 23:40:27.000000000 +0000
++++ dosemu/src/include/emu.h        2009-05-27 07:03:52.000000000 +0100
+@@ -61,7 +61,7 @@
+ EXTERN int terminal_fd INIT(-1);
+ EXTERN int running_kversion INIT(0);
+
+-EXTERN char *(*cstack)[16384];
++EXTERN char *(*cstack)[61440];
+
+ EXTERN int screen_mode;
+
 --- dosemu-pristine/src/arch/linux/async/signal.c	2009-01-30 22:55:56.000000000 +0000
 +++ dosemu/src/arch/linux/async/signal.c	2009-01-30 22:59:12.000000000 +0000
 @@ -188,8 +188,9 @@
@@ -314,7 +336,7 @@ diff -Naur dosemu-pristine/src/plugin/openglide/config/plugin_init.h dosemu/src/
 diff -Naur dosemu-pristine/src/plugin/openglide/glide2x.h dosemu/src/plugin/openglide/glide2x.h
 --- dosemu-pristine/src/plugin/openglide/glide2x.h	1970-01-01 01:00:00.000000000 +0100
 +++ dosemu/src/plugin/openglide/glide2x.h	2009-01-30 22:59:19.000000000 +0000
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,75 @@
 +#ifndef _glide2x_h_
 +#define _glide2x_h_
 +
@@ -386,7 +408,8 @@ diff -Naur dosemu-pristine/src/plugin/openglide/glide2x.h dosemu/src/plugin/open
 +#define CMD_GRTEXMINADDRESS (64)
 +#define CMD_GUTEXMEMQUERYAVAIL (65)
 +#define CMD_GRTEXTEXTUREMEMREQUIRED (66)
-+#define CMD_MAX (67)
++#define CMD_GRSPLASH (67)
++#define CMD_MAX (68)
 +
 +#endif /* _glide2x_h_ */
 diff -Naur dosemu-pristine/src/plugin/openglide/Makefile dosemu/src/plugin/openglide/Makefile
@@ -419,16 +442,20 @@ diff -Naur dosemu-pristine/src/plugin/openglide/Makefile dosemu/src/plugin/openg
 diff -Naur dosemu-pristine/src/plugin/openglide/openglide.c dosemu/src/plugin/openglide/openglide.c
 --- dosemu-pristine/src/plugin/openglide/openglide.c	1970-01-01 01:00:00.000000000 +0100
 +++ dosemu/src/plugin/openglide/openglide.c	2009-01-30 22:59:19.000000000 +0000
-@@ -0,0 +1,349 @@
+@@ -0,0 +1,355 @@
 +#include <stdio.h>
 +#include <string.h>
 +#include <limits.h>
-+#include </home/swhite/root/include/openglide/sdk2_glide.h>
-+#include "glide2x.h"
 +
 +#include "config.h"
 +#include "cpu.h"
 +#include "memory.h"
++
++/* Define as type to be equivalent bitsize as float */
++#define float FxU32
++
++#include </home/swhite/root/include/openglide/sdk2_glide.h>
++#include "glide2x.h"
 +
 +#define DOSEMU
 +
@@ -503,6 +530,7 @@ diff -Naur dosemu-pristine/src/plugin/openglide/openglide.c dosemu/src/plugin/op
 +#define SDK_GRTEXMINADDRESS              grTexMinAddress
 +#define SDK_GUTEXMEMQUERYAVAIL           guTexMemQueryAvail
 +#define SDK_GRTEXTEXTUREMEMREQUIRED      grTexTextureMemRequired
++#define SDK_GRSPLASH                     grSplash
 +
 +#define THUNK(func) THUNK_##func
 +
@@ -755,6 +783,7 @@ diff -Naur dosemu-pristine/src/plugin/openglide/openglide.c dosemu/src/plugin/op
 +    thunks[CMD_GRTEXMINADDRESS]           = &THUNK(GRTEXMINADDRESS);
 +    thunks[CMD_GUTEXMEMQUERYAVAIL]        = &THUNK(GUTEXMEMQUERYAVAIL);
 +    thunks[CMD_GRTEXTEXTUREMEMREQUIRED]   = &THUNK(GRTEXTEXTUREMEMREQUIRED);
++    thunks[CMD_GRSPLASH]                  = &THUNK(GRSPLASH);
 +
 +    register_vxd_client (&vxd);
 +
