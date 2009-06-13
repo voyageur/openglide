@@ -38,6 +38,7 @@ typedef enum {bmCopy = 0, bmAux, bmExchange} BufferMethod;
 
 static Display                  *dpy          = NULL;
 static int                       scrnum;
+static Colormap                  cmap;
 static Window                    win;
 static GLXContext                ctx          = NULL;
 static bool                      vidmode_ext  = false;
@@ -47,6 +48,7 @@ static GLfloat                  *aux_buffer;
 static BufferMethod              buffer_method;
 
 static std::vector<unsigned short> gammaRamp;
+static std::vector<XColor>         xcolors;
 
 bool OGLIsExtensionSupported( const char * extension );
 
@@ -115,6 +117,9 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
             None
         };
         visinfo = glXChooseVisual(dpy, scrnum, attrib);
+//        static XVisualInfo v;
+//        XMatchVisualInfo(dpy, scrnum, DefaultDepth(dpy, scrnum), DirectColor, &v);
+//        visinfo = &v;
     }
 
     if (!visinfo)
@@ -134,7 +139,11 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     try
     {
         int size;
-        if (XF86VidModeGetGammaRampSize(dpy, scrnum, &size))
+        if (visinfo->c_class == DirectColor)
+        {   // If DirectColor we can use colormaps instead
+            xcolors.resize (visinfo->colormap_size);
+        }
+        else if (XF86VidModeGetGammaRampSize(dpy, scrnum, &size))
         {
             gammaRamp.resize (size * 4);
             unsigned short *red   = &gammaRamp[0] + size;
@@ -143,16 +152,24 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 
             if (!XF86VidModeGetGammaRamp(dpy, scrnum, size, red, green, blue))
                 gammaRamp.clear ();
-       }
+        }
     }
     catch (...)
     {
     }
 
+    if (!xcolors.size())
+        cmap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
+    else
+    {
+        cmap = XCreateColormap(dpy, root, visinfo->visual, AllocAll);
+        SetGamma (1.0f);
+    }
+
     // window attributes
     attr.background_pixel = 0;
     attr.border_pixel = 0;
-    attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
+    attr.colormap = cmap;
     attr.event_mask = X_MASK;
     if (mode_changed)
     {
@@ -217,33 +234,47 @@ void FinaliseOpenGLWindow( void)
     dpy = NULL;
     win = 0;
     gammaRamp.clear ();
+    xcolors.clear ();
 }
 
 void SetGamma(float value)
 {
+    double gamma = value;
+
+    // This affects all windows
     if (gammaRamp.size())
     {
-//        XColor xcmap[256];
-        int    size  = (int)(gammaRamp.size() / 4);
-        double max   = (size - 1);
-        double gamma = value;
+        int    size = (int)(gammaRamp.size() / 4);
+        double max  = (size - 1);
         unsigned short *ramp = &gammaRamp[0];
 
-        /* Calculate the appropriate palette for the given gamma ramp */
+        // Calculate the appropriate palette for the given gamma ramp
         for ( int i = 0; i < size; i++ )
         {   // Better represantation of glides 8 bit gamma (init/initvg/gamma.c : sst1InitGammaRGB)
             unsigned int v =
                 ((unsigned int)( (max * pow( (double)i / max, 1.0 / gamma )) + 0.5) << 8) | (unsigned int)i;
-/*
-            xcmap[i].pixel = SDL_MapRGB(this->screen->format, i, i, i);
-            xcmap[i].red   = v;
-            xcmap[i].green = v;
-            xcmap[i].blue  = v;
-            xcmap[i].flags = (DoRed|DoGreen|DoBlue);
-*/
             ramp[i] = (unsigned short)v;
         }
         XF86VidModeSetGammaRamp(dpy, scrnum, size, ramp, ramp, ramp);
+    }
+    else if (xcolors.size())
+    {
+        int    size = (int)(xcolors.size());
+        double max  = (size - 1);
+
+        // Private colormap.  Calculate the appropriate palette for the given gamma ramp
+        for ( int i = 0; i < size; i++ )
+        {
+            unsigned short v =
+                ((unsigned short)( (max * pow( (double)i / max, 1.0 / gamma )) + 0.5) << 8) | (unsigned short)i;
+            xcolors[i].pixel = i << 16 | i << 8 | i;
+            xcolors[i].red   = v;
+            xcolors[i].green = v;
+            xcolors[i].blue  = v;
+            xcolors[i].flags = (DoRed|DoGreen|DoBlue);
+        }
+        XStoreColors(dpy, cmap, &xcolors[0], size);
+        XSync(dpy, False);
     }
 }
 
