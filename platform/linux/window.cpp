@@ -145,8 +145,8 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         }
         else if (XF86VidModeGetGammaRampSize(dpy, scrnum, &size))
         {
-            gammaRamp.resize (size * 4);
-            unsigned short *red   = &gammaRamp[0] + size;
+            gammaRamp.resize (size * 6);
+            unsigned short *red   = &gammaRamp[0];
             unsigned short *green = red   + size;
             unsigned short *blue  = green + size;
 
@@ -244,18 +244,24 @@ void SetGamma(float value)
     // This affects all windows
     if (gammaRamp.size())
     {
-        int    size = (int)(gammaRamp.size() / 4);
+        int    size = (int)(gammaRamp.size() / 6);
         double max  = (size - 1);
-        unsigned short *ramp = &gammaRamp[0];
+        unsigned short *red    = &gammaRamp[0];
+        unsigned short *green  = red    + size;
+        unsigned short *blue   = green  + size;
+        unsigned short *ramp_r = blue   + size;
+        unsigned short *ramp_g = ramp_r + size;
+        unsigned short *ramp_b = ramp_g + size;
 
         // Calculate the appropriate palette for the given gamma ramp
         for ( int i = 0; i < size; i++ )
         {   // Better represantation of glides 8 bit gamma (init/initvg/gamma.c : sst1InitGammaRGB)
-            unsigned int v =
-                ((unsigned int)( (max * pow( (double)i / max, 1.0 / gamma )) + 0.5) << 8) | (unsigned int)i;
-            ramp[i] = (unsigned short)v;
+            int v = (int)((max * pow( (double)i / max, 1.0 / gamma )) + 0.5);
+            ramp_r[i] = red[v];
+            ramp_g[i] = green[v];
+            ramp_b[i] = blue[v];
         }
-        XF86VidModeSetGammaRamp(dpy, scrnum, size, ramp, ramp, ramp);
+        XF86VidModeSetGammaRamp(dpy, scrnum, size, ramp_r, ramp_g, ramp_b);
     }
     else if (xcolors.size())
     {
@@ -282,8 +288,8 @@ void RestoreGamma()
 {
     if (gammaRamp.size())
     {
-        int size = (int)(gammaRamp.size() / 4);
-        unsigned short *red   = &gammaRamp[0] + size;
+        int size = (int)(gammaRamp.size() / 6);
+        unsigned short *red   = &gammaRamp[0];
         unsigned short *green = red   + size;
         unsigned short *blue  = green + size;
         XF86VidModeSetGammaRamp(dpy, scrnum, size, red, green, blue);
