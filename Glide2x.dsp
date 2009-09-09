@@ -411,6 +411,10 @@ SOURCE=.\Glide2x.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\gsplash.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\platform\windows\library.cpp
 # End Source File
 # Begin Source File
