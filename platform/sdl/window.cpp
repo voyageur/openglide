@@ -75,6 +75,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     }
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     if((SDL_SetVideoMode(width, height, 32, UserConfig.InitFullScreen ? SDL_OPENGL|SDL_FULLSCREEN : SDL_OPENGL)) == 0)
     {
@@ -82,7 +83,10 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         return;
     }
 
-    UserConfig.PrecisionFix = false;
+    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &height);
+    if ( height > 16 ) {
+	UserConfig.PrecisionFix = false;
+    }
 
     if(SDL_GetGammaRamp(old_ramp.red, old_ramp.green, old_ramp.blue) != -1)
         ramp_stored = true;

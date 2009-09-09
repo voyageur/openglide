@@ -370,15 +370,15 @@ void Convert1555to5551( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels )
 
 #endif
 
-FxU64 Mask565A = __UINT64_C(0xFF00FF00FF00FF00);
-FxU64 Mask565B = __UINT64_C(0xF800F800F800F800);
-FxU64 Mask565G = __UINT64_C(0x07E007E007E007E0);
-FxU64 Mask565R = __UINT64_C(0x001F001F001F001F);
-
 #ifdef HAVE_MMX
 
 void Convert565to8888( FxU16 *Src, FxU32 *Dst, FxU32 NumberOfPixels )
 {
+
+FxU64 Mask565A = __UINT64_C(0xFF00FF00FF00FF00);
+FxU64 Mask565B = __UINT64_C(0xF800F800F800F800);
+FxU64 Mask565G = __UINT64_C(0x07E007E007E007E0);
+FxU64 Mask565R = __UINT64_C(0x001F001F001F001F);
 
 #ifdef _MSC_VER
    // Word entered is ARGB
@@ -431,11 +431,11 @@ copying:
     asm ("movq  %3, %%mm7;"
          "movq  %4, %%mm6;"
          "movq  %5, %%mm5;"
-         "movq  Mask565R, %%mm4;"
+         "movq  %6, %%mm4;"
          ".align 16;"
          "MMXConvert565to8888_copying:"
          "movq  (%1), %%mm0;"
-         "addl $8, %1;"
+         "add" OP " $8, %1;"
          "movq  %%mm0, %%mm2;"
          "movq  %%mm0, %%mm1;"
          "pand  %%mm4, %%mm0;" /* Mask R */
@@ -456,14 +456,14 @@ copying:
          "punpckhbw %%mm1, %%mm2;"
 
          "movq  %%mm2, (%2);"  /* Storing Unpacked */
-         "addl $16, %2;"
+         "add" OP " $16, %2;"
          "movq  %%mm0, -8(%2);"
-         "subl $4, %0;"
+         "sub" OP " $4, %0;"
          "jg    MMXConvert565to8888_copying;"
          "EMMS;"
          : /* No outputs */
          : "r" ((FxU)NumberOfPixels), "r" (Src), "r" (Dst), /*Inputs */
-           "m" (Mask565A), "m" (Mask565B), "m" (Mask565G)
+           "m" (Mask565A), "m" (Mask565B), "m" (Mask565G), "m" (Mask565R)
          : "%mm0", "%mm1", "%mm2", "%mm3", "%mm4", "%mm5",
            "%mm6", "%mm7", "memory" /* Clobbers */
         );
