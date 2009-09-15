@@ -9,7 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
-
+#ifndef WIN32
 
 #include <stdlib.h>
 #include "GlOgl.h"
@@ -34,3 +34,4 @@ public:
 
 static InitLibrary initLibrary;
 
+#endif // WIN32

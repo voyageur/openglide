@@ -59,7 +59,8 @@ fi
 
 if test x$have_sdl_lib = xyes ; then
     AC_DEFINE(C_USE_SDL)
-    LIBS="$LIBS $SDL_LIBS"
+    # Don't need SDLmain since we're a library
+    LIBS="$LIBS ${SDL_LIBS/-lSDLmain/}"
     CPPFLAGS="$CPPFLAGS $SDL_CFLAGS -I/usr/include"
 fi
 
@@ -74,8 +75,8 @@ case "$target_cpu" in
   i?86)
     AC_DEFINE(HAVE_MMX,1)
     AC_MSG_RESULT(x86 compatible)
-    CXXFLAGS="$CXXFLAGS -mmmx -msse"
-    CXXFLAGS="-march=$target_cpu -fomit-frame-pointer $CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS -mmmx"
+    #CXXFLAGS="-march=$target_cpu -fomit-frame-pointer $CXXFLAGS"
   ;;
   *)
    AC_MSG_RESULT(unknown)
@@ -87,8 +88,8 @@ osflag=""
 case "$host" in
     *cygwin* | *mingw32*) 
         CXXFLAGS="$CXXFLAGS -DWIN32 -I\$(top_srcdir)/platform/windows"
-        LIBS="$LIBS -lopengl32 -lglu32"
-        DLLFLAGS="-Wc,-def -Wc,Glide2x.def"
+        LIBS="$LIBS -luser32 -lgdi32 -lopengl32 -lglu32"
+        DLLFLAGS="-avoid-version -Wc,-def -Wc,Glide2x.def"
         ;;
     *freebsd*)
         ;;
@@ -122,4 +123,5 @@ sdk2_unix.h \
 platform/Makefile \
 platform/linux/Makefile \
 platform/sdl/Makefile \
+platform/windows/Makefile \
 )

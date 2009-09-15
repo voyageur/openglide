@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifdef WIN32
 
 #include <windows.h>
 #include "GlOgl.h"
@@ -47,3 +48,4 @@ float ClockFrequency( void )
 }
 #pragma optimize( "", on )
 
+#endif // WIN32

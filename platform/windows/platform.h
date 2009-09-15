@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifdef WIN32
 
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
@@ -30,3 +31,5 @@ typedef unsigned int FxU;
 #endif
 
 #endif
+
+#endif // WIN32

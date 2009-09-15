@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#ifndef C_USE_SDL
+#if !defined C_USE_SDL && !defined WIN32
 
 #include <math.h>
 #include <vector>
@@ -413,4 +413,4 @@ void SwapBuffers()
     glDrawBuffer( OpenGL.RenderBuffer );
 }
 
-#endif // C_USE_SDL
+#endif // !C_USE_SDL && !WIN32

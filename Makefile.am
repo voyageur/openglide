@@ -58,7 +58,7 @@ libglide2x_la_LDFLAGS = -no-undefined -version-info $(LIBVERSION) $(X_PRE_LIBS) 
 
 INCLUDES=
 
-libglide2x_la_LIBADD = ./platform/linux/libplatform.la ./platform/sdl/libsdl.la
+libglide2x_la_LIBADD = ./platform/linux/libplatform.la ./platform/sdl/libsdl.la ./platform/windows/libwindows.la
 
 install-data-hook:
 	ln -sf $(libglide2xincludedir)/sdk2_glide.h $(includedir)/glide.h

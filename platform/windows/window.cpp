@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#ifndef C_USE_SDL
+#if !defined C_USE_SDL && defined WIN32
 
 #include <windows.h>
 #include <io.h>
@@ -218,4 +218,4 @@ void SwapBuffers()
     SwapBuffers(hDC);
 }
 
-#endif // C_USE_SDL
+#endif // !C_USE_SDL && WIN32

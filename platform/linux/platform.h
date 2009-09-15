@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifndef WIN32
 
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
@@ -40,3 +41,5 @@
 typedef void (*ExtFn)();
 
 #endif
+
+#endif // WIN32

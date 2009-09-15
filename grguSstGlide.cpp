@@ -55,7 +55,14 @@ static bool InterpretScreenRefresh(GrScreenRefresh_t eRefresh, GLuint &refresh)
     
     refresh = windowRefresh[eRefresh];
     return true;
-};
+}
+
+static FxU32 int_log2 (FxU32 val) {
+    FxU32 log = 0;
+    while ((val >>= 1) != 0)
+        log++;
+    return log;
+}
 
 
 //*************************************************
@@ -286,15 +293,15 @@ grSstWinOpen(   FxU hwnd,
 
     Glide.SrcBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
     Glide.DstBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
+    FxU32 texsize = 2 << int_log2(Glide.WindowWidth > Glide.WindowHeight ? Glide.WindowWidth : Glide.WindowHeight);
 
-    // Create LFB texture, resolution shouldn't be above 1024
     glGenTextures( 1, &Glide.LFBTexture );
     glBindTexture( GL_TEXTURE_2D, Glide.LFBTexture );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, texsize, texsize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
     glBindTexture( GL_TEXTURE_2D, 0 );
 
     // Just checking
@@ -307,7 +314,7 @@ grSstWinOpen(   FxU hwnd,
     ZeroMemory( Glide.SrcBuffer.Address, OPENGLBUFFERMEMORY * 2 );
 
 #define BLUE_SCREEN     (0x07FF)
-    for( int i = 0; i < Glide.WindowTotalPixels; i++ )
+    for( FxU32 i = 0; i < Glide.WindowTotalPixels; i++ )
     {
         Glide.DstBuffer.Address[i] = BLUE_SCREEN;
     }

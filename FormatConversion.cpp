@@ -41,10 +41,6 @@ void Convert8888to565(FxU32 *Src, FxU16 *Dst, FxU32 Pixels )
     }
 }
 
-FxU64 Mask565_5551_1 = __UINT64_C(0xFFC0FFC0FFC0FFC0);
-FxU64 Mask565_5551_2 = __UINT64_C(0x001F001F001F001F);
-FxU64 Mask565_5551_3 = __UINT64_C(0x0001000100010001);
-
 #ifdef HAVE_MMX
 
 // This functions processes 4 pixels at a time, there is no problem in
@@ -52,6 +48,10 @@ FxU64 Mask565_5551_3 = __UINT64_C(0x0001000100010001);
 // the buffers should be large enough
 void Convert565to5551( FxU32 *Src, FxU32 *Dst, int NumberOfPixels )
 {
+FxU64 Mask565_5551_1 = __UINT64_C(0xFFC0FFC0FFC0FFC0);
+FxU64 Mask565_5551_2 = __UINT64_C(0x001F001F001F001F);
+FxU64 Mask565_5551_3 = __UINT64_C(0x0001000100010001);
+
 #ifdef _MSC_VER
     __asm
     {

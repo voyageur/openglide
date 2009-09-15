@@ -49,7 +49,7 @@ grLfbLock( GrLock_t dwType,
     }
     else
     {
-        int j;
+        FxU32 j;
 
         glReadBuffer( dwBuffer == GR_BUFFER_BACKBUFFER
                       ? GL_BACK : GL_FRONT );
@@ -102,7 +102,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             return FXFALSE;
         }
 
-        int ii,
+        FxU32 ii,
             x,
             y,
             maxx = 0,
@@ -138,8 +138,8 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
         if ( maxx >= minx )
         {
             maxx++; maxy++;
-            int xsize = maxx - minx;
-            int ysize = maxy - miny;
+            FxU32 xsize = maxx - minx;
+            FxU32 ysize = maxy - miny;
 
             // Draw a textured quad
             glPushAttrib( GL_COLOR_BUFFER_BIT|GL_TEXTURE_BIT|GL_DEPTH_BUFFER_BIT );

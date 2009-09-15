@@ -37,15 +37,15 @@ static bool wasInit      = false;
 
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
-    wasInit = SDL_WasInit(SDL_INIT_VIDEO);
+    wasInit = SDL_WasInit(SDL_INIT_VIDEO)!=0;
     if(!wasInit)
     {
         bool err = false;
         char *oldWindowId = 0;
+        char windowId[40];
 
         if (wnd)
         {   // Set SDL window ID
-            char windowId[40];
             sprintf (windowId, "SDL_WINDOWID=%ld", (long)wnd);
             oldWindowId = getenv("SDL_WINDOWID");
             if (oldWindowId)
@@ -65,7 +65,8 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
                 putenv("SDL_WINDOWID");
             else
             {
-                setenv("SDL_WINDOWID", oldWindowId, 1);
+                sprintf (windowId, "SDL_WINDOWID=%s", oldWindowId);
+                putenv(windowId);
                 free (oldWindowId);
             }
         }

@@ -52,7 +52,7 @@
 #endif
 
 #ifdef __GNUC__
-#define RDTSC(v)    asm volatile ("rdtsc;" : "=A" (v) : : "%eax", "%edx")
+#define RDTSC(v)    asm volatile ("rdtsc;" : "=A" (v) )
 #endif
 
 #define ERRORFILE               "OpenGLid.err"

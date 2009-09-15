@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifndef WIN32
 
 #include <stdio.h>
 #include "platform/error.h"
@@ -23,3 +24,4 @@ void ReportError(const char *message)
     printf("Error: %s\n", message);
 }
 
+#endif // WIN32

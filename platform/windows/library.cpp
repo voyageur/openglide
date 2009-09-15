@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifdef WIN32
 
 #include <windows.h>
 #include "GlOgl.h"
@@ -70,3 +71,5 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvreserved )
     }
     return TRUE;
 }
+
+#endif // WIN32

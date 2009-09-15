@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS=linux sdl
+SUBDIRS=linux sdl windows
 
 EXTRA_DIST=\
 clock.h \

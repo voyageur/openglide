@@ -10,4 +10,5 @@ platform/clock.h \
 platform/error.h \
 platform/openglext.h \
 platform/window.h \
-platform/linux/platform.h
+platform/linux/platform.h \
+platform/windows/platform.h

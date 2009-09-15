@@ -9,6 +9,7 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifndef WIN32
 
 #include <stdio.h>
 #include <string.h>
@@ -30,3 +31,5 @@ float ClockFrequency( void )
     fclose (f);
     return freq * 1000000.0;
 }
+
+#endif // WIN32

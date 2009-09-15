@@ -20,7 +20,7 @@
 #ifndef __3DFX_H__
 #define __3DFX_H__
 
-#if defined(__unix__)
+#if defined(__unix__) || (__MINGW32__)
 #include "sdk2_unix.h"
 #else
 /*
@@ -73,6 +73,9 @@ typedef struct { float r, g, b, a; } FxColor4;
 #    define FX_ENTRY extern
 #    define FX_CALL  __stdcall
 #  endif
+#elif defined(__MINGW32__)
+#  define FX_ENTRY extern "C"
+#  define FX_CALL  __stdcall
 #elif defined(__WATCOMC__)
 #  define FX_ENTRY extern
 #  define FX_CALL  __stdcall
