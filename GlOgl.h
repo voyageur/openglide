@@ -201,6 +201,7 @@ struct GlideStruct
     BufferStruct            SrcBuffer;
     BufferStruct            DstBuffer;
     GLuint                  LFBTexture;
+    FxU32                   LFBTextureSize;
     int                     TextureMemory;
 };
 

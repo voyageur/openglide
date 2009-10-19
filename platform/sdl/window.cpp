@@ -37,6 +37,7 @@ static bool wasInit      = false;
 
 void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
+    bool FullScreen = UserConfig.InitFullScreen;
     wasInit = SDL_WasInit(SDL_INIT_VIDEO)!=0;
     if(!wasInit)
     {
@@ -73,12 +74,19 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 
         if (err)
             return;
-    }
+    } else {
+        SDL_Surface* tmpSurface = SDL_GetVideoSurface();
+        if (tmpSurface)
+        {
+            // Preserve window/fullscreen mode in SDL apps and override config file entry
+           (tmpSurface->flags&SDL_FULLSCREEN) ? (FullScreen = true) : (FullScreen = false);
+        }
+    } 
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    if((SDL_SetVideoMode(width, height, 32, UserConfig.InitFullScreen ? SDL_OPENGL|SDL_FULLSCREEN : SDL_OPENGL)) == 0)
+    if((SDL_SetVideoMode(width, height, 32, FullScreen ? SDL_OPENGL|SDL_FULLSCREEN : SDL_OPENGL)) == 0)
     {
         GlideMsg("Video mode set failed: %s\n", SDL_GetError());
         return;

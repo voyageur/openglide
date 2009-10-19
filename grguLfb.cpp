@@ -167,16 +167,16 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             glBegin( GL_QUADS );
                 glColor3f( 1.0f, 1.0f, 1.0f );
 
-                glTexCoord2f( (float)minx/1024.0f, 0.0f );
+                glTexCoord2f( (float)minx/Glide.LFBTextureSize, 0.0f );
                 glVertex2f( (float)minx, (float)miny );
 
-                glTexCoord2f((float)maxx/1024.0f, 0.0f );
+                glTexCoord2f((float)maxx/Glide.LFBTextureSize, 0.0f );
                 glVertex2f( (float)maxx, (float)miny );
 
-                glTexCoord2f( (float)maxx/1024.0f, (float)ysize/1024.0f );
+                glTexCoord2f( (float)maxx/Glide.LFBTextureSize, (float)ysize/Glide.LFBTextureSize );
                 glVertex2f( (float)maxx, (float)maxy );
 
-                glTexCoord2f( (float)minx/1024.0f, (float)ysize/1024.0f );
+                glTexCoord2f( (float)minx/Glide.LFBTextureSize, (float)ysize/Glide.LFBTextureSize );
                 glVertex2f( (float)minx, (float)maxy );
             glEnd( );
 

@@ -293,7 +293,7 @@ grSstWinOpen(   FxU hwnd,
 
     Glide.SrcBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
     Glide.DstBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
-    FxU32 texsize = 2 << int_log2(Glide.WindowWidth > Glide.WindowHeight ? Glide.WindowWidth : Glide.WindowHeight);
+    Glide.LFBTextureSize = 2 << int_log2(Glide.WindowWidth > Glide.WindowHeight ? (Glide.WindowWidth-1) : (Glide.WindowHeight-1));
 
     glGenTextures( 1, &Glide.LFBTexture );
     glBindTexture( GL_TEXTURE_2D, Glide.LFBTexture );
@@ -301,7 +301,7 @@ grSstWinOpen(   FxU hwnd,
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, texsize, texsize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Glide.LFBTextureSize, Glide.LFBTextureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
     glBindTexture( GL_TEXTURE_2D, 0 );
 
     // Just checking
