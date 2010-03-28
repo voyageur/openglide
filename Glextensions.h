@@ -21,7 +21,7 @@ void ValidateUserConfig();
 // This cannot have the same name as the prototype functions
 // in glext.h, else compiler compiains about object being
 // redeclared as different type of symbol (func->variable).
-extern PFNGLCLIENTACTIVETEXTUREPROC             p_glClientActiveTexture;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC          p_glClientActiveTexture;
 extern PFNGLMULTITEXCOORD4FARBPROC              p_glMultiTexCoord4fARB;
 extern PFNGLMULTITEXCOORD4FVARBPROC             p_glMultiTexCoord4fvARB;
 extern PFNGLACTIVETEXTUREARBPROC                p_glActiveTextureARB;

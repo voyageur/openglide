@@ -251,6 +251,11 @@ grSstWinOpen(   FxU hwnd,
         grSstWinClose( );
     }
 
+#ifdef OGL_DONE
+    GlideMsg( "grSstWinOpen( %d, %d, %d, %d, %d, %d, %d )\n",
+        hwnd, res, ref, cformat, org_loc, num_buffers, num_aux_buffers );
+#endif
+
     if (!InterpretScreenResolution(res, Glide.WindowWidth, Glide.WindowHeight))
     {
 #ifdef OGL_DEBUG
@@ -282,11 +287,6 @@ grSstWinOpen(   FxU hwnd,
     Glide.State.ColorFormat = cformat;
     Glide.NumBuffers        = num_buffers;
     Glide.AuxBuffers        = num_aux_buffers;
-
-#ifdef OGL_DONE
-    GlideMsg( "grSstWinOpen( %d, %d, %d, %d, %d, %d, %d )\n",
-        hwnd, res, ref, cformat, org_loc, num_buffers, num_aux_buffers );
-#endif
 
     // Initializing Glide and OpenGL
     InitOpenGL( );

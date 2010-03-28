@@ -36,7 +36,7 @@ static struct
 static BOOL ramp_stored  = false;
 static BOOL mode_changed = false;
 
-void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
+bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     PIXELFORMATDESCRIPTOR   pfd;
     int                     PixFormat;
@@ -129,6 +129,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     ramp_stored = GetDeviceGammaRamp( pDC, &old_ramp );
 
     ReleaseDC( NULL, pDC );
+    return true;
 }
 
 void FinaliseOpenGLWindow( void)

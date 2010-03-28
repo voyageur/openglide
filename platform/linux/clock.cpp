@@ -20,6 +20,8 @@ float ClockFrequency( void )
     char  str[35];
     float freq = 0.0;
     FILE *f = fopen ("/proc/cpuinfo", "r");
+    // Be nice and don't crash
+    if ( f == NULL ) return freq;
     while (fgets (str, sizeof (str), f))
     {
         if (!strncmp ("cpu MHz", str, 7))

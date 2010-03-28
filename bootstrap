@@ -1,6 +1,14 @@
 #!/bin/sh
 aclocal
-libtoolize --force --copy
+
+# MacOSX has glibtoolize
+if [ "`uname`" = "Darwin" ]; then
+    LIBTOOLIZE=glibtoolize
+else
+    LIBTOOLIZE=libtoolize
+fi
+
+$LIBTOOLIZE --force --copy
 autoheader --force
 automake --add-missing --copy
 autoconf --force

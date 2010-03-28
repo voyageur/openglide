@@ -9,13 +9,27 @@
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifndef __WINDOW_H__
 #define __WINDOW_H__
 
 #include "sdk2_3dfx.h"
 
-void InitialiseOpenGLWindow(FxU32 wnd, int x, int y, int width, int height);
+// Include proper OpenGL headers
+#ifdef C_USE_SDL
+#include "SDL_opengl.h"
+#elif defined(__MACOSX__)
+#include <OpenGL/gl.h>	/* Header File For The OpenGL Library */
+#include <OpenGL/glu.h>	/* Header File For The GLU Library */
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
+bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height);
 void FinaliseOpenGLWindow( void);
 
 void SetGamma(float value);

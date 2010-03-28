@@ -38,8 +38,6 @@
 #include "platform.h"
 #include "platform/window.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <stdio.h>
 
 #include "sdk2_glide.h"
@@ -303,7 +301,7 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
 // Genral Prototypes
 VARARGDECL(void) GlideMsg( const char *szString, ... );
 VARARGDECL(void) Error( const char *szString, ... );
-void GLErro( char *Funcao );
+void GLErro( const char *Funcao );
 void ConvertColor4B( GrColor_t GlideColor, FxU32 &C );
 void ConvertColorB( GrColor_t GlideColor, FxU8 &R, FxU8 &G, FxU8 &B, FxU8 &A );
 void ConvertColorF( GrColor_t GlideColor, float &R, float &G, float &B, float &A );

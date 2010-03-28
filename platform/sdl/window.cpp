@@ -35,7 +35,7 @@ static struct
 static bool ramp_stored  = false;
 static bool wasInit      = false;
 
-void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
+bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     bool FullScreen = UserConfig.InitFullScreen;
     wasInit = SDL_WasInit(SDL_INIT_VIDEO)!=0;
@@ -73,7 +73,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         }
 
         if (err)
-            return;
+            return false;
     } else {
         SDL_Surface* tmpSurface = SDL_GetVideoSurface();
         if (tmpSurface)
@@ -89,16 +89,18 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     if((SDL_SetVideoMode(width, height, 32, FullScreen ? SDL_OPENGL|SDL_FULLSCREEN : SDL_OPENGL)) == 0)
     {
         GlideMsg("Video mode set failed: %s\n", SDL_GetError());
-        return;
+        return false;
     }
 
     SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &height);
     if ( height > 16 ) {
-	UserConfig.PrecisionFix = false;
+        UserConfig.PrecisionFix = false;
     }
 
     if(SDL_GetGammaRamp(old_ramp.red, old_ramp.green, old_ramp.blue) != -1)
         ramp_stored = true;
+
+    return true;
 }
 
 void FinaliseOpenGLWindow( void)

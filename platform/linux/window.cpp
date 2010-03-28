@@ -52,7 +52,7 @@ static std::vector<XColor>         xcolors;
 
 bool OGLIsExtensionSupported( const char * extension );
 
-void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
+bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
 {
     Window root;
     XVisualInfo *visinfo = 0;
@@ -62,7 +62,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     if (!(dpy = XOpenDisplay(NULL)))
     {
         fprintf(stderr, "Error couldn't open the X display\n");
-        return;
+        return false;
     }
 
     scrnum = DefaultScreen(dpy);
@@ -125,7 +125,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     if (!visinfo)
     {
         fprintf(stderr, "Error couldn't get an RGB, Double-buffered, Depth visual\n");
-        return;
+        return false;
     }
 
     {   // Determine presence of video mode extension
@@ -216,6 +216,7 @@ void InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     }
 
     UserConfig.PrecisionFix = false;
+    return true;
 }
 
 void FinaliseOpenGLWindow( void)
@@ -351,7 +352,7 @@ void ResetScreenMode()
         {
             XFree(vidmodes);
             vidmodes=0;
-	}
+        }
     }
     if (aux_buffer)
         free (aux_buffer);
@@ -380,7 +381,7 @@ void SwapBuffers()
         glDrawBuffer(GL_AUX0);
         glRasterPos2i(0, OpenGL.WindowHeight - 1);
         glCopyPixels(0, 0, OpenGL.WindowWidth, OpenGL.WindowHeight, GL_COLOR);
-	glXSwapBuffers(dpy, win);
+        glXSwapBuffers(dpy, win);
         glReadBuffer(GL_AUX0);
         glDrawBuffer(GL_BACK);
         glRasterPos2i(0, OpenGL.WindowHeight - 1);

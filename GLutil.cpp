@@ -73,7 +73,7 @@ VARARGDECL(void) Error( const char *szString, ... )
     NumberOfErrors++;
 }
 
-void GLErro( char *Funcao )
+void GLErro( const char *Funcao )
 {
     GLenum Erro = glGetError( );
 

@@ -84,7 +84,7 @@ stExtensionSupport glNecessaryExt[] =
 }; 
 
 //Functions
-PFNGLCLIENTACTIVETEXTUREPROC            p_glClientActiveTexture = NULL;
+PFNGLCLIENTACTIVETEXTUREARBPROC         p_glClientActiveTexture = NULL;
 
 PFNGLMULTITEXCOORD4FARBPROC             p_glMultiTexCoord4fARB = NULL;
 PFNGLMULTITEXCOORD4FVARBPROC            p_glMultiTexCoord4fvARB = NULL;
@@ -345,7 +345,7 @@ void GLExtensions( void )
         GlideMsg( "MultiTexture Textures Units = %x\n", NumberOfTMUs );
 
         OpenGL.MultiTextureTMUs     = NumberOfTMUs;
-        p_glClientActiveTexture       = (PFNGLCLIENTACTIVETEXTUREPROC) OGLGetProcAddress( "glClientActiveTexture" );
+        p_glClientActiveTexture       = (PFNGLCLIENTACTIVETEXTUREARBPROC) OGLGetProcAddress( "glClientActiveTextureARB" );
         p_glActiveTextureARB          = (PFNGLACTIVETEXTUREARBPROC) OGLGetProcAddress( "glActiveTextureARB" );
         p_glMultiTexCoord4fARB        = (PFNGLMULTITEXCOORD4FARBPROC) OGLGetProcAddress( "glMultiTexCoord4fARB" );
         p_glMultiTexCoord4fvARB       = (PFNGLMULTITEXCOORD4FVARBPROC) OGLGetProcAddress( "glMultiTexCoord4fvARB" );

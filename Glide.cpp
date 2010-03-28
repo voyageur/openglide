@@ -75,7 +75,10 @@ void InitMainVariables( void )
 
 bool InitWindow( FxU hWnd )
 {
-    InitialiseOpenGLWindow( hWnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight );
+    if ( !InitialiseOpenGLWindow( hWnd, 0, 0,  OpenGL.WindowWidth, OpenGL.WindowHeight ) ) {
+        Error( "Failed to Initialise OpenGL Window!\n" );
+        return false;
+    }
 
     if ( !strcmp( (char*)glGetString( GL_RENDERER ), "GDI Generic" ) )
         ReportWarning("You are running in a Non-Accelerated OpenGL!!!\nThings can become really slow");

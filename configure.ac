@@ -91,6 +91,11 @@ case "$host" in
         LIBS="$LIBS -luser32 -lgdi32 -lopengl32 -lglu32"
         DLLFLAGS="-avoid-version -Wc,-def -Wc,Glide2x.def"
         ;;
+    *darwin*)
+        osflag="__linux__"
+        CXXFLAGS="$CXXFLAGS -D__unix__ -D$osflag -I\$(top_srcdir)/platform/linux"
+        LIBS="$LIBS -Wl,-framework,OpenGL"
+        ;;
     *freebsd*)
         ;;
     *hpux*)
