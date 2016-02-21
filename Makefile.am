@@ -61,4 +61,5 @@ INCLUDES=
 libglide2x_la_LIBADD = ./platform/linux/libplatform.la ./platform/sdl/libsdl.la ./platform/windows/libwindows.la
 
 install-data-hook:
-	ln -sf $(libglide2xincludedir)/sdk2_glide.h $(includedir)/glide.h
+	(cd $(DESTDIR)$(includedir); \
+		$(LN_S) openglide/sdk2_glide.h glide.h)
