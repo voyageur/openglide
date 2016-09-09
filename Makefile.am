@@ -62,8 +62,8 @@ libglide2x_la_LIBADD = ./platform/linux/libplatform.la ./platform/sdl/libsdl.la 
 
 install-data-hook:
 	cd $(DESTDIR)$(includedir) && \
-		$(LN_S) openglide/sdk2_glide.h glide.h
+		$(LN_S) -f openglide/sdk2_glide.h glide.h
 
 install-exec-hook:
 	cd $(DESTDIR)$(libdir) && \
-		$(LN_S) lib*.so libglide.so.2
+		$(LN_S) -f lib*.so libglide.so.2
