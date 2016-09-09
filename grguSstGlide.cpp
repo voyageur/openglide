@@ -272,10 +272,28 @@ grSstWinOpen(   FxU hwnd,
         return FXFALSE;
     }
 
-    OpenGL.WindowWidth  = Glide.WindowWidth;
-    OpenGL.WindowHeight = Glide.WindowHeight;
-    Glide.WindowTotalPixels = Glide.WindowWidth * Glide.WindowHeight;
+    // Set the size of the OpenGL window (might be different from Glide window size)
+    if (UserConfig.Resolution == 0)
+    {
+        // Use the resolution requested by the game
+        OpenGL.WindowWidth = Glide.WindowWidth;
+        OpenGL.WindowHeight = Glide.WindowHeight;
+    }
+    else if (UserConfig.Resolution <= 16)
+    {
+        // multiply the original size by the resolution factor
+        OpenGL.WindowWidth = Glide.WindowWidth * UserConfig.Resolution;
+        OpenGL.WindowHeight = Glide.WindowHeight * UserConfig.Resolution;
+    }
+    else
+    {
+        // override the resolution
+        OpenGL.WindowWidth = UserConfig.Resolution;
+        // Glide games have a fixed 4/3 aspect ratio
+        OpenGL.WindowHeight = UserConfig.Resolution * 3 / 4;
+    }
 
+    Glide.WindowTotalPixels = Glide.WindowWidth * Glide.WindowHeight;
     OpenGL.WaitSignal = (int)( 1000 / OpenGL.Refresh );
 
     // Initing OpenGL Window
@@ -284,6 +302,12 @@ grSstWinOpen(   FxU hwnd,
         return FXFALSE;
     }
 
+    OpenGL.ClipMinX = 0;
+    OpenGL.ClipMinY = 0;
+    OpenGL.ClipMaxX = OpenGL.WindowWidth;
+    OpenGL.ClipMaxY = OpenGL.WindowHeight;
+    OpenGL.WindowTotalPixels = (FxU32)( OpenGL.WindowWidth * OpenGL.WindowHeight );
+
     Glide.State.ColorFormat = cformat;
     Glide.NumBuffers        = num_buffers;
     Glide.AuxBuffers        = num_aux_buffers;
@@ -291,27 +315,33 @@ grSstWinOpen(   FxU hwnd,
     // Initializing Glide and OpenGL
     InitOpenGL( );
 
-    Glide.SrcBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
-    Glide.DstBuffer.Address = new FxU16[ OPENGLBUFFERMEMORY * 2 ];
+    OpenGL.tmpBuf = new FxU32[ OpenGL.WindowTotalPixels ];
+    Glide.SrcBuffer.Address = new FxU16[ Glide.WindowTotalPixels ];
+    Glide.DstBuffer.Address = new FxU16[ Glide.WindowTotalPixels ];
     Glide.LFBTextureSize = 2 << int_log2(Glide.WindowWidth > Glide.WindowHeight ? (Glide.WindowWidth-1) : (Glide.WindowHeight-1));
 
     glGenTextures( 1, &Glide.LFBTexture );
     glBindTexture( GL_TEXTURE_2D, Glide.LFBTexture );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    if ( OpenGL.WindowTotalPixels != Glide.WindowTotalPixels ) {
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    } else {
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    }
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, Glide.LFBTextureSize, Glide.LFBTextureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
     glBindTexture( GL_TEXTURE_2D, 0 );
 
     // Just checking
-    if ( ( !Glide.SrcBuffer.Address ) || ( !Glide.DstBuffer.Address ) )
+    if ( ( !Glide.SrcBuffer.Address ) || ( !Glide.DstBuffer.Address ) || ( !OpenGL.tmpBuf ) )
     {
         Error( "Could NOT allocate sufficient memory for Buffers... Sorry\n" );
         exit( -1 );
     }
 
-    ZeroMemory( Glide.SrcBuffer.Address, OPENGLBUFFERMEMORY * 2 );
+    ZeroMemory( Glide.SrcBuffer.Address, Glide.WindowTotalPixels * 2 );
 
 #define BLUE_SCREEN     (0x07FF)
     for( FxU32 i = 0; i < Glide.WindowTotalPixels; i++ )
@@ -452,6 +482,7 @@ grSstWinClose( void )
     glDeleteTextures(1, &Glide.LFBTexture);
     delete[] Glide.SrcBuffer.Address;
     delete[] Glide.DstBuffer.Address;
+    delete[] OpenGL.tmpBuf;
 }
 
 //*************************************************

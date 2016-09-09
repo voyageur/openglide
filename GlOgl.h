@@ -66,8 +66,6 @@
 
 #define OGL_VER_1_1             101
 
-#define OPENGLBUFFERMEMORY      OpenGL.WindowWidth * OpenGL.WindowHeight
-
 #define OPENGLFOGTABLESIZE      64 * 1024
 
 #define D1OVER255               0.003921568627451f      // 1 / 255
@@ -209,6 +207,7 @@ struct OpenGLStruct
     bool                    WinOpen;
     GLsizei                 WindowWidth;
     GLsizei                 WindowHeight;
+    FxU32                   WindowTotalPixels;
     GLfloat                 Gamma;
     GLfloat                 AlphaReferenceValue;
     GLenum                  AlphaTestFunction;
@@ -225,6 +224,10 @@ struct OpenGLStruct
     GLenum                  DstBlend;
     GLenum                  SrcAlphaBlend;
     GLenum                  DstAlphaBlend;
+    FxU32                   ClipMinX;
+    FxU32                   ClipMaxX;
+    FxU32                   ClipMinY;
+    FxU32                   ClipMaxY;
     GLuint                  Refresh;
     GLboolean               ColorMask;
     GLfloat                 ConstantColor[ 4 ];
@@ -245,6 +248,7 @@ struct OpenGLStruct
     int                     MultiTextureTMUs;
     int                     DepthBufferType;
     int                     WaitSignal;
+    FxU32                   *tmpBuf;
 };
 
 struct ConfigStruct
@@ -253,6 +257,8 @@ struct ConfigStruct
     int     Priority;
     int     TextureMemorySize;
     int     FrameBufferMemorySize;
+
+    float   Resolution;
 
     bool    FogEnable;
     bool    InitFullScreen;

@@ -95,6 +95,12 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
     Glide.State.ClipMaxX = maxx;
     Glide.State.ClipMinY = miny;
     Glide.State.ClipMaxY = maxy;
+    // calculate the corresponding OpenGL coords
+    // (the multiplication has to come first because the values are integers)
+    OpenGL.ClipMinX = OpenGL.WindowWidth * minx / Glide.WindowWidth;
+    OpenGL.ClipMaxX = OpenGL.WindowWidth * maxx / Glide.WindowWidth;
+    OpenGL.ClipMinY = OpenGL.WindowHeight * miny / Glide.WindowHeight;
+    OpenGL.ClipMaxY = OpenGL.WindowHeight * maxy / Glide.WindowHeight;
 
     if ( ( Glide.State.ClipMinX != 0 ) || 
          ( Glide.State.ClipMinY != 0 ) ||
@@ -113,29 +119,29 @@ grClipWindow( FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy )
 
     if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
     {
-        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
-                 Glide.State.ClipMinY, Glide.State.ClipMaxY, 
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX,
+                 Glide.State.ClipMinY, Glide.State.ClipMaxY,
                  OpenGL.ZNear, OpenGL.ZFar );
-        glViewport( Glide.State.ClipMinX, Glide.State.ClipMinY, 
-                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
-                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
+        glViewport( OpenGL.ClipMinX, OpenGL.ClipMinY,
+                    OpenGL.ClipMaxX - OpenGL.ClipMinX,
+                    OpenGL.ClipMaxY - OpenGL.ClipMinY );
         // Used for the buffer clearing
-	    glScissor( Glide.State.ClipMinX, Glide.State.ClipMinY,
-    			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
-    			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
+        glScissor( OpenGL.ClipMinX, OpenGL.ClipMinY,
+                   OpenGL.ClipMaxX - OpenGL.ClipMinX,
+                   OpenGL.ClipMaxY - OpenGL.ClipMinY );
     }
     else
     {
-        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
-                 Glide.State.ClipMaxY, Glide.State.ClipMinY, 
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX,
+                 Glide.State.ClipMaxY, Glide.State.ClipMinY,
                  OpenGL.ZNear, OpenGL.ZFar );
-        glViewport( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
-                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
-                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
+        glViewport( OpenGL.ClipMinX, OpenGL.WindowHeight - OpenGL.ClipMaxY,
+                    OpenGL.ClipMaxX - OpenGL.ClipMinX,
+                    OpenGL.ClipMaxY - OpenGL.ClipMinY );
         // Used for the buffer clearing
-	    glScissor( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
-    			   Glide.State.ClipMaxX - Glide.State.ClipMinX,
-    			   Glide.State.ClipMaxY - Glide.State.ClipMinY );
+        glScissor( OpenGL.ClipMinX, OpenGL.WindowHeight - OpenGL.ClipMaxY,
+                   OpenGL.ClipMaxX - OpenGL.ClipMinX,
+                   OpenGL.ClipMaxY - OpenGL.ClipMinY );
     }
 
     glMatrixMode( GL_MODELVIEW );

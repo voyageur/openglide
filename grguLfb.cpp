@@ -18,10 +18,6 @@
 
 #define BLUE_SCREEN     (0x07FF)
 
-// Will need to change this later
-static FxU32 tempBuf[ 2048 * 2048 ];
-
-
 //*************************************************
 FX_ENTRY FxBool FX_CALL
 grLfbLock( GrLock_t dwType, 
@@ -30,7 +26,7 @@ grLfbLock( GrLock_t dwType,
            GrOriginLocation_t dwOrigin, 
            FxBool bPixelPipeline, 
            GrLfbInfo_t *lfbInfo )
-{ 
+{
 #ifdef OGL_CRITICAL
     GlideMsg( "grLfbLock( %d, %d, %d, %d, %d, --- )\n", dwType, dwBuffer, dwWriteMode, dwOrigin, bPixelPipeline ); 
 #endif
@@ -54,24 +50,80 @@ grLfbLock( GrLock_t dwType,
         glReadBuffer( dwBuffer == GR_BUFFER_BACKBUFFER
                       ? GL_BACK : GL_FRONT );
 
+        // BGRA has been tested to be the fastest way to read pixels
+        // Reading pixels in one of the 565 modes is way slower than reading BGRA and converting to 565 later
+        // This may change with new drivers/graphics hardware...
+        // if anyone can show a faster way to read pixels, suggestions welcome :-)
         glReadPixels( 0, 0,
-                      Glide.WindowWidth, Glide.WindowHeight,
+                      OpenGL.WindowWidth, OpenGL.WindowHeight,
                       GL_BGRA, GL_UNSIGNED_BYTE,
-                      (void *)tempBuf );
+                      (void *)OpenGL.tmpBuf );
 
         if ( dwOrigin == GR_ORIGIN_UPPER_LEFT )
         {
-            for ( j = 0; j < Glide.WindowHeight; j++ )
-            {
-                Convert8888to565( tempBuf + ( ( ( Glide.WindowHeight ) - 1 - j ) * Glide.WindowWidth ),
+            // When the OpenGL resolution differs from the Glide resolution,
+            // the content of the read buffer must be scaled
+            if ( OpenGL.WindowTotalPixels != Glide.WindowTotalPixels ) {
+                const FxU32* src;
+                FxU16* dst = Glide.SrcBuffer.Address;
+                const FxU32 xratio = (OpenGL.WindowWidth << 16) / (Glide.WindowWidth);
+                const FxU32 yratio = (OpenGL.WindowHeight << 16) / (Glide.WindowHeight);
+                FxU32 u, v = 0, x, y;
+                for ( y = 0; y < Glide.WindowHeight; y++ )
+                {
+                    src = OpenGL.tmpBuf + (OpenGL.WindowHeight -1 - (v >> 16)) * OpenGL.WindowWidth;
+                    u = 0;
+                    for ( x = 0; x < Glide.WindowWidth; x++ )
+                    {
+                        // Resize and convert from 888 to 565
+                        FxU32 pixel = src[u >> 16];
+                        *dst++ = ( FxU16 ) (
+                            ( pixel & 0x00F80000 ) >> 8 |
+                            ( pixel & 0x0000FC00 ) >> 5 |
+                            ( pixel & 0x000000F8 ) >> 3 );
+                        u += xratio;
+                    }
+                    v += yratio;
+                }
+            } else {
+                for ( j = 0; j < Glide.WindowHeight; j++ )
+                {
+                    Convert8888to565( OpenGL.tmpBuf + ( ( ( Glide.WindowHeight ) - 1 - j ) * Glide.WindowWidth ),
                         Glide.SrcBuffer.Address + ( j * Glide.WindowWidth ),
                         Glide.WindowWidth );
+                }
             }
         }
         else
         {
-            Convert8888to565( tempBuf, Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
-        }    
+            if ( OpenGL.WindowTotalPixels != Glide.WindowTotalPixels ) {
+                // Copy and scale
+                const FxU32* src;
+                FxU16* dst = Glide.SrcBuffer.Address;
+                const FxU32 xratio = (OpenGL.WindowWidth << 16) / Glide.WindowWidth;
+                const FxU32 yratio = (OpenGL.WindowHeight << 16) / Glide.WindowHeight;
+                FxU32 u, v = 0, x, y;
+                for ( y = 0; y < Glide.WindowHeight; y++ )
+                {
+                    src = OpenGL.tmpBuf + (v >> 16) * OpenGL.WindowWidth;
+                    u = 0;
+                    for( x = 0; x < Glide.WindowWidth; x++ )
+                    {
+                        // Resize and convert from 888 to 565
+                        FxU32 pixel = src[u >> 16];
+                        *dst++ = ( FxU16 ) (
+                            ( pixel & 0x00F80000 ) >> 8 |
+                            ( pixel & 0x0000FC00 ) >> 5 |
+                            ( pixel & 0x000000F8 ) >> 3 );
+                        u += xratio;
+                    }
+                    v += yratio;
+                }
+            } else {
+                Convert8888to565( OpenGL.tmpBuf, Glide.SrcBuffer.Address, Glide.WindowTotalPixels );
+            }
+        }
+
         Glide.SrcBuffer.Lock            = true;
         Glide.SrcBuffer.Type            = dwType;
         Glide.SrcBuffer.Buffer          = dwBuffer;
@@ -94,7 +146,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 #ifdef OGL_CRITICAL
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif
-    
+
     if ( dwType & 1 )
     {
         if ( ! Glide.DstBuffer.Lock )
@@ -107,8 +159,8 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
             y,
             maxx = 0,
             maxy = 0,
-            minx = 2048, 
-            miny = 2048;
+            minx = Glide.WindowWidth,
+            miny = Glide.WindowHeight;
 
         for ( ii = 0, x = 0, y = 0; ii < Glide.WindowTotalPixels; ii++ )
         {
@@ -119,13 +171,13 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
                 if ( x < minx ) minx = x;
                 if ( y < miny ) miny = y;
 
-                tempBuf[ ii ] = 0x0    |    // A
+                OpenGL.tmpBuf[ ii ] = 0x0    |                      // A
                 ( Glide.DstBuffer.Address[ ii ] & 0x001F ) << 19 |  // B
                 ( Glide.DstBuffer.Address[ ii ] & 0x07E0 ) << 5  |  // G
                 ( Glide.DstBuffer.Address[ ii ] >> 8 );             // R
                 Glide.DstBuffer.Address[ ii ] = BLUE_SCREEN;
             } else
-                tempBuf[ ii ] = 0xFFFFFFFF;
+                OpenGL.tmpBuf[ ii ] = 0xFFFFFFFF;
 
             x++;
             if ( x == Glide.WindowWidth )
@@ -158,7 +210,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 
             glBindTexture( GL_TEXTURE_2D, Glide.LFBTexture );
             glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, Glide.WindowWidth, ysize, GL_RGBA,
-                GL_UNSIGNED_BYTE, tempBuf + ( miny * Glide.WindowWidth ) );
+                GL_UNSIGNED_BYTE, OpenGL.tmpBuf + ( miny * Glide.WindowWidth ) );
 
             glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
             glDrawBuffer( Glide.DstBuffer.Buffer == GR_BUFFER_BACKBUFFER
@@ -198,7 +250,7 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
         if ( Glide.SrcBuffer.Lock )
         {
             Glide.SrcBuffer.Lock = false;
-            
+
             return FXTRUE; 
         }
         else
@@ -220,24 +272,80 @@ grLfbReadRegion( GrBuffer_t src_buffer,
         src_buffer, src_x, src_y, src_width, src_height, dst_stride );
 #endif
 
-    RenderDrawTriangles( );
+    // Copied from the linux sst1 driver src
+    FxBool rv = FXTRUE;
+    GrLfbInfo_t info;
 
-    switch ( src_buffer )
+    info.size = sizeof( info );
+    if ( grLfbLock( GR_LFB_READ_ONLY,
+                src_buffer,
+                GR_LFBWRITEMODE_ANY,
+                GR_ORIGIN_UPPER_LEFT,
+                FXFALSE,
+                &info ) )
     {
-    case GR_BUFFER_FRONTBUFFER:     glReadBuffer( GL_FRONT );   break;
-    case GR_BUFFER_BACKBUFFER:
-    case GR_BUFFER_AUXBUFFER:       glReadBuffer( GL_BACK );    break;
+        FxU32 *srcData;         /* Tracking Source Pointer */
+        FxU32 *dstData;         /* Tracking Destination Pointer */
+        FxU32 *end;             /* Demarks End of each Scanline */
+        FxU32 srcJump;          /* bytes to next scanline */
+        FxU32 dstJump;          /* bytes to next scanline */
+        FxU32 length;           /* bytes to copy in scanline */
+        FxU32 scanline;         /* scanline number */
+        int   aligned;          /* word aligned? */
+
+        dstData = ( FxU32 * ) dst_data;
+        srcData = ( FxU32 * ) ( ((char*)info.lfbPtr)+
+                                (src_y*info.strideInBytes) +
+                                (src_x<<1) );
+        scanline = src_height;
+        length   = src_width * 2;
+        dstJump  = dst_stride - length;
+        srcJump  = info.strideInBytes - length;
+        aligned  = !((FxU)srcData&0x2);
+
+        if ( aligned ) {
+            while( scanline-- ) {
+                end = (FxU32*)((char*)srcData + length - 2);
+
+                while( srcData < end )
+                    *dstData++ = *srcData++;
+
+                if ( ((int)length) & 0x2 ) {
+                    (*(FxU16*)dstData) = (*(FxU16*)srcData);
+                    dstData = (FxU32*)(((FxU16*)dstData) + 1 );
+                    srcData = (FxU32*)(((FxU16*)srcData) + 1 );
+                }
+
+                dstData = (FxU32*)(((char*)dstData)+dstJump);
+                srcData = (FxU32*)(((char*)srcData)+srcJump);
+            }
+        } else {
+            while( scanline-- ) {
+                end = (FxU32*)((char*)srcData + length - 2);
+
+                (*(FxU16*)dstData) = (*(FxU16*)srcData);
+                dstData = (FxU32*)(((FxU16*)dstData) + 1 );
+                srcData = (FxU32*)(((FxU16*)srcData) + 1 );
+
+                while( srcData < end )
+                    *dstData++ = *srcData++;
+
+                if ( !(((int)length) & 0x2) ) {
+                    (*(FxU16*)dstData) = (*(FxU16*)srcData);
+                    dstData = (FxU32*)(((FxU16*)dstData) + 1 );
+                    srcData = (FxU32*)(((FxU16*)srcData) + 1 );
+                }
+
+                dstData = (FxU32*)(((char*)dstData)+dstJump);
+                srcData = (FxU32*)(((char*)srcData)+srcJump);
+            }
+        }
+        grLfbUnlock( GR_LFB_READ_ONLY, src_buffer );
+    } else {
+        rv = FXFALSE;
     }
 
-    glReadPixels( src_x, src_y, src_width, src_height, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)Glide.SrcBuffer.Address );
-//  glReadPixels( 320, 230, 300, 200, GL_RED, GL_UNSIGNED_BYTE, &Glide.SrcBuffer.Address );
-//  glDrawPixels( 300, 200, GL_RED , GL_UNSIGNED_BYTE, Glide.SrcBuffer.Address );
-
-#ifdef OPENGL_DEBUG
-    GLErro( "grLfbReadRegion" );
-#endif
-
-    return FXTRUE; 
+    return rv;
 }
 
 //*************************************************
@@ -253,51 +361,142 @@ grLfbWriteRegion( GrBuffer_t dst_buffer,
         dst_buffer, dst_x, dst_y, src_format, src_width, src_height, src_stride );
 #endif
 
-    RenderDrawTriangles( );
+    // Copied from the linux sst1 driver src
+    FxBool           rv = FXTRUE;
+    GrLfbInfo_t      info;
+    GrLfbWriteMode_t writeMode;
 
-    if ( src_stride != (FxI32)src_width )
+    if ( src_format == GR_LFB_SRC_FMT_RLE16 )
+        writeMode = GR_LFBWRITEMODE_565;
+    else
+        writeMode = (GrLfbWriteMode_t)src_format;
+
+    info.size = sizeof( info );
+
+    if ( grLfbLock((GrLock_t)( GR_LFB_WRITE_ONLY | GR_LFB_NOIDLE),
+                 dst_buffer,
+                 writeMode,
+                 GR_ORIGIN_UPPER_LEFT,
+                 FXFALSE,
+                 &info ) )
     {
-//      Error( "grLfbWriteRegion: different width and stride.\n" );
-        return FXTRUE;
-    }
+        FxU32 *srcData;         /* Tracking Source Pointer */
+        FxU32 *dstData;         /* Tracking Destination Pointer */
+        FxU32 *end;             /* Demarks End of each Scanline */
+        FxI32 srcJump;          /* bytes to next scanline */
+        FxU32 dstJump;          /* bytes to next scanline */
+        FxU32 length;           /* bytes to copy in scanline */
+        FxU32 scanline;         /* scanline number */
+        int   aligned;          /* word aligned? */
 
-    switch ( dst_buffer )
-    {
-    case GR_BUFFER_FRONTBUFFER:     glDrawBuffer( GL_FRONT );   break;
-    case GR_BUFFER_BACKBUFFER:
-    case GR_BUFFER_AUXBUFFER:       glDrawBuffer( GL_BACK );    break;
-    }
+        srcData = ( FxU32 * ) src_data;
+        dstData = ( FxU32 * ) ( ((char*)info.lfbPtr)+
+                                (dst_y*info.strideInBytes) );
+        scanline = src_height;
 
-    glRasterPos2i( dst_x, dst_y );
+        switch( src_format ) {
+            /* 16-bit aligned */
+            case GR_LFB_SRC_FMT_565:
+            case GR_LFB_SRC_FMT_555:
+            case GR_LFB_SRC_FMT_1555:
+            case GR_LFB_SRC_FMT_ZA16:
+                dstData = (FxU32*)(((FxU16*)dstData) + dst_x);
+                length  = src_width * 2;
+                aligned = !((FxU)dstData&0x2);
+                srcJump = src_stride - length;
+                dstJump = info.strideInBytes - length;
+                if ( aligned )
+                {
+                    while( scanline-- )
+                    {
+                        end = (FxU32*)((char*)srcData + length - 2);
+                        while( srcData < end )
+                        {
+                            // TODO: swap on bigendian?
+                            *dstData = *srcData;
+                            dstData++;
+                            srcData++;
+                        }
 
-    switch ( src_format )
-    {
-    case GR_LFB_SRC_FMT_565:
-    case GR_LFB_SRC_FMT_555:
-    case GR_LFB_SRC_FMT_1555:
-    case GR_LFB_SRC_FMT_888:
-        break;
+                        if ( ((int)length) & 0x2 )
+                        {
+                            (*(FxU16*)&(dstData[0])) = (*(FxU16*)&(srcData[0]));
 
-    case GR_LFB_SRC_FMT_8888:
-        break;
+                            dstData = (FxU32*)(((FxU16*)dstData) + 1 );
+                            srcData = (FxU32*)(((FxU16*)srcData) + 1 );
+                        }
 
-    case GR_LFB_SRC_FMT_565_DEPTH:
-    case GR_LFB_SRC_FMT_555_DEPTH:
-    case GR_LFB_SRC_FMT_1555_DEPTH:
-    case GR_LFB_SRC_FMT_ZA16:
-    case GR_LFB_SRC_FMT_RLE16:
-        break;
-    }
+                        dstData = (FxU32*)(((char*)dstData)+dstJump);
+                        srcData = (FxU32*)(((char*)srcData)+srcJump);
+                    }
+                }
+                else
+                {
+                    while( scanline-- ) {
+                        end = (FxU32*)((char*)srcData + length - 2);
 
-//  glDrawPixels( src_width, src_height, GL_RGBA, GL_UNSIGNED_BYTE, Glide.SrcBuffer.Buffer );
+                        // TODO: swap on bigendian?
+                        (*(FxU16*)&(dstData[0])) = (*(FxU16*)&(srcData[0]));
+                        dstData = (FxU32*)(((FxU16*)dstData) + 1 );
+                        srcData = (FxU32*)(((FxU16*)srcData) + 1 );
 
-    glDrawBuffer( OpenGL.RenderBuffer );
+                        while( srcData < end ) {
+                            // TODO: swap on bigendian?
+                            *dstData = *srcData;
+                            dstData++;
+                            srcData++;
+                        }
 
-#ifdef OPENGL_DEBUG
-    GLErro( "grLfbWriteRegion" );
-#endif
+                        if ( !(length & 0x2) )
+                        {
+                            // TODO: swap on bigendian?
+                            (*(FxU16*)&(dstData[0])) = (*(FxU16*)&(srcData[0]));
+                            dstData = (FxU32*)(((FxU16*)dstData) + 1 );
+                            srcData = (FxU32*)(((FxU16*)srcData) + 1 );
+                        }
 
-    return FXTRUE; 
+                        dstData = (FxU32*)(((char*)dstData)+dstJump);
+                        srcData = (FxU32*)(((char*)srcData)+srcJump);
+                    }
+                }
+                break;
+                /* 32-bit aligned */
+                case GR_LFB_SRC_FMT_888:
+                case GR_LFB_SRC_FMT_8888:
+                case GR_LFB_SRC_FMT_565_DEPTH:
+                case GR_LFB_SRC_FMT_555_DEPTH:
+                case GR_LFB_SRC_FMT_1555_DEPTH:
+                    dstData = ((FxU32*)dstData) + dst_x;
+                    length  = src_width * 4;
+                    srcJump = src_stride - length;
+                    dstJump = info.strideInBytes - length;
+
+                    while( scanline-- ) {
+                        end = (FxU32*)((char*)srcData + length);
+                        while( srcData < end ) {
+                            // TODO: swap on bigendian?
+                            *dstData = *srcData;
+                            dstData++;
+                            srcData++;
+                        }
+                        dstData = (FxU32*)(((char*)dstData)+dstJump);
+                        srcData = (FxU32*)(((char*)srcData)+srcJump);
+                    }
+                break;
+                case GR_LFB_SRC_FMT_RLE16:
+	            // TODO: needs to be implemented
+	            rv = FXFALSE;
+	        break;
+                default:
+	            rv = FXFALSE;
+	            break;
+            }
+            grLfbUnlock( GR_LFB_WRITE_ONLY, dst_buffer );
+        } else {
+            rv = FXFALSE;
+        }
+
+    return rv;
 }
 
 FX_ENTRY void FX_CALL 
