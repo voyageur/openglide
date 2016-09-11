@@ -116,6 +116,8 @@ bool InitWindow( FxU hWnd )
 //*************************************************
 void InitOpenGL( void )
 {
+    glShadeModel( GL_SMOOTH );
+
     OpenGL.ZNear = ZBUFFERNEAR;
     OpenGL.ZFar = ZBUFFERFAR;
 
