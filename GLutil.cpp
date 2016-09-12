@@ -275,6 +275,8 @@ void GetOptions( void )
     UserConfig.EXT_blend_func_separate      = false;
     UserConfig.Wrap565to5551                = true;
 
+    UserConfig.Resolution                   = 0;
+
     UserConfig.TextureMemorySize            = 16;
     UserConfig.FrameBufferMemorySize        = 8;
 
@@ -294,6 +296,7 @@ void GetOptions( void )
         fprintf( IniFile, "Configuration File for OpenGLide\n\n" );
         fprintf( IniFile, "Info:\n" );
         fprintf( IniFile, "Priority goes from 0(HIGH) to 5(IDLE)\n" );
+        fprintf( IniFile, "Output resolution: 0 = original, 1.0-16.0 = scale factor, >16 = fixed width (height calculated automatically)\n" );
         fprintf( IniFile, "Texture Memory goes from %d to %d\n", OGL_MIN_TEXTURE_BUFFER, OGL_MAX_TEXTURE_BUFFER );
         fprintf( IniFile, "Frame Buffer Memory goes from %d to %d\n", OGL_MIN_FRAME_BUFFER, OGL_MAX_FRAME_BUFFER );
         fprintf( IniFile, "All other fields are boolean with 1(TRUE) and 0(FALSE)\n\n" );
@@ -302,6 +305,7 @@ void GetOptions( void )
         fprintf( IniFile, "WrapperPriority=%d\n", UserConfig.Priority );
         fprintf( IniFile, "CreateWindow=%d\n", UserConfig.CreateWindow );
         fprintf( IniFile, "InitFullScreen=%d\n", UserConfig.InitFullScreen );
+        fprintf( IniFile, "Resolution=%.1f\n", UserConfig.Resolution );
         fprintf( IniFile, "EnableMipMaps=%d\n", UserConfig.EnableMipMaps );
         fprintf( IniFile, "IgnorePaletteChange=%d\n", UserConfig.IgnorePaletteChange );
         fprintf( IniFile, "Wrap565to5551=%d\n", UserConfig.Wrap565to5551 );
@@ -323,6 +327,8 @@ void GetOptions( void )
                 UserConfig.CreateWindow = atoi( Pointer ) ? true : false;
             if ( (Pointer = FindConfig(Path, "InitFullScreen")) )
                 UserConfig.InitFullScreen = atoi( Pointer ) ? true : false;
+            if ( (Pointer = FindConfig(Path, "Resolution")) )
+                UserConfig.Resolution = atof( Pointer );
             if ( (Pointer = FindConfig(Path, "EnableMipMaps")) )
                 UserConfig.EnableMipMaps = atoi( Pointer ) ? true : false;
             if ( (Pointer = FindConfig(Path, "IgnorePaletteChange")) )

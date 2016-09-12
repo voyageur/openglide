@@ -62,21 +62,21 @@ grDepthBufferMode( GrDepthBufferMode_t mode )
 
     if ( Glide.State.OriginInformation == GR_ORIGIN_LOWER_LEFT )
     {
-        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
-                 Glide.State.ClipMinY, Glide.State.ClipMaxY, 
+        glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX,
+                 Glide.State.ClipMinY, Glide.State.ClipMaxY,
                  OpenGL.ZNear, OpenGL.ZFar );
-        glViewport( Glide.State.ClipMinX, Glide.State.ClipMinY, 
-                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
-                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
+        glViewport( OpenGL.ClipMinX, OpenGL.ClipMinY,
+                    OpenGL.ClipMaxX - OpenGL.ClipMinX,
+                    OpenGL.ClipMaxY - OpenGL.ClipMinY );
     }
     else
     {
         glOrtho( Glide.State.ClipMinX, Glide.State.ClipMaxX, 
                  Glide.State.ClipMaxY, Glide.State.ClipMinY, 
                  OpenGL.ZNear, OpenGL.ZFar );
-        glViewport( Glide.State.ClipMinX, OpenGL.WindowHeight - Glide.State.ClipMaxY, 
-                    Glide.State.ClipMaxX - Glide.State.ClipMinX, 
-                    Glide.State.ClipMaxY - Glide.State.ClipMinY ); 
+        glViewport( OpenGL.ClipMinX, OpenGL.WindowHeight - OpenGL.ClipMaxY,
+                    OpenGL.ClipMaxX - OpenGL.ClipMinX,
+                    OpenGL.ClipMaxY - OpenGL.ClipMinY );
     }
 
     glMatrixMode( GL_MODELVIEW );

@@ -80,8 +80,21 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         {
             // Preserve window/fullscreen mode in SDL apps and override config file entry
            (tmpSurface->flags&SDL_FULLSCREEN) ? (FullScreen = true) : (FullScreen = false);
+
+            // When in fullscreen, render at the same resolution
+            if((FullScreen) && (UserConfig.Resolution < 1.0f)) {
+                // Oneday perhaps a proper support for widescreen and 5:4 displays?
+                if((float)tmpSurface->w/tmpSurface->h < 1.33f) {
+                    OpenGL.WindowWidth = width = tmpSurface->w;
+                    OpenGL.WindowHeight = height = tmpSurface->w * 3 / 4;
+                } else {
+                    OpenGL.WindowWidth = width = tmpSurface->h * 4 / 3;
+                    OpenGL.WindowHeight = height = tmpSurface->h;
+                }
+                UserConfig.Resolution = OpenGL.WindowWidth;
+            }
         }
-    } 
+    }
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
