@@ -46,10 +46,10 @@ dnl Check for the X11 library
 AC_PATH_XTRA
 
 AH_TEMPLATE(C_USE_SDL,[Define to use SDL library])
-AC_ARG_ENABLE(sdl,AC_HELP_STRING([--disable-sdl],[Disable SDL support]),,disable_sdl=no)
+AC_ARG_ENABLE(sdl,AC_HELP_STRING([--disable-sdl],[Disable SDL support]),,enable_sdl=yes)
 
 dnl Check for SDL
-if test x$disable_sdl = xno ; then
+if test x$enable_sdl != xno ; then
     SDL_VERSION=1.2.0
     AM_PATH_SDL($SDL_VERSION,
             have_sdl_lib=yes,
