@@ -47,22 +47,22 @@ TODO:
  create mode 100644 include/glidedef.h
  create mode 100644 src/hardware/glide.cpp
 
-diff -Naur dosbox.orig/configure.ac dosbox/configure.ac
---- dosbox.orig/configure.ac	2017-12-19 17:04:25.213014234 +0100
-+++ dosbox/configure.ac	2018-01-11 15:12:36.560641614 +0100
-@@ -493,7 +493,7 @@
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -450,7 +450,7 @@ int main(int argc,char * argv[]) {
  dnl Some target detection and actions for them
  case "$host" in
      *-*-cygwin* | *-*-mingw32*)
 -       LIBS="$LIBS -lwinmm"
 +       LIBS="$LIBS -lwinmm -lshlwapi"
+        AC_CHECK_HEADERS(ddraw.h)
         AC_DEFINE(C_DIRECTSERIAL, 1, [ Define to 1 if you want serial passthrough support (Win32, Posix and OS/2 only).])
         if test x$have_sdl_net_lib = xyes -a x$have_sdl_net_h = xyes ; then
-          LIBS="$LIBS -lws2_32"
-
-diff -Naur dosbox.orig/include/glide.h dosbox/include/glide.h
---- dosbox.orig/include/glide.h	1970-01-01 01:00:00.000000000 +0100
-+++ dosbox/include/glide.h	2018-01-11 15:11:29.583499626 +0100
+diff --git a/include/glide.h b/include/glide.h
+new file mode 100644
+--- /dev/null
++++ b/include/glide.h
 @@ -0,0 +1,331 @@
 +/*
 + *  Copyright (C) 2002-2007  The DOSBox Team
@@ -395,9 +395,10 @@ diff -Naur dosbox.orig/include/glide.h dosbox/include/glide.h
 +};
 +
 +#endif // DOSBOX_GLIDE_H
-diff -Naur dosbox.orig/include/glidedef.h dosbox/include/glidedef.h
---- dosbox.orig/include/glidedef.h	1970-01-01 01:00:00.000000000 +0100
-+++ dosbox/include/glidedef.h	2018-01-11 15:11:29.583499626 +0100
+diff --git a/include/glidedef.h b/include/glidedef.h
+new file mode 100644
+--- /dev/null
++++ b/include/glidedef.h
 @@ -0,0 +1,179 @@
 +/*
 + *  Copyright (C) 2002-2007  The DOSBox Team
@@ -578,10 +579,10 @@ diff -Naur dosbox.orig/include/glidedef.h dosbox/include/glidedef.h
 +#endif // __3DFX_H__
 +
 +#endif // GLIDEDEF_H
-diff -Naur dosbox.orig/include/mem.h dosbox/include/mem.h
---- dosbox.orig/include/mem.h	2017-06-03 00:31:34.462105245 +0200
-+++ dosbox/include/mem.h	2018-01-11 15:11:29.583499626 +0100
-@@ -152,6 +152,8 @@
+diff --git a/include/mem.h b/include/mem.h
+--- a/include/mem.h
++++ b/include/mem.h
+@@ -152,6 +152,8 @@ static INLINE Bit32u phys_readd(PhysPt addr){
  
  void MEM_BlockWrite(PhysPt pt,void const * const data,Bitu size);
  void MEM_BlockRead(PhysPt pt,void * data,Bitu size);
@@ -590,10 +591,10 @@ diff -Naur dosbox.orig/include/mem.h dosbox/include/mem.h
  void MEM_BlockCopy(PhysPt dest,PhysPt src,Bitu size);
  void MEM_StrCopy(PhysPt pt,char * data,Bitu size);
  
-diff -Naur dosbox.orig/src/dosbox.cpp dosbox/src/dosbox.cpp
---- dosbox.orig/src/dosbox.cpp	2017-12-06 21:42:44.657021337 +0100
-+++ dosbox/src/dosbox.cpp	2018-01-11 15:11:29.583499626 +0100
-@@ -81,6 +81,7 @@
+diff --git a/src/dosbox.cpp b/src/dosbox.cpp
+--- a/src/dosbox.cpp
++++ b/src/dosbox.cpp
+@@ -81,6 +81,7 @@ void PCI_Init(Section*);
  
  void KEYBOARD_Init(Section*);	//TODO This should setup INT 16 too but ok ;)
  void JOYSTICK_Init(Section*);
@@ -601,7 +602,7 @@ diff -Naur dosbox.orig/src/dosbox.cpp dosbox/src/dosbox.cpp
  void MOUSE_Init(Section*);
  void SBLASTER_Init(Section*);
  void GUS_Init(Section*);
-@@ -742,6 +743,17 @@
+@@ -666,6 +667,17 @@ void DOSBOX_Init(void) {
  	Pmulti_remain->Set_help("see serial1");
  
  
@@ -619,9 +620,9 @@ diff -Naur dosbox.orig/src/dosbox.cpp dosbox/src/dosbox.cpp
  	/* All the DOS Related stuff, which will eventually start up in the shell */
  	secprop=control->AddSection_prop("dos",&DOS_Init,false);//done
  	secprop->AddInitFunction(&XMS_Init,true);//done
-diff -Naur dosbox.orig/src/gui/sdlmain.cpp dosbox/src/gui/sdlmain.cpp
---- dosbox.orig/src/gui/sdlmain.cpp	2017-10-10 16:40:44.924658343 +0200
-+++ dosbox/src/gui/sdlmain.cpp	2018-01-11 15:11:29.584499628 +0100
+diff --git a/src/gui/sdlmain.cpp b/src/gui/sdlmain.cpp
+--- a/src/gui/sdlmain.cpp
++++ b/src/gui/sdlmain.cpp
 @@ -49,6 +49,7 @@
  #include "cpu.h"
  #include "cross.h"
@@ -630,7 +631,7 @@ diff -Naur dosbox.orig/src/gui/sdlmain.cpp dosbox/src/gui/sdlmain.cpp
  
  #define MAPPERFILE "mapper-" VERSION ".map"
  //#define DISABLE_JOYSTICK
-@@ -434,6 +435,10 @@
+@@ -380,6 +381,10 @@ check_gotbpp:
  
  
  void GFX_ResetScreen(void) {
@@ -641,7 +642,7 @@ diff -Naur dosbox.orig/src/gui/sdlmain.cpp dosbox/src/gui/sdlmain.cpp
  	GFX_Stop();
  	if (sdl.draw.callback)
  		(sdl.draw.callback)( GFX_CallBackReset );
-@@ -832,7 +837,10 @@
+@@ -780,7 +785,10 @@ void GFX_SwitchFullScreen(void) {
  		sticky_keys(true); //restore sticky keys to default state in windowed mode.
  #endif
  	}
@@ -653,7 +654,7 @@ diff -Naur dosbox.orig/src/gui/sdlmain.cpp dosbox/src/gui/sdlmain.cpp
  }
  
  static void SwitchFullScreen(bool pressed) {
-@@ -1591,7 +1599,7 @@
+@@ -1519,7 +1527,7 @@ void GFX_Events() {
  			throw(0);
  			break;
  		case SDL_VIDEOEXPOSE:
@@ -662,7 +663,7 @@ diff -Naur dosbox.orig/src/gui/sdlmain.cpp dosbox/src/gui/sdlmain.cpp
  			break;
  #ifdef WIN32
  		case SDL_KEYDOWN:
-@@ -2023,6 +2031,7 @@
+@@ -1936,6 +1944,7 @@ int main(int argc, char* argv[]) {
  			if (strcmp(sdl_drv_name,"windib")==0) LOG_MSG("SDL_Init: Starting up with SDL windib video driver.\n          Try to update your video card and directx drivers!");
  		}
  #endif
@@ -670,10 +671,10 @@ diff -Naur dosbox.orig/src/gui/sdlmain.cpp dosbox/src/gui/sdlmain.cpp
  	sdl.num_joysticks=SDL_NumJoysticks();
  
  	/* Parse configuration files */
-diff -Naur dosbox.orig/src/hardware/Makefile.am dosbox/src/hardware/Makefile.am
---- dosbox.orig/src/hardware/Makefile.am	2013-05-25 10:36:43.261184900 +0200
-+++ dosbox/src/hardware/Makefile.am	2018-01-11 15:11:29.584499628 +0100
-@@ -10,6 +10,6 @@
+diff --git a/src/hardware/Makefile.am b/src/hardware/Makefile.am
+--- a/src/hardware/Makefile.am
++++ b/src/hardware/Makefile.am
+@@ -10,6 +10,6 @@ libhardware_a_SOURCES = adlib.cpp dma.cpp gameblaster.cpp hardware.cpp iohandler
                          memory.cpp mixer.cpp pcspeaker.cpp pci_bus.cpp pic.cpp sblaster.cpp tandy_sound.cpp timer.cpp \
  			vga.cpp vga_attr.cpp vga_crtc.cpp vga_dac.cpp vga_draw.cpp vga_gfx.cpp vga_other.cpp \
  			vga_memory.cpp vga_misc.cpp vga_seq.cpp vga_xga.cpp vga_s3.cpp vga_tseng.cpp vga_paradise.cpp \
@@ -681,9 +682,10 @@ diff -Naur dosbox.orig/src/hardware/Makefile.am dosbox/src/hardware/Makefile.am
 +			cmos.cpp disney.cpp gus.cpp mpu401.cpp ipx.cpp ipxserver.cpp dbopl.cpp glide.cpp
  
  
-diff -Naur dosbox.orig/src/hardware/glide.cpp dosbox/src/hardware/glide.cpp
---- dosbox.orig/src/hardware/glide.cpp	1970-01-01 01:00:00.000000000 +0100
-+++ dosbox/src/hardware/glide.cpp	2018-01-11 15:11:29.585499630 +0100
+diff --git a/src/hardware/glide.cpp b/src/hardware/glide.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/hardware/glide.cpp
 @@ -0,0 +1,1962 @@
 +/*
 + *  Copyright (C) 2002-2013  The DOSBox Team
@@ -2647,9 +2649,9 @@ diff -Naur dosbox.orig/src/hardware/glide.cpp dosbox/src/hardware/glide.cpp
 +
 +    }	/* switch */
 +}	/* process_msg() */
-diff -Naur dosbox.orig/src/hardware/memory.cpp dosbox/src/hardware/memory.cpp
---- dosbox.orig/src/hardware/memory.cpp	2017-06-03 00:31:36.560106812 +0200
-+++ dosbox/src/hardware/memory.cpp	2018-01-11 15:11:29.585499630 +0100
+diff --git a/src/hardware/memory.cpp b/src/hardware/memory.cpp
+--- a/src/hardware/memory.cpp
++++ b/src/hardware/memory.cpp
 @@ -23,6 +23,7 @@
  #include "setup.h"
  #include "paging.h"
@@ -2658,7 +2660,7 @@ diff -Naur dosbox.orig/src/hardware/memory.cpp dosbox/src/hardware/memory.cpp
  
  #include <string.h>
  
-@@ -140,6 +141,8 @@
+@@ -140,6 +141,8 @@ PageHandler * MEM_GetPageHandler(Bitu phys_page) {
  	} else if ((phys_page>=memory.lfb.start_page+0x01000000/4096) &&
  				(phys_page<memory.lfb.start_page+0x01000000/4096+16)) {
  		return memory.lfb.mmiohandler;
@@ -2667,7 +2669,7 @@ diff -Naur dosbox.orig/src/hardware/memory.cpp dosbox/src/hardware/memory.cpp
  	}
  	return &illegal_page_handler;
  }
-@@ -191,6 +194,24 @@
+@@ -191,6 +194,24 @@ void MEM_BlockWrite(PhysPt pt,void const * const data,Bitu size) {
  	}
  }
  
