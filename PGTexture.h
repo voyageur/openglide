@@ -41,6 +41,7 @@ public:
     void DownloadTable( GrTexTable_t type, FxU32 *data, int first, int count );
     void Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info );
     void DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info );
+    void DownloadMipMapPartial( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info, int start, int end );
     FxU32 GetMemorySize( void );
 
     PGTexture( int mem_size );
