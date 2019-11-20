@@ -64,4 +64,4 @@ install-data-hook:
 
 install-exec-hook:
 	cd $(DESTDIR)$(libdir) && \
-		$(LN_S) -f lib*.so libglide.so.2
+		$(LN_S) -f libglide2x.so libglide.so.2
