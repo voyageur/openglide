@@ -17,6 +17,8 @@
 #include <windows.h>
 #include <io.h>
 
+#define max(x,y) ((x) < (y) ? (y) : (x))
+
 #define FASTCALL __fastcall
 #define OG_memcpy MMXCopyMemory
 
