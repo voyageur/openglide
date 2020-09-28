@@ -459,31 +459,13 @@ int DetectMMX( void )
         pop EDX
         pop EAX
     }
+    return Result & 0x00800000;
 #endif
 
 #ifdef __GNUC__
-#if SIZEOF_INT_P == 4
-    asm ("push %%ebx;"
-         "mov  $1, %%eax;"
-         "CPUID;"
-         "pop  %%ebx;"
-         : "=d" (Result) /* Outputs */
-         : /* No inputs */
-         : "%eax", "%ecx", "cc" /* Clobbers */
-        );
-#else
-    asm ("push %%rbx;"
-         "mov  $1, %%rax;"
-         "CPUID;"
-         "pop  %%rbx;"
-         : "=d" (Result) /* Outputs */
-         : /* No inputs */
-         : "%rax", "%rcx", "cc" /* Clobbers */
-        );
-#endif
+	return __builtin_cpu_supports("mmx");
 #endif
 
-    return Result & 0x00800000;
 #else
     return 0;
 #endif
