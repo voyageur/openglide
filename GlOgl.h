@@ -320,8 +320,6 @@ void InitOpenGL( void );
 void GetOptions( void );
 void InitMainVariables( void );
 
-void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes );
-
 int DetectMMX();
 
 #endif

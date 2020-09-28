@@ -18,7 +18,6 @@
 #include <io.h>
 
 #define FASTCALL __fastcall
-#define OG_memcpy MMXCopyMemory
 
 #define VARARGDECL(t) t _cdecl
 typedef int (__stdcall *ExtFn)();

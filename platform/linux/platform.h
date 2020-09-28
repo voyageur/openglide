@@ -31,10 +31,8 @@
 # else
 #  define FASTCALL
 # endif
-#define OG_memcpy MMXCopyMemory
 #else
 #define FASTCALL
-#define OG_memcpy memcpy
 #endif
 
 #define VARARGDECL(t) extern "C" t
