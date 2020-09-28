@@ -5,7 +5,7 @@
 #   include "config.h"
 #   endif
 
-#   if SIZEOF_INT_P == 4
+#   if __SIZEOF_POINTER__ == 4
 #   define OP "l"
 #   else
 #   define OP "q"

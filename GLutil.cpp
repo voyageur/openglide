@@ -462,7 +462,7 @@ int DetectMMX( void )
 #endif
 
 #ifdef __GNUC__
-#if SIZEOF_INT_P == 4
+#if __SIZEOF_POINTER__ == 4
     asm ("push %%ebx;"
          "mov  $1, %%eax;"
          "CPUID;"
