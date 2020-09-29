@@ -25,7 +25,8 @@ void Convert565Kto8888( FxU16 *Buffer1, FxU16 key, FxU32 *Buffer2, FxU32 Pixels 
         *Buffer2++ = ( ( (*Buffer1) == key) ? 0x00000000 : 0xFF000000 ) |   // A
                        ( (*Buffer1)    & 0x001F ) << 19 |                   // B
                        ( (*Buffer1)    & 0x07E0 ) << 5  |                   // G
-                       ( (*Buffer1++)  & 0xF800 ) >> 8;                     // R
+                       ( (*Buffer1)    & 0xF800 ) >> 8;                     // R
+        Buffer1++;
         Pixels--;
     }
 }
@@ -119,9 +120,10 @@ void Convert565to5551( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels )
 {
    while ( Pixels > 0 )
    {
-      *Buffer2++ = (   (*Buffer1) & 0xFFC0FFC0 ) |
-                ( ( (*Buffer1++) & 0x001F001F ) << 1 ) |
+      *Buffer2++ = ( (*Buffer1) & 0xFFC0FFC0 ) |
+                 ( ( (*Buffer1) & 0x001F001F ) << 1 ) |
                      0x00010001;
+      Buffer1++;
       Pixels -= 2;
    }
 }
@@ -200,8 +202,9 @@ void Convert5551to565( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels )
 {
    while ( Pixels > 0 )
    {
-      *Buffer2++ = (   (*Buffer1) & 0xFFC0FFC0 ) |
-                ( ( (*Buffer1++) & 0x003E003E ) >> 1 );
+      *Buffer2++ = ( (*Buffer1) & 0xFFC0FFC0 ) |
+                 ( ( (*Buffer1) & 0x003E003E ) >> 1 );
+      Buffer1++;
       Pixels -= 2;
    }
 }
@@ -283,7 +286,8 @@ void Convert4444to4444special( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels )
    while ( Pixels > 0 )
    {
       *Buffer2++ = ( ( (*Buffer1) & 0x0FFF0FFF ) << 4 )|
-                ( ( (*Buffer1++) & 0xF000F000 ) >> 12 );
+                   ( ( (*Buffer1) & 0xF000F000 ) >> 12 );
+      Buffer1++;
       Pixels -= 2;
    }
 }
@@ -363,7 +367,8 @@ void Convert1555to5551( FxU32 *Buffer1, FxU32 *Buffer2, int Pixels )
    while ( Pixels > 0 )
    {
       *Buffer2++ = ( ( (*Buffer1) & 0x7FFF7FFF ) << 1 )|
-                ( ( (*Buffer1++) & 0x80008000 ) >> 15 );
+                   ( ( (*Buffer1) & 0x80008000 ) >> 15 );
+      Buffer1++;
       Pixels -= 2;
    }
 }
@@ -478,9 +483,10 @@ void Convert565to8888( FxU16 *Buffer1, FxU32 *Buffer2, FxU32 Pixels )
    while ( Pixels )
    {
       *Buffer2++ = 0xFF000000 |              // A
-         ( (*Buffer1)    & 0x001F ) << 19 |  // B
-         ( (*Buffer1)    & 0x07E0 ) << 5  |  // G
-         ( (*Buffer1++)  & 0xF800 ) >> 8;    // R
+         ( (*Buffer1) & 0x001F ) << 19 |  // B
+         ( (*Buffer1) & 0x07E0 ) << 5  |  // G
+         ( (*Buffer1) & 0xF800 ) >> 8;    // R
+      Buffer1++;
       Pixels--;
    }
 }
