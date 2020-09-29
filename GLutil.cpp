@@ -35,7 +35,7 @@ extern unsigned long    NumberOfErrors;
 
 VARARGDECL(void) GlideMsg( const char *szString, ... )
 {
-    va_list( Arg );
+    va_list Arg;
     va_start( Arg, szString );
 
     FILE *fHandle = fopen( GLIDEFILE, "at" );
@@ -52,7 +52,7 @@ VARARGDECL(void) GlideMsg( const char *szString, ... )
 
 VARARGDECL(void) Error( const char *szString, ... )
 {
-    va_list( Arg );
+    va_list Arg;
     va_start( Arg, szString );
 
     if ( NumberOfErrors == 0 )
