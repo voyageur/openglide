@@ -1,6 +1,28 @@
 # Vim swap files
 .*.swp
 
+# Autotools/libtool files
+.deps/
+.libs/
+autom4te.cache
+/aclocal.m4
+/compile
+/config.guess
+/config.h.in
+/config.h
+/config.log
+/config.status
+/config.sub
+/configure
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/missing
+Makefile
+Makefile.in
+/stamp-h1
+
 # Compiled Object files
 *.slo
 *.lo
