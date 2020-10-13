@@ -20,6 +20,7 @@
 
 // Include proper OpenGL headers
 #ifdef C_USE_SDL
+#define NO_SDL_GLEXT
 #include "SDL_opengl.h"
 #elif defined(__MACOSX__)
 #include <OpenGL/gl.h>	/* Header File For The OpenGL Library */

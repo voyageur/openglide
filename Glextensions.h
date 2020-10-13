@@ -13,15 +13,11 @@
 #ifndef __GLEXTENSIONS__
 #define __GLEXTENSIONS__
 
-#ifndef GL_GLEXT_VERSION
-#include "glext.h"
-#endif
-
 void ValidateUserConfig();
 
 // Extensions Functions Declarations
 // This cannot have the same name as the prototype functions
-// in glext.h, else compiler compiains about object being
+// in glext.h, else compiler complains about object being
 // redeclared as different type of symbol (func->variable).
 extern PFNGLCLIENTACTIVETEXTUREARBPROC          p_glClientActiveTexture;
 extern PFNGLMULTITEXCOORD4FARBPROC              p_glMultiTexCoord4fARB;
