@@ -89,7 +89,7 @@ case "$host" in
     *cygwin* | *mingw32*) 
         CXXFLAGS="$CXXFLAGS -DWIN32 -I\$(top_srcdir)/platform/windows"
         LIBS="$LIBS -luser32 -lgdi32 -lopengl32 -lglu32"
-        DLLFLAGS="-avoid-version -Wc,-def -Wc,Glide2x.def"
+        DLLFLAGS="-avoid-version -Wc,-def -Wc,$srcdir/Glide2x.def"
         ;;
     *darwin*)
         osflag="__linux__"
