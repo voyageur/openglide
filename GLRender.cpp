@@ -47,21 +47,14 @@ RenderStruct OGLRender;
 static TColorStruct     Local, 
                         Other, 
                         CFactor;
-static float            AFactor[3];
 static TColorStruct     *pC,
                         *pC2;
 static TVertexStruct    *pV;
 static TTextureStruct   *pTS;
 static TFogStruct       *pF;
-static void             *pt1, 
-                        *pt2, 
-                        *pt3;
 static float            atmuoow;
 static float            btmuoow;
 static float            ctmuoow;
-static float            aoow, 
-                        boow, 
-                        coow;
 static float            hAspect, 
                         wAspect,
                         maxoow;

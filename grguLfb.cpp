@@ -190,7 +190,6 @@ grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
         if ( maxx >= minx )
         {
             maxx++; maxy++;
-            FxU32 xsize = maxx - minx;
             FxU32 ysize = maxy - miny;
 
             // Draw a textured quad
