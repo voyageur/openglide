@@ -40,7 +40,7 @@
  **
  * 
  * 14    12/19/97 8:09a Peter
- * fog table propogation
+ * fog table propagation
  * 
  * 13    7/07/97 3:05p Dow
  * Moved fouled clears
@@ -901,7 +901,7 @@ grSplash (float x, float y, float w, float h, FxU32 _frame)
     drawFaces( frame, 1 );
   }
     
-  /* Get rid of the remnants on teh screen just in case
+  /* Get rid of the remnants on the screen just in case
    * the app doesn't do it itself yet
    * assumes that the screen is clear.
    */

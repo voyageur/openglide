@@ -221,7 +221,7 @@ grGlideShamelessPlug( const FxBool on )
 }
 
 //*************************************************
-//* Returns the number of Voodoo Boards Instaled
+//* Returns the number of Voodoo Boards Installed
 //*************************************************
 FX_ENTRY FxBool FX_CALL
 grSstQueryBoards( GrHwConfiguration *hwConfig )

@@ -5,7 +5,7 @@
 //*           implementation of the TexDB class
 //*
 //*         OpenGLide is OpenSource under LGPL license
-//*              Originaly made by Fabio Barros
+//*              Originally made by Fabio Barros
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************

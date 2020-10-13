@@ -5,7 +5,7 @@
 //*                     Render File
 //*
 //*         OpenGLide is OpenSource under LGPL license
-//*              Originaly made by Fabio Barros
+//*              Originally made by Fabio Barros
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
@@ -43,7 +43,7 @@ static const float vertex_snap = float( 3L << 18 );
 // Standard structs for the render
 RenderStruct OGLRender;
 
-// Varibles for the Add functions
+// Variables for the Add functions
 static TColorStruct     Local, 
                         Other, 
                         CFactor;
@@ -63,7 +63,7 @@ static float            hAspect,
 // Functions definitions
 //**************************************************************
 
-// Intializes the render and allocates memory
+// Initializes the render and allocates memory
 void RenderInitialize( void )
 {
     OGLRender.NumberOfTriangles = 0;
