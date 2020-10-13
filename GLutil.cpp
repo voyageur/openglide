@@ -459,74 +459,15 @@ int DetectMMX( void )
         pop EDX
         pop EAX
     }
+    return Result & 0x00800000;
 #endif
 
 #ifdef __GNUC__
-#if __SIZEOF_POINTER__ == 4
-    asm ("push %%ebx;"
-         "mov  $1, %%eax;"
-         "CPUID;"
-         "pop  %%ebx;"
-         : "=d" (Result) /* Outputs */
-         : /* No inputs */
-         : "%eax", "%ecx", "cc" /* Clobbers */
-        );
-#else
-    asm ("push %%rbx;"
-         "mov  $1, %%rax;"
-         "CPUID;"
-         "pop  %%rbx;"
-         : "=d" (Result) /* Outputs */
-         : /* No inputs */
-         : "%rax", "%rcx", "cc" /* Clobbers */
-        );
-#endif
+	return __builtin_cpu_supports("mmx");
+
 #endif
 
-    return Result & 0x00800000;
 #else
     return 0;
-#endif
-}
-
-// Copy Blocks of Memory Using MMX
-void MMXCopyMemory( void *Dst, void *Src, FxU32 NumberOfBytes )
-{
-#ifdef HAVE_MMX
-
-#ifdef _MSC_VER
-    __asm
-    {
-        mov ECX, NumberOfBytes
-        mov EAX, Src
-        mov EDX, Dst
-        jmp start
-copying:
-        MOVQ MM0, [EAX+ECX]
-        MOVQ [EDX+ECX], MM0
-start:  sub ECX, 8
-        jae copying
-        EMMS
-    }
-#endif
-
-#ifdef __GNUC__
-    asm ("jmp   MMXCopyMemory_start;"
-         "MMXCopyMemory_copying:"
-         "movq  (%1,%0), %%mm0;"
-         "movq  %%mm0, (%2,%0);"
-         "MMXCopyMemory_start:"
-#if SIZEOF_INT_P == 4
-         "subl  $8, %0;"
-#else
-         "subq  $8, %0;"
-#endif
-         "jae   MMXCopyMemory_copying;"
-         : /* No outputs */
-         : "r" ((FxU)NumberOfBytes), "r" (Src), "r" (Dst) /* Inputs */
-         : "%mm0", "memory" /* Clobbers */
-        );
-#endif
-
 #endif
 }

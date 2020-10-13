@@ -222,10 +222,6 @@ LINK32=link.exe
 # PROP Default_Filter ".h"
 # Begin Source File
 
-SOURCE=.\amd3dx.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\platform\clock.h
 # End Source File
 # Begin Source File

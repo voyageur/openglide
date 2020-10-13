@@ -11,6 +11,7 @@
 //**************************************************************
 
 #include <math.h>
+#include <string.h>
 
 #include "GlOgl.h"
 #include "GLRender.h"
@@ -30,7 +31,7 @@ grFogTable( const GrFog_t *ft )
 
     if ( InternalConfig.FogEnable )
     {
-        OG_memcpy( Glide.FogTable, (GrFog_t *)ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
+        memcpy( Glide.FogTable, (GrFog_t *)ft, GR_FOG_TABLE_SIZE * sizeof( FxU8 ) );
         Glide.FogTable[ GR_FOG_TABLE_SIZE ] = 255;
 
         for ( int i = 0; i < GR_FOG_TABLE_SIZE; i++ )
