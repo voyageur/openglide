@@ -27,21 +27,6 @@ AC_PROG_LIBTOOL
 dnl Checks for header files.
 AC_HEADER_STDC
 
-dnl Checks for data type sizes
-AC_CHECK_SIZEOF(unsigned char)
-AC_CHECK_SIZEOF(unsigned short)
-AC_CHECK_SIZEOF(unsigned int)
-AC_CHECK_SIZEOF(unsigned long)
-AC_CHECK_SIZEOF(unsigned long long)
-AC_CHECK_SIZEOF(int *)
-
-AC_SUBST(SIZEOF_UNSIGNED_CHAR,$ac_cv_sizeof_unsigned_char)
-AC_SUBST(SIZEOF_UNSIGNED_SHORT,$ac_cv_sizeof_unsigned_short)
-AC_SUBST(SIZEOF_UNSIGNED_INT,$ac_cv_sizeof_unsigned_int)
-AC_SUBST(SIZEOF_UNSIGNED_LONG,$ac_cv_sizeof_unsigned_long)
-AC_SUBST(SIZEOF_UNSIGNED_LONG_LONG,$ac_cv_sizeof_unsigned_long_long)
-AC_SUBST(SIZEOF_INT_P,$ac_cv_sizeof_int_p)
-
 dnl Check for the X11 library
 AC_PATH_XTRA
 
@@ -89,7 +74,7 @@ case "$host" in
     *cygwin* | *mingw32*) 
         CXXFLAGS="$CXXFLAGS -DWIN32 -I\$(top_srcdir)/platform/windows"
         LIBS="$LIBS -luser32 -lgdi32 -lopengl32 -lglu32"
-        DLLFLAGS="-avoid-version -Wc,-def -Wc,Glide2x.def"
+        DLLFLAGS="-avoid-version -Wc,-def -Wc,$srcdir/Glide2x.def"
         ;;
     *darwin*)
         osflag="__linux__"
@@ -124,7 +109,6 @@ esac
 
 AC_OUTPUT(
 Makefile \
-sdk2_unix.h \
 platform/Makefile \
 platform/linux/Makefile \
 platform/sdl/Makefile \

@@ -20,24 +20,24 @@
 #ifndef __3DFX_H__
 #define __3DFX_H__
 
-#if defined(__unix__) || (__MINGW32__)
-#include "sdk2_unix.h"
-#else
+#include <cstdint>
+
 /*
 ** basic data types
 */
-typedef unsigned char   FxU8;
-typedef signed   char   FxI8;
-typedef unsigned short  FxU16;
-typedef signed   short  FxI16;
-typedef signed   int    FxI32;
-typedef unsigned int    FxU32;
-typedef int             FxBool;
-typedef float           FxFloat;
-typedef double          FxDouble;
-typedef FxU32           FxU;
-typedef FxI32           FxI;
-#endif
+typedef uint8_t   FxU8;
+typedef int8_t    FxI8;
+typedef uint16_t  FxU16;
+typedef int16_t   FxI16;
+typedef uint32_t  FxU32;
+typedef int32_t   FxI32;
+typedef uint64_t  FxU64;
+typedef int64_t   FxI64;
+typedef int       FxBool;
+typedef float     FxFloat;
+typedef double    FxDouble;
+typedef uintptr_t FxU;
+typedef intptr_t  FxI;
 
 /*
 ** color types

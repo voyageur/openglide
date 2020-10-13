@@ -464,6 +464,7 @@ int DetectMMX( void )
 
 #ifdef __GNUC__
 	return __builtin_cpu_supports("mmx");
+
 #endif
 
 #else

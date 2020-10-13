@@ -16,8 +16,7 @@ sdk2_glide.h \
 sdk2_3dfx.h \
 sdk2_glidesys.h \
 sdk2_glideutl.h \
-sdk2_sst1vid.h \
-sdk2_unix.h
+sdk2_sst1vid.h
 
 libglide2x_la_SOURCES = \
 grguDepth.cpp \
