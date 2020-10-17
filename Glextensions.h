@@ -13,6 +13,10 @@
 #ifndef __GLEXTENSIONS__
 #define __GLEXTENSIONS__
 
+#ifndef GL_GLEXT_VERSION
+#include <GL/glext.h>
+#endif
+
 void ValidateUserConfig();
 
 // Extensions Functions Declarations
