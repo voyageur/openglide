@@ -5,7 +5,7 @@
 //*                  Color and Alpha File
 //*
 //*         OpenGLide is OpenSource under LGPL license
-//*              Originaly made by Fabio Barros
+//*              Originally made by Fabio Barros
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
@@ -354,7 +354,7 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 
 #ifdef OGL_DEBUG
     default:
-        Error( "grAlphaBlendFunction: Unknow RGB source blend factor.\n" );
+        Error( "grAlphaBlendFunction: Unknown RGB source blend factor.\n" );
         OpenGL.SrcBlend = GL_ONE;
         break;
 #endif
@@ -374,7 +374,7 @@ grAlphaBlendFunction( GrAlphaBlendFnc_t rgb_sf,   GrAlphaBlendFnc_t rgb_df,
 
 #ifdef OGL_DEBUG
     default:
-        Error( "grAlphaBlendFunction: Unknow RGB destination blend factor.\n" );
+        Error( "grAlphaBlendFunction: Unknown RGB destination blend factor.\n" );
         OpenGL.DstBlend = GL_ZERO;
         break;
 #endif
@@ -502,7 +502,7 @@ guAlphaSource( GrAlphaSource_t dwMode )
 }
 
 //*************************************************
-//* Sets the ChromaKey Value for comparision
+//* Sets the ChromaKey Value for comparison
 //*************************************************
 FX_ENTRY void FX_CALL
 grChromakeyValue( GrColor_t value )

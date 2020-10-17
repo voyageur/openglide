@@ -5,7 +5,7 @@
 //*    Linux specific functions for handling display window
 //*
 //*         OpenGLide is OpenSource under LGPL license
-//*              Originaly made by Fabio Barros
+//*              Originally made by Fabio Barros
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
@@ -256,7 +256,7 @@ void SetGamma(float value)
 
         // Calculate the appropriate palette for the given gamma ramp
         for ( int i = 0; i < size; i++ )
-        {   // Better represantation of glides 8 bit gamma (init/initvg/gamma.c : sst1InitGammaRGB)
+        {   // Better representation of glides 8 bit gamma (init/initvg/gamma.c : sst1InitGammaRGB)
             int v = (int)((max * pow( (double)i / max, 1.0 / gamma )) + 0.5);
             ramp_r[i] = red[v];
             ramp_g[i] = green[v];
@@ -369,7 +369,7 @@ void SwapBuffers()
     // What a pain.  Under Glide front/back buffers are swapped.
     // Under Linux GL copies the back to front buffer and the
     // back buffer becomes underfined.  So we have to copy the
-    // front buffer manually to the back (probably noticable
+    // front buffer manually to the back (probably noticeable
     // performance hit).  NOTE the restored image looks quantised.
     // Verify the screen mode used...
     glDisable( GL_BLEND );

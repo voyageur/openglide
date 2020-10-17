@@ -5,7 +5,7 @@
 //*                      Main Header
 //*
 //*         OpenGLide is OpenSource under LGPL license
-//*              Originaly made by Fabio Barros
+//*              Originally made by Fabio Barros
 //*      Modified by Paul for Glidos (http://www.glidos.net)
 //*               Linux version by Simon White
 //**************************************************************
@@ -304,7 +304,7 @@ extern GLIDEERRORFUNCTION   ExternErrorFunction;
     extern double           FpsAux;
 #endif
 
-// Genral Prototypes
+// General Prototypes
 VARARGDECL(void) GlideMsg( const char *szString, ... );
 VARARGDECL(void) Error( const char *szString, ... );
 void GLErro( const char *Funcao );

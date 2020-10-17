@@ -383,7 +383,7 @@ FxBool FX_ENTRY FX_CALL grSstWinOpen(
 	PPARAM(&memlfb);
 
 #ifdef _DEBUG
-	WRITESTRING("Return adress pointer: 0x%x", &ret);
+	WRITESTRING("Return address pointer: 0x%x", &ret);
 	PRINTINFO(tmpstr);
 #endif
 
@@ -1462,7 +1462,7 @@ void FX_ENTRY FX_CALL grTexDownloadMipMap( GrChipID_t tmu, FxU32 startAddress,Fx
 
 #ifdef _HEAVYDEBUG
 	if(print_func[_grTexDownloadMipMap16-_grAADrawLine8] == 1) {
-		WRITESTRING("This function containes pointer to a pointer. Value: 0x%x", info->data);
+		WRITESTRING("This function contains pointer to a pointer. Value: 0x%x", info->data);
 		PRINTINFO(tmpstr);
 		print_func[_grTexDownloadMipMap16-_grAADrawLine8] = 2;
 	}
@@ -1648,7 +1648,7 @@ void FX_ENTRY FX_CALL grTexMultibaseAddress( GrChipID_t tmu, GrTexBaseRange_t ra
 
 #ifdef _HEAVYDEBUG
 	if(print_func[_grTexMultibaseAddress20-_grAADrawLine8] == 1) {
-		WRITESTRING("This function containes pointer to a pointer. Value: 0x%x", info->data);
+		WRITESTRING("This function contains pointer to a pointer. Value: 0x%x", info->data);
 		PRINTINFO(tmpstr);
 		print_func[_grTexMultibaseAddress20-_grAADrawLine8] = 2;
 	}
@@ -1682,7 +1682,7 @@ void FX_ENTRY FX_CALL grTexSource( GrChipID_t tmu, FxU32 startAddress, FxU32 eve
 
 #ifdef _HEAVYDEBUG
 	if(print_func[_grTexSource16-_grAADrawLine8] == 1) {
-		WRITESTRING("This function containes pointer to a pointer. Value: 0x%x", info->data);
+		WRITESTRING("This function contains pointer to a pointer. Value: 0x%x", info->data);
 		PRINTINFO(tmpstr);
 		print_func[_grTexSource16-_grAADrawLine8] = 2;
 	}
@@ -1704,7 +1704,7 @@ FxU32 FX_ENTRY FX_CALL grTexTextureMemRequired( FxU32 evenOdd, GrTexInfo *info )
 
 #ifdef _HEAVYDEBUG
 	if(print_func[_grTexTextureMemRequired8-_grAADrawLine8] == 1) {
-		WRITESTRING("This function containes pointer to a pointer. Value: 0x%x", info->data);
+		WRITESTRING("This function contains pointer to a pointer. Value: 0x%x", info->data);
 		PRINTINFO(tmpstr);
 		print_func[_grTexTextureMemRequired8-_grAADrawLine8] = 2;
 	}
@@ -1746,7 +1746,7 @@ FxBool FX_ENTRY FX_CALL gu3dfGetInfo( const char *filename, Gu3dfInfo *info )
 
 #ifdef _HEAVYDEBUG
 	if(print_func[_gu3dfGetInfo8-_grAADrawLine8] == 1) {
-		WRITESTRING("This function containes pointer to a pointer. Value: 0x%x", info->data);
+		WRITESTRING("This function contains pointer to a pointer. Value: 0x%x", info->data);
 		PRINTINFO(tmpstr);
 		print_func[_gu3dfGetInfo8-_grAADrawLine8] = 2;
 	}
@@ -1776,7 +1776,7 @@ FxBool FX_ENTRY FX_CALL gu3dfLoad( const char *filename, Gu3dfInfo *info )
 
 #ifdef _HEAVYDEBUG
 	if(print_func[_gu3dfLoad8-_grAADrawLine8] == 1) {
-		WRITESTRING("This function containes pointer to a pointer. Value: 0x%x", info->data);
+		WRITESTRING("This function contains pointer to a pointer. Value: 0x%x", info->data);
 		PRINTINFO(tmpstr);
 		print_func[_gu3dfLoad8-_grAADrawLine8] = 2;
 	}
