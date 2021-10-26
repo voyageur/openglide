@@ -47,10 +47,23 @@ TODO:
  create mode 100644 include/glidedef.h
  create mode 100644 src/hardware/glide.cpp
 
-diff -Naur dosbox.orig/configure.ac dosbox/configure.ac
---- dosbox.orig/configure.ac	2021-02-14 12:26:31.000653746 +0000
-+++ dosbox/configure.ac	2021-02-14 12:28:58.493761398 +0000
-@@ -616,7 +616,7 @@
+diff -Naur --ignore-all-space dosbox.orig/configure.ac dosbox/configure.ac
+--- dosbox.orig/configure.ac	2021-10-26 09:21:09.051218922 +0100
++++ dosbox/configure.ac	2021-10-26 09:34:17.865191112 +0100
+@@ -19,6 +19,12 @@
+ AC_PROG_INSTALL
+ AC_PROG_RANLIB
+ 
++dnl The dlopen() function is in the C library for *BSD and in
++dnl libdl on GLIBC-based systems
++AC_SEARCH_LIBS([dlopen], [dl dld], [], [
++  AC_MSG_ERROR([unable to find the dlopen() function])
++])
++
+ dnl Some needed libaries for OS2
+ dnl perharps join this with the other target depended checks. move them upwards
+ if test x$host = xi386-pc-os2-emx ; then
+@@ -616,7 +622,7 @@
  dnl Some target detection and actions for them
  case "$host" in
      *-*-cygwin* | *-*-mingw32*)
