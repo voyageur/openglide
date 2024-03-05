@@ -47,6 +47,13 @@ if test x$have_sdl_lib = xyes ; then
     # Don't need SDLmain since we're a library
     LIBS="$LIBS ${SDL_LIBS/-lSDLmain/}"
     CPPFLAGS="$CPPFLAGS $SDL_CFLAGS -I/usr/include"
+else
+    PKG_CHECK_MODULES([X11], [x11])
+    PKG_CHECK_MODULES([XF86VM], [xxf86vm])
+    AC_SUBST([X11_CFLAGS])
+    AC_SUBST([X11_LIBS])
+    AC_SUBST([XF86VM_CFLAGS])
+    AC_SUBST([XF86VM_LIBS])
 fi
 
 dnl The target cpu checks
